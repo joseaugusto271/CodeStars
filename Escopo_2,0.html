@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeQuest - Plataforma Completa</title>
+  <style>
+    /* Variáveis do Tema Claro (Padrão) */
+    :root {
+      --bg-body: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-header: #ffffff;
+      --bg-subtle: #f1f5f9;
+      --border-color: #e2e8f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+      
+      --badge-html-bg: #fff7ed;
+      --badge-html-txt: #ea580c;
+      --badge-css-bg: #f0f9ff;
+      --badge-css-txt: #0284c7;
+      --badge-js-bg: #fefce8;
+      --badge-js-txt: #ca8a04;
+    }
+
+    /* Variáveis do Modo Escuro */
+    [data-theme="dark"] {
+      --bg-body: #0b0f17;
+      --bg-card: #151c28;
+      --bg-header: #111827;
+      --bg-subtle: #1f2937;
+      --border-color: #1f293d;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 10px 20px rgba(0, 0, 0, 0.4);
+
+      --badge-html-bg: rgba(234, 88, 12, 0.15);
+      --badge-html-txt: #ff7849;
+      --badge-css-bg: rgba(2, 132, 199, 0.15);
+      --badge-css-txt: #38bdf8;
+      --badge-js-bg: rgba(202, 138, 4, 0.15);
+      --badge-js-txt: #facc15;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 40px;
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 20px; }
+
+    .hamburger-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      gap: 4px; cursor: pointer;
+    }
+
+    .hamburger-btn span {
+      display: block; width: 18px; height: 2px;
+      background-color: currentColor; border-radius: 2px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+
+    .brand-logo {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #4f46e5, #0284c7);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.1rem; color: #ffffff;
+    }
+
+    .brand h1 { font-size: 1.25rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+
+    nav.header-nav { display: flex; gap: 8px; }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background-color: var(--bg-subtle);
+      color: #4f46e5;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 16px; }
+
+    .header-widgets { display: flex; align-items: center; gap: 12px; }
+
+    .widget-item {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--bg-body);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px; border-radius: 20px;
+      font-weight: 700; font-size: 0.85rem; color: var(--text-main);
+    }
+
+    .theme-toggle-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px; border-radius: 20px;
+      font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+    }
+
+    /* Sidebar Drawer */
+    .sidebar-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(2px);
+      z-index: 200; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    }
+
+    .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+    .sidebar-drawer {
+      position: fixed; top: 0; left: -340px;
+      width: 320px; height: 100vh;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      z-index: 201; padding: 24px;
+      display: flex; flex-direction: column; gap: 20px;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 10px 0 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-drawer.open { left: 0; }
+
+    .drawer-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--border-color); padding-bottom: 12px;
+    }
+
+    .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; }
+
+    .profile-card {
+      background: var(--bg-body);
+      border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 16px; text-align: center;
+      cursor: pointer; position: relative;
+    }
+
+    .profile-card:hover { border-color: #4f46e5; }
+
+    .edit-badge-hint {
+      position: absolute; top: 12px; right: 12px;
+      font-size: 0.75rem; color: #4f46e5; font-weight: 600;
+    }
+
+    .avatar-large {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: var(--bg-subtle); display: flex;
+      align-items: center; justify-content: center;
+      font-size: 1.5rem; margin: 0 auto 10px auto;
+    }
+
+    .profile-name { font-size: 1rem; font-weight: 700; color: var(--text-main); }
+    .profile-rank { color: #4f46e5; font-size: 0.8rem; font-weight: 600; margin-bottom: 12px; }
+
+    .progress-box {
+      background-color: var(--bg-card); border-radius: 8px;
+      padding: 10px; border: 1px solid var(--border-color);
+    }
+
+    .progress-info {
+      display: flex; justify-content: space-between;
+      font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px;
+    }
+
+    .bar-bg { background-color: var(--bg-subtle); height: 8px; border-radius: 4px; overflow: hidden; }
+    .bar-fill { width: 68%; height: 100%; background: #4f46e5; }
+
+    .btn-sidebar-edit {
+      width: 100%; background: #4f46e5; color: #ffffff;
+      border: none; padding: 10px; border-radius: 10px;
+      font-weight: 700; font-size: 0.85rem; cursor: pointer;
+    }
+
+    .btn-sidebar-edit:hover { background: #4338ca; }
+
+    .stats-vivid-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .vivid-card {
+      background: var(--bg-body); border: 1px solid var(--border-color);
+      border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .vivid-icon { font-size: 1.1rem; }
+    .vivid-val { font-size: 0.9rem; font-weight: 700; color: var(--text-main); }
+    .vivid-lbl { font-size: 0.65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+
+    /* Dashboard Principal */
+    .dashboard {
+      max-width: 1120px; margin: 40px auto; padding: 0 24px; width: 100%;
+    }
+
+    .main-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px; padding: 36px;
+      box-shadow: var(--shadow-sm); min-height: 520px;
+    }
+
+    .section-header { margin-bottom: 28px; }
+    .section-title { font-size: 1.5rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.3px; }
+    .section-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+
+    .view-section { display: none; }
+    .view-section.active-view { display: block; }
+
+    /* Grid de Módulos (Aprender) */
+    .modules-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    .module-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 24px; cursor: pointer;
+      display: flex; flex-direction: column;
+    }
+
+    .module-card:hover {
+      border-color: #818cf8; transform: translateY(-3px); box-shadow: var(--shadow-md);
+    }
+
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+
+    .tech-badge {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: 800;
+    }
+
+    .html-theme { background: var(--badge-html-bg); color: var(--badge-html-txt); }
+    .css-theme { background: var(--badge-css-bg); color: var(--badge-css-txt); }
+    .js-theme { background: var(--badge-js-bg); color: var(--badge-js-txt); }
+
+    .status-pill { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 12px; }
+    .status-pill.active { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .status-pill.coming { background: var(--bg-subtle); color: var(--text-muted); }
+
+    .module-card h3 { font-size: 1.2rem; margin-bottom: 8px; font-weight: 700; color: var(--text-main); }
+    .module-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
+
+    .card-progress-wrapper { margin-top: auto; }
+    .card-progress-header { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+    .card-progress-bar { height: 6px; background-color: var(--bg-subtle); border-radius: 3px; overflow: hidden; }
+    .card-progress-fill { height: 100%; border-radius: 3px; }
+    .html-fill { background: #ea580c; }
+    .css-fill { background: #0284c7; }
+    .js-fill { background: #ca8a04; }
+
+    /* Visão das Fases */
+    .levels-view { flex-direction: column; align-items: center; }
+    .btn-back {
+      align-self: flex-start; background: var(--bg-card); color: var(--text-main);
+      border: 1px solid var(--border-color); padding: 8px 18px; border-radius: 8px;
+      cursor: pointer; font-weight: 600; font-size: 0.85rem; margin-bottom: 20px;
+    }
+
+    .duolingo-path { display: flex; flex-direction: column; align-items: center; gap: 24px; margin: 20px 0; width: 100%; }
+    .path-node:nth-child(1) { transform: translateX(0); }
+    .path-node:nth-child(2) { transform: translateX(-40px); }
+    .path-node:nth-child(3) { transform: translateX(-60px); }
+    .path-node:nth-child(4) { transform: translateX(-20px); }
+    .path-node:nth-child(5) { transform: translateX(30px); }
+
+    .path-node { position: relative; display: flex; align-items: center; }
+    .node-button { width: 64px; height: 64px; border-radius: 50%; border: none; font-size: 1.4rem; cursor: pointer; position: relative; }
+    .node-button.completed { background: #22c55e; color: #ffffff; box-shadow: 0 4px 0 #15803d; }
+    .node-button.current { background: #4f46e5; color: #ffffff; box-shadow: 0 4px 0 #3730a3; }
+    .node-button.locked { background: var(--bg-subtle); color: var(--text-muted); box-shadow: 0 4px 0 var(--border-color); cursor: not-allowed; }
+    .node-label {
+      position: absolute; left: 80px; white-space: nowrap; background: var(--bg-card);
+      border: 1px solid var(--border-color); padding: 6px 14px; border-radius: 8px;
+      font-size: 0.85rem; font-weight: 600; color: var(--text-main); box-shadow: var(--shadow-sm);
+    }
+
+    /* ESTILOS DO EDITOR DE CÓDIGO (DIVIDIDO) */
+    .editor-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .task-instruction {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .task-instruction h3 {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .task-instruction p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .split-editor {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      min-height: 320px;
+    }
+
+    .editor-pane, .preview-pane {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--bg-body);
+    }
+
+    .pane-header {
+      background: var(--bg-subtle);
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .code-input {
+      width: 100%;
+      height: 100%;
+      min-height: 250px;
+      border: none;
+      padding: 16px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.95rem;
+      background: transparent;
+      color: var(--text-main);
+      outline: none;
+      resize: none;
+      line-height: 1.5;
+    }
+
+    .preview-iframe {
+      width: 100%;
+      height: 100%;
+      min-height: 250px;
+      border: none;
+      background: #ffffff;
+    }
+
+    .editor-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .feedback-msg {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .feedback-msg.success { color: #22c55e; }
+    .feedback-msg.error { color: #ef4444; }
+
+    /* SEÇÃO DESAFIOS */
+    .challenges-list { display: flex; flex-direction: column; gap: 16px; }
+    .challenge-card {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    .challenge-info { display: flex; align-items: center; gap: 16px; }
+    .challenge-icon {
+      width: 48px; height: 48px; background: var(--bg-subtle);
+      border-radius: 12px; display: flex; align-items: center;
+      justify-content: center; font-size: 1.4rem;
+    }
+
+    .challenge-details h4 { font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+    .challenge-details p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; }
+    .challenge-rewards { display: flex; gap: 12px; font-size: 0.8rem; font-weight: 700; color: #4f46e5; }
+
+    .btn-action {
+      background: #4f46e5; color: #ffffff; border: none;
+      padding: 10px 20px; border-radius: 10px;
+      font-weight: 700; font-size: 0.85rem; cursor: pointer;
+    }
+
+    .btn-action:hover { background: #4338ca; }
+    .btn-action.done { background: var(--bg-subtle); color: var(--text-muted); cursor: default; }
+
+    /* SEÇÃO LOJA */
+    .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    .shop-item {
+      background: var(--bg-card); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 20px; text-align: center;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    .shop-item-icon {
+      font-size: 2.5rem; margin-bottom: 12px; background: var(--bg-subtle);
+      width: 80px; height: 80px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .shop-item h4 { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+    .shop-item p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.4; flex-grow: 1; }
+
+    .btn-buy {
+      width: 100%; background: var(--bg-subtle); border: 1px solid var(--border-color);
+      color: var(--text-main); padding: 10px; border-radius: 10px;
+      font-weight: 700; font-size: 0.9rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+
+    .btn-buy:hover { border-color: #0284c7; color: #0284c7; }
+
+    /* SEÇÃO EDITAR PERFIL */
+    .edit-profile-form { max-width: 500px; display: flex; flex-direction: column; gap: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+    .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-main); }
+    .form-group input, .form-group select {
+      background: var(--bg-body); border: 1px solid var(--border-color);
+      color: var(--text-main); padding: 12px 16px; border-radius: 10px;
+      font-size: 0.95rem; outline: none;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: #4f46e5; }
+    .avatar-selector { display: flex; gap: 12px; margin-top: 6px; }
+    .avatar-opt {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: var(--bg-body); border: 2px solid var(--border-color);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; cursor: pointer;
+    }
+    .avatar-opt.selected { border-color: #4f46e5; background: var(--bg-subtle); }
+    .btn-save-profile {
+      background: #22c55e; color: #ffffff; border: none;
+      padding: 12px; border-radius: 10px; font-weight: 700;
+      font-size: 0.95rem; cursor: pointer; margin-top: 10px;
+    }
+    .btn-save-profile:hover { background: #16a34a; }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar Lateral -->
+  <aside class="sidebar-drawer" id="sidebar-drawer">
+    <div class="drawer-header">
+      <h3 style="font-size: 1rem;">Perfil</h3>
+      <button class="close-btn" onclick="toggleSidebar()">✕</button>
+    </div>
+
+    <div class="profile-card" onclick="openProfileEditPage()">
+      <span class="edit-badge-hint">✏️ Editar</span>
+      <div class="avatar-large" id="profile-avatar">👨‍💻</div>
+      <div class="profile-name" id="profile-name-val">Dev Explorer</div>
+      <div class="profile-rank" id="profile-title-val">Desenvolvedor Frontend</div>
+
+      <div class="progress-box">
+        <div class="progress-info">
+          <span>Nível 3</span>
+          <span id="xp-display">340 / 500 XP</span>
+        </div>
+        <div class="bar-bg">
+          <div class="bar-fill" id="xp-bar" style="width: 68%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-sidebar-edit" onclick="openProfileEditPage()">Editar Configurações</button>
+
+    <div class="stats-vivid-grid">
+      <div class="vivid-card">
+        <span class="vivid-icon">🔥</span>
+        <div>
+          <div class="vivid-val" id="streak-val">7 Dias</div>
+          <div class="vivid-lbl">Sequência</div>
+        </div>
+      </div>
+      <div class="vivid-card">
+        <span class="vivid-icon">⭐</span>
+        <div>
+          <div class="vivid-val" id="total-xp-val">340</div>
+          <div class="vivid-lbl">XP Total</div>
+        </div>
+      </div>
+      <div class="vivid-card">
+        <span class="vivid-icon">🏆</span>
+        <div>
+          <div class="vivid-val">Top 5%</div>
+          <div class="vivid-lbl">Liga Ouro</div>
+        </div>
+      </div>
+      <div class="vivid-card">
+        <span class="vivid-icon">🎯</span>
+        <div>
+          <div class="vivid-val">85%</div>
+          <div class="vivid-lbl">Precisão</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <button class="hamburger-btn" onclick="toggleSidebar()" title="Menu de Perfil">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="brand">
+        <div class="brand-logo">&lt;/&gt;</div>
+        <h1>CodeQuest</h1>
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <a class="nav-link active" id="nav-aprender" onclick="switchTab('aprender', this)">Aprender</a>
+      <a class="nav-link" id="nav-desafios" onclick="switchTab('desafios', this)">Desafios</a>
+      <a class="nav-link" id="nav-loja" onclick="switchTab('loja', this)">Loja</a>
+      <a class="nav-link" id="nav-perfil" onclick="switchTab('perfil', this)">Perfil</a>
+    </nav>
+
+    <div class="header-right">
+      <div class="header-widgets">
+        <div class="widget-item">🔥 <span id="widget-streak">7</span></div>
+        <div class="widget-item">💎 <span id="widget-gems">42</span></div>
+        <div class="widget-item">❤️ <span id="widget-hearts">5/5</span></div>
+      </div>
+
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="theme-btn">
+        <span id="theme-icon">🌙</span> <span id="theme-text">Escuro</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard -->
+  <div class="dashboard">
+    <main class="main-content">
+      
+      <!-- SEÇÃO APRENDER -->
+      <div id="view-aprender" class="view-section active-view">
+        
+        <!-- Grid de Módulos -->
+        <div id="modules-view">
+          <div class="section-header">
+            <h2 class="section-title">Trilhas de Aprendizado</h2>
+            <p class="section-subtitle">Escolha um módulo para praticar seus conhecimentos.</p>
+          </div>
+          
+          <div class="modules-grid">
+            <div class="module-card" onclick="openModule('HTML5 - Fundamentos', 'html')">
+              <div class="card-top">
+                <div class="tech-badge html-theme">&lt;/&gt;</div>
+                <span class="status-pill active">Em Andamento</span>
+              </div>
+              <h3>HTML5</h3>
+              <p>Estruturação de conteúdo moderno usando tags semânticas e acessibilidade.</p>
+              
+              <div class="card-progress-wrapper">
+                <div class="card-progress-header">
+                  <span>Progresso</span>
+                  <span>80%</span>
+                </div>
+                <div class="card-progress-bar">
+                  <div class="card-progress-fill html-fill" style="width: 80%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="module-card" onclick="openModule('CSS3 - Estilização', 'css')">
+              <div class="card-top">
+                <div class="tech-badge css-theme">🎨</div>
+                <span class="status-pill active">Em Andamento</span>
+              </div>
+              <h3>CSS3</h3>
+              <p>Estilização visual, layouts com Flexbox, Grid e responsividade.</p>
+              
+              <div class="card-progress-wrapper">
+                <div class="card-progress-header">
+                  <span>Progresso</span>
+                  <span>40%</span>
+                </div>
+                <div class="card-progress-bar">
+                  <div class="card-progress-fill css-fill" style="width: 40%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="module-card" onclick="openModule('JavaScript - Lógica', 'js')">
+              <div class="card-top">
+                <div class="tech-badge js-theme">⚡</div>
+                <span class="status-pill coming">Em Breve</span>
+              </div>
+              <h3>JavaScript</h3>
+              <p>Lógica de programação, manipulação do DOM e criação de interatividade.</p>
+              
+              <div class="card-progress-wrapper">
+                <div class="card-progress-header">
+                  <span>Progresso</span>
+                  <span>0%</span>
+                </div>
+                <div class="card-progress-bar">
+                  <div class="card-progress-fill js-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visão das Fases -->
+        <div id="levels-view" class="levels-view" style="display: none;">
+          <button class="btn-back" onclick="closeModule()">← Voltar às Trilhas</button>
+          <h2 class="section-title" id="module-title-display">Módulo</h2>
+          <div class="duolingo-path" id="dynamic-path"></div>
+        </div>
+
+        <!-- Visão da Lição Interativa (Editor de Código) -->
+        <div id="interactive-lesson-view" style="display: none;">
+          <button class="btn-back" onclick="closeLesson()">← Voltar às Fases</button>
+          
+          <div class="editor-container">
+            <div class="task-instruction">
+              <h3>🎯 Lição 1: Seu Primeiríssimo Elemento</h3>
+              <p>Crie um título principal usando a tag <code>&lt;h1&gt;</code> com o texto <strong>"Meu Site"</strong> e, logo abaixo, adicione um parágrafo usando a tag <code>&lt;p&gt;</code> dizendo <strong>"Olá Mundo!"</strong>.</p>
+            </div>
+
+            <div class="split-editor">
+              <div class="editor-pane">
+                <div class="pane-header">💻 Editor HTML</div>
+                <textarea id="code-input" class="code-input" oninput="updatePreview()" placeholder="Digite seu código HTML aqui..."></textarea>
+              </div>
+
+              <div class="preview-pane">
+                <div class="pane-header">🌐 Resultado (Visualização)</div>
+                <iframe id="preview-iframe" class="preview-iframe"></iframe>
+              </div>
+            </div>
+
+            <div class="editor-actions">
+              <span id="feedback-msg" class="feedback-msg"></span>
+              <button class="btn-action" onclick="checkAnswer()">Verificar Resposta</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SEÇÃO DESAFIOS -->
+      <div id="view-desafios" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Desafios & Missões</h2>
+          <p class="section-subtitle">Complete as tarefas diárias e semanais para acumular XP e Gemas!</p>
+        </div>
+
+        <div class="challenges-list">
+          <div class="challenge-card">
+            <div class="challenge-info">
+              <div class="challenge-icon">⚡</div>
+              <div class="challenge-details">
+                <h4>Sintaxe Impecável</h4>
+                <p>Complete 3 lições sem cometer nenhum erro.</p>
+                <div class="challenge-rewards">
+                  <span>+50 XP</span>
+                  <span>💎 +10</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn-action" onclick="claimChallenge(this, 50, 10)">Reclamar</button>
+          </div>
+
+          <div class="challenge-card">
+            <div class="challenge-info">
+              <div class="challenge-icon">🔥</div>
+              <div class="challenge-details">
+                <h4>Mestre da Frequência</h4>
+                <p>Mantenha uma sequência de estudo de 7 dias seguidos.</p>
+                <div class="challenge-rewards">
+                  <span>+100 XP</span>
+                  <span>💎 +25</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn-action" onclick="claimChallenge(this, 100, 25)">Reclamar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO LOJA -->
+      <div id="view-loja" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Loja CodeQuest</h2>
+          <p class="section-subtitle">Troque suas gemas por utilitários e personalizações exclusivas.</p>
+        </div>
+
+        <div class="shop-grid">
+          <div class="shop-item">
+            <div class="shop-item-icon">❤️</div>
+            <h4>Recarregar Vidas</h4>
+            <p>Restaure todas as suas vidas para não interromper seus estudos.</p>
+            <button class="btn-buy" onclick="buyItem('hearts', 15)">💎 15 Gemas</button>
+          </div>
+
+          <div class="shop-item">
+            <div class="shop-item-icon">🛡️</div>
+            <h4>Bloqueio de Sequência</h4>
+            <p>Protege sua sequência por 1 dia caso você esqueça de praticar.</p>
+            <button class="btn-buy" onclick="buyItem('streak_freeze', 30)">💎 30 Gemas</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEÇÃO EDITAR PERFIL -->
+      <div id="view-perfil" class="view-section">
+        <div class="section-header">
+          <h2 class="section-title">Editar Perfil</h2>
+          <p class="section-subtitle">Atualize suas informações de conta e personalize seu avatar.</p>
+        </div>
+
+        <form class="edit-profile-form" onsubmit="saveProfile(event)">
+          <div class="form-group">
+            <label>Avatar de Perfil</label>
+            <div class="avatar-selector">
+              <div class="avatar-opt selected" onclick="selectAvatar(this, '👨‍💻')">👨‍💻</div>
+              <div class="avatar-opt" onclick="selectAvatar(this, '👩‍💻')">👩‍💻</div>
+              <div class="avatar-opt" onclick="selectAvatar(this, '🥷')">🥷</div>
+              <div class="avatar-opt" onclick="selectAvatar(this, '🚀')">🚀</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="input-name">Nome Exibido</label>
+            <input type="text" id="input-name" value="Dev Explorer" required />
+          </div>
+
+          <div class="form-group">
+            <label for="input-title">Título do Desenvolvedor</label>
+            <select id="input-title">
+              <option value="Desenvolvedor Frontend">Desenvolvedor Frontend</option>
+              <option value="Engenheiro Fullstack">Engenheiro Fullstack</option>
+              <option value="Mestre do CSS">Mestre do CSS</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-save-profile">Salvar Alterações</button>
+        </form>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    let userData = {
+      gems: 42,
+      xp: 340,
+      streak: 7,
+      hearts: 5,
+      name: "Dev Explorer",
+      title: "Desenvolvedor Frontend",
+      avatar: "👨‍💻"
+    };
+
+    const lessonsData = {
+      html: [
+        { id: 1, title: "Sintaxe e Primeiras Tags", status: "completed" },
+        { id: 2, title: "Listas e Links", status: "completed" },
+        { id: 3, title: "Imagens e Atributos", status: "current" },
+        { id: 4, title: "Formulários Interativos", status: "locked" }
+      ],
+      css: [
+        { id: 1, title: "Cores e Fontes", status: "completed" },
+        { id: 2, title: "Box Model Explicado", status: "current" }
+      ],
+      js: [
+        { id: 1, title: "Variáveis (let / const)", status: "completed" }
+      ]
+    };
+
+    function updateWidgets() {
+      document.getElementById('widget-gems').innerText = userData.gems;
+      document.getElementById('widget-streak').innerText = userData.streak;
+      document.getElementById('widget-hearts').innerText = userData.hearts + '/5';
+      document.getElementById('total-xp-val').innerText = userData.xp;
+      document.getElementById('xp-display').innerText = userData.xp + ' / 500 XP';
+      document.getElementById('xp-bar').style.width = (userData.xp / 500 * 100) + '%';
+      
+      document.getElementById('profile-name-val').innerText = userData.name;
+      document.getElementById('profile-title-val').innerText = userData.title;
+      document.getElementById('profile-avatar').innerText = userData.avatar;
+    }
+
+    function switchTab(tabName, element) {
+      document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+      const targetNav = element || document.getElementById('nav-' + tabName);
+      if (targetNav) targetNav.classList.add('active');
+
+      document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active-view'));
+      document.getElementById('view-' + tabName).classList.add('active-view');
+    }
+
+    function openProfileEditPage() {
+      if (document.getElementById('sidebar-drawer').classList.contains('open')) {
+        toggleSidebar();
+      }
+      switchTab('perfil', document.getElementById('nav-perfil'));
+    }
+
+    function selectAvatar(el, avatarEmoji) {
+      document.querySelectorAll('.avatar-opt').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      userData.avatar = avatarEmoji;
+    }
+
+    function saveProfile(event) {
+      event.preventDefault();
+      userData.name = document.getElementById('input-name').value;
+      userData.title = document.getElementById('input-title').value;
+      updateWidgets();
+      alert('Perfil atualizado com sucesso!');
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      
+      const themeIcon = document.getElementById('theme-icon');
+      const themeText = document.getElementById('theme-text');
+      if (newTheme === 'dark') {
+        themeIcon.innerText = '☀️'; themeText.innerText = 'Claro';
+      } else {
+        themeIcon.innerText = '🌙'; themeText.innerText = 'Escuro';
+      }
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar-drawer').classList.toggle('open');
+      document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function openModule(title, techKey) {
+      document.getElementById('modules-view').style.display = 'none';
+      document.getElementById('levels-view').style.display = 'flex';
+      document.getElementById('interactive-lesson-view').style.display = 'none';
+      document.getElementById('module-title-display').innerText = title;
+
+      const pathContainer = document.getElementById('dynamic-path');
+      pathContainer.innerHTML = '';
+
+      lessonsData[techKey].forEach((lesson) => {
+        const node = document.createElement('div');
+        node.className = 'path-node';
+
+        let icon = '🔒';
+        if (lesson.status === 'completed') icon = '✓';
+        if (lesson.status === 'current') icon = '⭐';
+
+        node.innerHTML = `
+          <button class="node-button ${lesson.status}" onclick="startLesson(${lesson.id})">${icon}</button>
+          <span class="node-label">${lesson.title}</span>
+        `;
+        pathContainer.appendChild(node);
+      });
+    }
+
+    function closeModule() {
+      document.getElementById('levels-view').style.display = 'none';
+      document.getElementById('modules-view').style.display = 'block';
+    }
+
+    /* FUNÇÕES DO EDITOR PRÁTICO */
+    function startLesson(lessonId) {
+      document.getElementById('levels-view').style.display = 'none';
+      document.getElementById('interactive-lesson-view').style.display = 'block';
+      
+      // Código Inicial do exercício
+      const initialCode = `<!-- Escreva seu código abaixo -->\n`;
+      document.getElementById('code-input').value = initialCode;
+      document.getElementById('feedback-msg').innerText = '';
+      updatePreview();
+    }
+
+    function closeLesson() {
+      document.getElementById('interactive-lesson-view').style.display = 'none';
+      document.getElementById('levels-view').style.display = 'flex';
+    }
+
+    function updatePreview() {
+      const code = document.getElementById('code-input').value;
+      const iframe = document.getElementById('preview-iframe');
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      
+      iframeDoc.open();
+      iframeDoc.write(`
+        <style>
+          body { font-family: sans-serif; padding: 12px; color: #1e293b; }
+          h1 { color: #4f46e5; }
+        </style>
+        ${code}
+      `);
+      iframeDoc.close();
+    }
+
+    function checkAnswer() {
+      const code = document.getElementById('code-input').value.toLowerCase();
+      const feedback = document.getElementById('feedback-msg');
+
+      const hasH1 = code.includes('<h1>meu site</h1>');
+      const hasP = code.includes('<p>olá mundo!</p>') || code.includes('<p>ola mundo!</p>');
+
+      if (hasH1 && hasP) {
+        feedback.innerText = '🎉 Excelente! Você completou a lição com sucesso!';
+        feedback.className = 'feedback-msg success';
+        
+        userData.xp += 20;
+        userData.gems += 5;
+        updateWidgets();
+      } else {
+        feedback.innerText = '❌ Ainda falta algo. Verifique se digitou <h1>Meu Site</h1> e <p>Olá Mundo!</p> corretamente.';
+        feedback.className = 'feedback-msg error';
+      }
+    }
+
+    function claimChallenge(button, xp, gems) {
+      userData.xp += xp;
+      userData.gems += gems;
+      updateWidgets();
+
+      button.innerText = 'Concluído ✓';
+      button.classList.add('done');
+      button.disabled = true;
+    }
+
+    function buyItem(itemType, cost) {
+      if (userData.gems < cost) {
+        alert('Gemas insuficientes para esta compra!');
+        return;
+      }
+      userData.gems -= cost;
+
+      if (itemType === 'hearts') {
+        userData.hearts = 5;
+        alert('Vidas totalmente restauradas!');
+      } else if (itemType === 'streak_freeze') {
+        alert('Bloqueio de Sequência ativado!');
+      }
+
+      updateWidgets();
+    }
+  </script>
+
+</body>
+</html>
