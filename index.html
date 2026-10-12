@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CodeStars</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   BASE (compartilhado pelo login e pelo painel)
+   ===================================================================== */
+:root{
+  --roxo:#2c1450; --esc:#3a1b66; --fundo-linha:#1c0b36; --roxo-esc:#1c0b36;
+  --creme:#fffde3; --amarelo:#f2f26b; --menta:#7ff0c0; --verde:#10b981;
+  --texto:#1e1230; --suave:#5b5470; --claro:#e9dcff; --campo:#e6e2d4; --erro:#c2253a;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--roxo);color:#fff;font-family:Nunito,system-ui,sans-serif;font-size:16px;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+:focus-visible{outline:3px solid var(--amarelo);outline-offset:3px;border-radius:8px}
+.splash{display:grid;place-items:center;min-height:100vh;text-align:center;padding:24px}
+.splash .spin{animation:giraL 3s linear infinite;filter:drop-shadow(4px 5px 0 rgba(0,0,0,.3))}
+@keyframes giraL{to{transform:rotate(360deg)}}
+.splash p{font-weight:700;color:var(--claro)}
+#aviso{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--amarelo);color:var(--texto);font-weight:800;padding:12px 20px;border-radius:12px;box-shadow:0 5px 0 var(--fundo-linha);opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center;z-index:50}
+#aviso.on{opacity:1;transform:translate(-50%,0)}
+.marca-logo{display:inline-flex;align-items:center;gap:10px;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:26px;letter-spacing:.3px;color:#fff;line-height:1}
+.marca-logo b{color:var(--amarelo);font-weight:700}
+.marca-logo svg{transition:transform .3s}
+a.marca-logo:hover svg{transform:rotate(-14deg) scale(1.08)}
+
+/* =====================================================================
+   TELA DE LOGIN
+   ===================================================================== */
+#hdrLogin{position:relative;z-index:10;height:72px;display:flex;align-items:center;gap:36px;padding:0 32px;background:transparent;color:#fff}
+#hdrLogin button,#hdrLogin a{font:700 16px Nunito,system-ui,sans-serif;color:#fff;background:none;border:0;cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:8px 0}
+#hdrLogin svg{flex:none}
+#hdrLogin .marca-logo{font:700 26px 'Chakra Petch',sans-serif;margin-right:4px}
+.menu{display:flex;gap:32px;margin-right:auto}
+.dd{position:relative}
+.dd>button svg{transition:transform .2s}
+.dd:hover>button svg,.dd:focus-within>button svg{transform:rotate(180deg)}
+.dd .sub-lista{display:none;position:absolute;top:100%;left:-14px;min-width:190px;background:var(--roxo-esc);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:8px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.dd:hover .sub-lista,.dd:focus-within .sub-lista{display:block}
+#hdrLogin .dd .sub-lista a{display:flex;padding:10px 12px;border-radius:8px;font-weight:600;width:100%}
+#hdrLogin .dd .sub-lista a:hover{background:rgba(255,255,255,.1)}
+#hdrLogin .dirL{display:flex;align-items:center;gap:28px}
+#hdrLogin .cta{background:#8b5cf6;border:2px solid #b79bff;border-radius:10px;padding:10px 20px;box-shadow:0 0 16px rgba(139,92,246,.55);transition:background .2s}
+#hdrLogin .cta:hover{background:#9d74fa}
+#hdrLogin :focus-visible{outline:3px solid var(--amarelo);outline-offset:3px;border-radius:6px}
+.lmain{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 72px)}
+.vitrine{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;padding:40px;color:#fff;text-align:center}
+.vitrine>*:not(.fundo){position:relative;z-index:1}
+.fundo{position:absolute;inset:0;z-index:0;pointer-events:none;user-select:none}
+.snip{position:absolute;white-space:nowrap;font-family:'Chakra Petch',monospace;font-size:15px;color:#e9dcff;opacity:.5;transform:rotate(var(--r));animation:flutua 7s ease-in-out infinite;animation-delay:var(--d,0s)}
+.snip.g{font-size:26px;opacity:.6}
+.snip.xl{font-size:90px;font-weight:700;opacity:.14;color:var(--amarelo)}
+.snip .t{color:#ff9bd2}.snip .a{color:var(--amarelo)}.snip .s{color:var(--menta)}.snip .k{color:#b9a2ff}.snip .p{color:#ffb86b}
+@keyframes flutua{50%{transform:rotate(var(--r)) translateY(-10px)}}
+.estrela{width:150px;cursor:pointer;transition:transform .3s;filter:drop-shadow(6px 6px 0 rgba(0,0,0,.3));background:none;border:0;padding:0}
+.estrela:hover{transform:rotate(12deg) scale(1.06)}
+.estrela svg{display:block;transform-origin:50% 65%;animation:respira 4.5s ease-in-out infinite}
+@keyframes respira{0%,100%{transform:translateY(0) rotate(-4deg) scale(1)}50%{transform:translateY(-14px) rotate(4deg) scale(1.04)}}
+#olhos{transition:transform .35s ease-out}
+#olhos circle{transform-box:fill-box;transform-origin:center;animation:piscar 4.2s infinite}
+@keyframes piscar{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.estrela.gira{animation:gira .9s ease-in-out}
+@keyframes gira{40%{transform:translateY(-30px) rotate(200deg) scale(1.12)}100%{transform:rotate(360deg)}}
+.estrela.pula{animation:pula .6s}
+@keyframes pula{30%{transform:translateY(-24px) rotate(-10deg)}60%{transform:translateY(0) rotate(8deg)}}
+.estrela.triste{animation:balanca .4s}
+@keyframes balanca{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.codigo{background:#2a1148;border-radius:12px;padding:18px 22px;font-family:'Chakra Petch',monospace;font-size:16px;text-align:left;min-width:min(380px,100%);box-shadow:0 8px 0 rgba(0,0,0,.25)}
+.codigo .k{color:#ff9bd2}.codigo .s{color:var(--amarelo)}
+.cursor{display:inline-block;width:8px;height:1em;background:var(--menta);vertical-align:middle;animation:cursorpisca 1s steps(2) infinite}
+@keyframes cursorpisca{50%{opacity:0}}
+.frase{font-size:18px;max-width:34ch;line-height:1.5;margin:0}
+.social-prova{font-size:14px;opacity:.85;margin:0}
+.lado-form{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px 20px}
+.lcard{background:var(--creme);color:var(--texto);width:100%;max-width:460px;border-radius:20px;padding:40px 36px;box-shadow:0 10px 0 var(--roxo-esc)}
+.lcard h1{font-family:'Chakra Petch',sans-serif;font-size:30px;margin:0 0 6px}
+.lsub{font-size:15px;margin:0 0 24px}
+a.link{color:#8a1f9c;font-weight:700;text-decoration:underline;cursor:pointer}
+.lgoogle{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;border:2px solid #d9d4bd;border-radius:12px;padding:12px 6px;font:700 15px Nunito,sans-serif;cursor:pointer;color:var(--texto)}
+.lgoogle:hover{border-color:var(--roxo)}
+.g-logo{font:800 18px Nunito,sans-serif;background:linear-gradient(90deg,#4285f4 25%,#ea4335 25% 50%,#fbbc05 50% 75%,#34a853 75%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ou{display:flex;align-items:center;gap:12px;color:#5b5470;font-size:14px;margin:22px 0}
+.ou::before,.ou::after{content:"";flex:1;height:1px;background:#bdb7a0}
+.lcard label{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+.grupo{margin-bottom:18px}
+.cx{position:relative}
+.lcard input[type=email],.lcard input[type=password],.lcard input[type=text]{width:100%;background:var(--campo);border:2px solid transparent;border-radius:12px;padding:13px 14px;font:16px Nunito,sans-serif;color:var(--texto)}
+.lcard input::placeholder{color:#7a748c}
+.lcard input:focus{outline:none;border-color:#522580;background:#fff;box-shadow:0 0 0 3px rgba(82,37,128,.2)}
+.lcard input.invalido{border-color:var(--erro)}
+.olho{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;padding:6px;color:#4a4260}
+.lcard button:focus-visible,.lcard a:focus-visible{outline:3px solid #522580;outline-offset:2px}
+.erro{display:none;color:var(--erro);font-size:14px;font-weight:700;margin-top:6px}
+.erro.on{display:block}
+.okmsg{display:none;background:#e3f8ea;color:#0b5a2b;border-radius:10px;padding:10px 12px;font-size:14px;font-weight:700;margin:0 0 16px}
+.okmsg.on{display:block}
+.linha{display:flex;justify-content:flex-end;font-size:14px;margin:4px 0 22px}
+.dicaL{font-size:13px;color:#5b5470;margin:6px 0 0}
+.principal{width:100%;background:var(--amarelo);border:0;border-bottom:6px solid var(--menta);border-radius:12px;padding:15px;font:700 18px 'Chakra Petch',sans-serif;cursor:pointer;color:var(--texto);transition:transform .1s}
+.principal:active{transform:translateY(3px);border-bottom-width:3px}
+.principal:disabled{opacity:.7;cursor:wait}
+.termos{font-size:13px;text-align:center;margin:22px 0 0;color:#4a4260}
+.aviso-config{width:100%;max-width:460px;background:#fff3cd;color:#5c4400;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:700;line-height:1.5}
+/* footer grande do login */
+.fgrande{background:var(--roxo-esc);color:#fff;padding:52px 32px 24px}
+.rodape{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:32px}
+.fgrande p{font-size:14px;line-height:1.6;opacity:.85;max-width:32ch;margin:10px 0 0}
+.fgrande h2{font:700 16px/1 Nunito,sans-serif;margin:0 0 16px}
+.fgrande ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.fgrande a{color:#e9dcff;font-size:14px}
+.fgrande a:hover{color:#fff;text-decoration:underline}
+.fgrande a:focus-visible{outline:3px solid var(--amarelo);outline-offset:3px;border-radius:4px}
+.base{max-width:1100px;margin:40px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.15);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;opacity:.85}
+
+/* =====================================================================
+   PAINEL (depois de entrar)
+   ===================================================================== */
+.logo{display:inline-flex;align-items:center;gap:8px;font:700 24px 'Chakra Petch',sans-serif;line-height:1}
+.logo b{color:var(--amarelo)}
+#hdrApp{display:flex;align-items:center;gap:32px;height:72px;padding:0 32px;background:transparent;position:relative;z-index:5}
+.tabs{display:flex;gap:6px;margin-right:auto;height:100%}
+.tabs a{display:flex;align-items:center;padding:0 14px;font-weight:700;color:var(--claro);border-bottom:3px solid transparent}
+.tabs a:hover{color:#fff}.tabs a.on{color:#fff;border-color:var(--amarelo)}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--amarelo);color:var(--texto);border:0;font:700 18px 'Chakra Petch',sans-serif;overflow:hidden;padding:0;display:grid;place-items:center}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.dir{display:flex;align-items:center;gap:8px}
+.dir .avatar{margin-left:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:5px 12px;font:800 14px Nunito,sans-serif;cursor:default}
+.chip i{font-style:normal;font-size:15px}
+.wrap{max-width:1040px;margin:0 auto;padding:32px 24px 56px}
+.wrap.larga{max-width:1320px}
+.hero{display:flex;align-items:center;gap:18px;margin-bottom:32px}
+.mascote{width:86px;flex:none;border:0;background:none;padding:0;filter:drop-shadow(4px 5px 0 rgba(0,0,0,.3))}
+.mascote svg{display:block;animation:flut 4s ease-in-out infinite}
+.mascote.gira{animation:giraM .8s ease-in-out}
+@keyframes flut{50%{transform:translateY(-8px) rotate(5deg)}}
+@keyframes giraM{40%{transform:translateY(-20px) rotate(200deg)}100%{transform:rotate(360deg)}}
+.pisca{transform-box:fill-box;transform-origin:center;animation:pisca 4s infinite}
+@keyframes pisca{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+#telaApp h1{font:700 34px 'Chakra Petch',sans-serif;margin:0 0 4px}
+.fala{margin:0;font-size:18px;color:var(--claro);min-height:27px}
+.card{background:var(--creme);color:var(--texto);border-radius:20px;box-shadow:0 8px 0 var(--fundo-linha)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;align-items:start}
+.cont{display:grid;grid-template-columns:1fr 1fr;gap:22px;padding:24px;margin-bottom:32px}
+.tag{font-size:13px;font-weight:800;color:#8a1f9c;letter-spacing:.4px}
+.cont h2,.lc h2{font:700 24px 'Chakra Petch',sans-serif;margin:4px 0 16px}
+.barra{height:12px;background:#ddd8c2;border-radius:99px;overflow:hidden}
+.barra i{display:block;height:100%;width:0;background:var(--verde);border-radius:99px;transition:width .6s}
+.meta{display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--suave);margin:8px 0 18px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--amarelo);border:0;border-bottom:6px solid var(--menta);border-radius:12px;padding:13px 24px;font:700 18px 'Chakra Petch',sans-serif;color:var(--texto)}
+.btn:active{transform:translateY(3px);border-bottom-width:3px}
+.btn:disabled{opacity:.7;cursor:wait}
+pre{margin:0;background:#2a1148;color:#e9dcff;border-radius:12px;padding:16px;font:15px/1.7 'Chakra Petch',monospace;overflow-x:auto;align-self:stretch;display:flex;align-items:center}
+pre code{font:inherit}
+.k{color:#ff9bd2}.p{color:#ffb86b}.s{color:var(--menta)}
+h2.sec{font:700 22px 'Chakra Petch',sans-serif;margin:0 0 14px}
+.mods{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.mp{background:rgba(255,255,255,.1);border:2px solid transparent;border-radius:12px;padding:9px 16px;font-weight:800;display:flex;gap:8px;align-items:center}
+.mp:hover{background:rgba(255,255,255,.16)}
+.mp.on{background:var(--esc);border-color:var(--amarelo)}
+.mp.trava{opacity:.65}
+.lista{display:grid;gap:10px}
+.row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--esc);border:2px solid transparent;border-radius:12px;box-shadow:0 4px 0 var(--fundo-linha);width:100%;text-align:left}
+.row .n{font:700 13px 'Chakra Petch',sans-serif;color:var(--claro);width:20px}
+.row .t{font-weight:800;font-size:17px;margin-right:auto}
+.row.ok .t{color:var(--claro)}
+.row.atual{border-color:var(--amarelo);box-shadow:0 4px 0 var(--fundo-linha),0 0 20px rgba(242,242,107,.3)}
+.row.trava{opacity:.7}
+.pill{font:800 12px Nunito,sans-serif;letter-spacing:.4px;padding:5px 10px;border-radius:8px;background:rgba(0,0,0,.25);color:var(--menta)}
+.pill.p{color:var(--amarelo)}
+.ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:15px;flex:none;font-weight:800}
+.ic.ok{background:var(--menta);color:#0b3b2a}.ic.go{background:var(--amarelo);color:var(--texto)}
+aside{display:grid;gap:20px;position:sticky;top:24px}
+.mini{padding:20px}
+.mini h3{font:700 18px 'Chakra Petch',sans-serif;margin:0 0 14px}
+.anel{display:flex;align-items:center;gap:14px}
+.ring{width:72px;height:72px;border-radius:50%;background:conic-gradient(var(--verde) var(--p,0%),#ddd8c2 0);display:grid;place-items:center;flex:none}
+.ring span{width:54px;height:54px;border-radius:50%;background:var(--creme);display:grid;place-items:center;font:700 18px 'Chakra Petch',sans-serif}
+.anel p{margin:0;font-size:14px;color:var(--suave);font-weight:600;line-height:1.5}
+.dias{display:flex;gap:6px;margin-top:16px}
+.dias span{flex:1;text-align:center;font-size:11px;font-weight:800;color:var(--suave)}
+.dias b{display:block;height:26px;line-height:26px;border-radius:7px;background:#e6e0b8;margin-bottom:4px;font-size:14px}
+.dias .x b{background:var(--amarelo)}
+ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+ol li{display:flex;gap:8px;padding:8px 10px;border-radius:10px;font-weight:700;font-size:15px}
+ol li em{margin-left:auto;font-style:normal;color:var(--suave)}
+ol li.eu{background:var(--amarelo)}
+/* lição */
+.lc{max-width:720px;margin:0 auto}
+.lc .cartao{padding:28px}
+.lc pre{margin:0 0 18px}
+.lc p{color:var(--suave);line-height:1.6;margin:0 0 20px}
+/* perfil */
+.perfil{max-width:560px;margin:0 auto}
+.voltar{background:none;border:0;color:var(--claro);font-weight:800;padding:6px 0;margin-bottom:16px}
+.voltar:hover{color:#fff}
+.pcard{padding:32px}
+.pcard h1{font-size:28px!important;margin:0 0 24px!important}
+.foto{display:flex;align-items:center;gap:22px;margin-bottom:28px;flex-wrap:wrap}
+.grande{width:120px;height:120px;border-radius:50%;background:var(--amarelo);color:var(--texto);border:4px solid var(--esc);display:grid;place-items:center;font:700 52px 'Chakra Petch',sans-serif;overflow:hidden;flex:none}
+.grande img{width:100%;height:100%;object-fit:cover}
+.acoes{display:grid;gap:10px;justify-items:start}
+.sec2{background:var(--esc);color:#fff;border:0;border-bottom:4px solid var(--fundo-linha);border-radius:10px;padding:10px 16px;font:700 15px 'Chakra Petch',sans-serif}
+.sec2:disabled{opacity:.7;cursor:wait}
+.rm{background:none;border:0;color:#8a1f9c;font-weight:800;text-decoration:underline;padding:4px 0}
+.campo{margin-bottom:16px}
+.campo label{display:block;font-weight:800;margin-bottom:6px}
+.campo input,.campo select{width:100%;background:#e6e2d4;border:2px solid transparent;border-radius:12px;padding:13px 14px;font:16px Nunito,sans-serif;color:var(--texto)}
+.campo input:focus,.campo select:focus{outline:none;border-color:#522580;background:#fff;box-shadow:0 0 0 3px rgba(82,37,128,.2)}
+.campo input.erro{border-color:#c2253a}
+.campo input[readonly]{opacity:.75}
+.dica{font-size:13px;color:var(--suave);margin:6px 0 0}
+.err{color:#c2253a;font-weight:700;font-size:14px;margin:6px 0 0}
+.rod2{display:flex;gap:12px;margin-top:26px;flex-wrap:wrap;align-items:center}
+.sc{margin:26px 0 0;padding-top:22px;border-top:2px solid #e6e0b8}
+.sc h2{font:700 18px 'Chakra Petch',sans-serif;margin:0 0 14px}
+.opts{display:flex;gap:8px;flex-wrap:wrap;border:0;padding:0;margin:0 0 16px}
+.opts legend{font-weight:800;margin-bottom:8px;padding:0}
+.opt{position:relative}
+.opt input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.opt span{display:block;padding:9px 18px;border-radius:10px;background:#e6e2d4;font-weight:800;border:2px solid transparent}
+.opt input:checked+span{background:var(--amarelo);border-color:#522580}
+.opt input:focus-visible+span{outline:3px solid #522580;outline-offset:2px}
+.sw{display:flex;align-items:center;gap:10px;font-weight:700;margin:0 0 14px}
+.sw input{width:20px;height:20px;accent-color:#522580}
+details.senha{background:#f3efd0;border-radius:12px;padding:12px 14px}
+details.senha summary{font-weight:800;cursor:pointer}
+details.senha .campo{margin:14px 0 0}
+.sair{color:#c2253a;background:none;border:0;font-weight:800;padding:6px 0;text-decoration:underline}
+.conf{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:700;margin-top:8px}
+/* projetos */
+.ptopo{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.ptopo h1{margin:0 0 4px!important}
+.pbtns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pb{font-size:16px;padding:10px 20px}
+.pbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.pbar select,.pbar input{background:#fff;color:var(--texto);border:2px solid transparent;border-radius:10px;padding:9px 12px;font:700 15px Nunito,sans-serif;min-width:0}
+.pbar select{max-width:240px}
+.pbar input{width:240px}
+.pbar select:focus,.pbar input:focus{outline:3px solid var(--amarelo);outline-offset:2px}
+#stSalvo{font-size:14px;font-weight:800;color:var(--claro);margin-left:auto}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:20px;height:clamp(440px,calc(100vh - 290px),760px)}
+.pg .card{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:#f1ecc4;border-bottom:2px solid #e6e0b8;min-height:54px}
+.pt{font-weight:800}
+.st2{font-size:13px;font-weight:800;color:var(--suave)}
+.abas{display:flex;gap:6px;flex-wrap:wrap}
+.aba{background:none;border:2px solid transparent;border-radius:10px;padding:7px 14px;font-weight:800;color:var(--suave)}
+.aba:hover{background:rgba(82,37,128,.08)}
+.aba.on{background:#fff;border-color:#522580;color:var(--texto)}
+.ed{flex:1;min-height:0;width:100%;resize:none;border:0;background:#2a1148;color:#e9dcff;font:15px/1.65 ui-monospace,Menlo,Consolas,'Courier New',monospace;padding:16px 18px;tab-size:2;white-space:pre;overflow:auto}
+.ed:focus{outline:3px solid var(--amarelo);outline-offset:-3px}
+#res{flex:1;min-height:0;width:100%;border:0;background:#fff}
+.cons{height:120px;background:#1c0b36;color:#e9dcff;display:flex;flex-direction:column;flex:none}
+.ch{display:flex;justify-content:space-between;align-items:center;padding:4px 14px;font:800 12px Nunito,sans-serif;letter-spacing:.4px;color:var(--claro);border-bottom:1px solid rgba(255,255,255,.12)}
+.ch .rm{color:var(--amarelo);font-size:12px}
+#cons{margin:0;padding:8px 14px;overflow:auto;flex:1;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;display:block;border-radius:0}
+#cons .e{color:#ff8a9b}#cons .w{color:var(--amarelo)}
+.dica3{margin:12px 0 0;font-size:14px;color:var(--claro)}
+/* footer curto do painel */
+.fapp{background:var(--fundo-linha);padding:24px 32px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center;font-size:14px;color:var(--claro)}
+.fapp nav{display:flex;gap:20px}
+.fapp a:hover{color:#fff;text-decoration:underline}
+/* tema claro (só dentro do painel) */
+:root[data-tema=claro]{--roxo:#f3edff;--esc:#e4d8fb;--fundo-linha:#cdb9f2;--claro:#5b4a7a}
+:root[data-tema=claro] body{color:#1e1230}
+:root[data-tema=claro] .logo b{color:#7a3fd1}
+:root[data-tema=claro] .logo{color:#1e1230}
+:root[data-tema=claro] .tabs a:hover,:root[data-tema=claro] .tabs a.on{color:#1e1230}
+:root[data-tema=claro] .chip,:root[data-tema=claro] .mp{background:rgba(82,37,128,.1);border-color:rgba(82,37,128,.18)}
+:root[data-tema=claro] .mp.on{background:var(--esc);border-color:#522580}
+:root[data-tema=claro] .row.atual{border-color:#522580;box-shadow:0 4px 0 var(--fundo-linha),0 0 18px rgba(82,37,128,.25)}
+:root[data-tema=claro] .pill{background:#2a1148}
+:root[data-tema=claro] .sec2{color:#1e1230}
+:root[data-tema=claro] .voltar:hover{color:#1e1230}
+:root[data-tema=claro] .fapp{color:#5b4a7a}
+:root[data-tema=claro] .fapp a:hover{color:#1e1230}
+
+@media (max-width:900px){
+  #hdrApp{padding:8px 16px 0;height:auto;flex-wrap:wrap;gap:8px 12px}
+  .tabs{order:3;width:100%;height:44px;overflow-x:auto;margin:0;gap:0}
+  .dir{margin-left:auto}.chip.ex{display:none}
+  .wrap{padding:24px 16px 40px}
+  .grid{grid-template-columns:1fr}aside{position:static}
+  .cont{grid-template-columns:1fr}
+  #telaApp h1{font-size:26px}.mascote{width:68px}
+  .pg{grid-template-columns:1fr;height:auto}.pg .card{height:420px}.ptopo{align-items:flex-start}
+  #stSalvo{margin-left:0;width:100%}
+  .fapp{padding:24px 16px}
+}
+@media (max-width:820px){
+  .lmain{grid-template-columns:1fr}
+  .vitrine{padding:24px 20px 8px}
+  .estrela{width:90px}
+  .codigo,.frase,.social-prova,.fundo{display:none}
+  .rodape{grid-template-columns:1fr 1fr}
+  .marca{grid-column:1/-1}
+  .fgrande{padding:40px 20px 20px}
+  .lcard{padding:28px 20px}
+  #hdrLogin{gap:14px;padding:0 16px}
+  .menu,.idioma{display:none}
+  #hdrLogin .dirL{margin-left:auto;gap:16px}
+}
+@media (max-width:480px){.pcard{padding:22px 16px}.foto{justify-content:center}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="lg" viewBox="0 0 100 100">
+    <polygon points="50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8" transform="translate(3 4)" fill="#1e1230" stroke="#1e1230" stroke-width="8" stroke-linejoin="round"/>
+    <polygon points="50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8" fill="#ffcc00" stroke="#ffcc00" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M43 49L35 57L43 65M57 49L65 57L57 65M53 47L47 67" fill="none" stroke="#3d1a61" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<noscript><p style="padding:24px">O CodeStars precisa de JavaScript para funcionar.</p></noscript>
+
+<!-- ============ CARREGANDO ============ -->
+<div id="carregando" class="splash" role="status" aria-live="polite">
+  <div>
+    <svg class="spin" width="72" height="72" aria-hidden="true"><use href="#lg"/></svg>
+    <p id="splTxt">Carregando…</p>
+    <div id="cargaErro" hidden>
+      <p>Não consegui carregar seus dados. Verifique sua internet e tente de novo.</p>
+      <button class="btn" id="tentar" type="button" style="font-size:16px;padding:10px 20px">Tentar de novo</button>
+      <button class="sec2" id="sairErro" type="button">Sair</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TELA DE LOGIN ============ -->
+<div id="telaLogin" hidden>
+  <header id="hdrLogin">
+    <a class="marca-logo" href="#" aria-label="CodeStars, página inicial"><svg width="42" height="42" aria-hidden="true"><use href="#lg"/></svg><span>Code<b>Stars</b></span></a>
+    <nav class="menu" aria-label="Principal">
+      <div class="dd">
+        <button type="button" aria-haspopup="true">Cursos <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="sub-lista"><a href="#">HTML</a><a href="#">CSS</a><a href="#">JavaScript</a><a href="#">Git</a></div>
+      </div>
+      <div class="dd">
+        <button type="button" aria-haspopup="true">Recursos <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="sub-lista"><a href="#">Avaliações</a><a href="#">Ajuda</a><a href="#">Blog</a></div>
+      </div>
+    </nav>
+    <div class="dirL">
+      <button type="button" class="idioma" aria-label="Idioma"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg> PT <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <button type="button" id="hdrEntrar">Entrar</button>
+      <button type="button" class="cta" id="hdrCriar">Começar grátis</button>
+    </div>
+  </header>
+
+  <div class="lmain">
+    <section class="vitrine" aria-label="Apresentação">
+      <div class="fundo" aria-hidden="true">
+        <span class="snip xl" style="--r:-12deg;top:4%;left:4%">&lt;/&gt;</span>
+        <span class="snip xl" style="--r:10deg;bottom:3%;right:6%;--d:-2s">{ }</span>
+        <span class="snip xl" style="--r:70deg;top:42%;left:-2%;--d:-4s">;</span>
+        <span class="snip" style="--r:-70deg;top:30%;left:-4%"><span class="t">&lt;h1</span> <span class="a">class</span>=<span class="s">"titulo"</span><span class="t">&gt;</span></span>
+        <span class="snip" style="--r:70deg;top:14%;right:-14%;--d:-1s"><span class="k">body</span> { <span class="p">background</span>: <span class="s">purple</span>; }</span>
+        <span class="snip" style="--r:-14deg;top:8%;left:30%;--d:-3s"><span class="k">function</span> <span class="a">entrar</span>() {</span>
+        <span class="snip" style="--r:8deg;top:20%;left:6%;--d:-5s"><span class="k">const</span> estrela = <span class="s">"★"</span>;</span>
+        <span class="snip" style="--r:90deg;top:50%;right:-8%;--d:-2s"><span class="t">&lt;div</span> <span class="a">class</span>=<span class="s">"card"</span><span class="t">&gt;&lt;/div&gt;</span></span>
+        <span class="snip" style="--r:-25deg;top:70%;left:3%;--d:-6s"><span class="p">display</span>: <span class="s">flex</span>;</span>
+        <span class="snip" style="--r:62deg;bottom:14%;left:-6%;--d:-1s"><span class="t">&lt;/html&gt;</span></span>
+        <span class="snip" style="--r:-8deg;bottom:6%;left:18%;--d:-4s"><span class="k">for</span> (<span class="k">let</span> i = 0; i &lt; 5; i++) {</span>
+        <span class="snip" style="--r:-70deg;bottom:30%;right:-16%;--d:-3s"><span class="k">.btn</span>:hover { <span class="p">transform</span>: <span class="s">scale(1.1)</span>; }</span>
+        <span class="snip" style="--r:15deg;top:62%;right:2%;--d:-5s"><span class="k">document</span>.querySelector(<span class="s">"#login"</span>)</span>
+        <span class="snip" style="--r:-30deg;top:36%;right:10%;--d:-2s"><span class="t">&lt;p&gt;</span>Olá, mundo!<span class="t">&lt;/p&gt;</span></span>
+        <span class="snip" style="--r:72deg;top:6%;left:12%;--d:-6s"><span class="k">if</span> (aprendendo) { <span class="a">subirDeNivel</span>(); }</span>
+        <span class="snip" style="--r:-5deg;bottom:22%;right:22%;--d:-1s"><span class="p">color</span>: <span class="s">#ffcc00</span>;</span>
+        <span class="snip g" style="--r:20deg;top:84%;left:46%;--d:-3s"><span class="t">&lt;/&gt;</span></span>
+        <span class="snip g" style="--r:-18deg;top:3%;right:8%;--d:-4s"><span class="a">=&gt;</span></span>
+        <span class="snip g" style="--r:35deg;top:56%;left:8%;--d:-2s"><span class="k">( )</span></span>
+      </div>
+      <button class="estrela" id="estrela" type="button" aria-label="Estrela mascote, clique para animar">
+        <svg viewBox="0 0 100 100" width="100%" aria-hidden="true">
+          <polygon points="50,6 62,36 94,38 69,58 78,90 50,72 22,90 31,58 6,38 38,36" fill="#ffcc00" stroke="#e0a800" stroke-width="2" stroke-linejoin="round"/>
+          <g id="olhos"><circle cx="41" cy="50" r="3.2" fill="#1e1230"/><circle cx="59" cy="50" r="3.2" fill="#1e1230"/></g>
+          <path id="boca" d="M42 59 Q50 66 58 59" fill="none" stroke="#1e1230" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="codigo" aria-hidden="true"><span class="k">console</span>.log(<span class="s">"<span id="digita"></span></span><span class="cursor"></span></div>
+      <p class="frase" id="frase"></p>
+      <p class="social-prova">+12.000 estrelas já estão aprendendo</p>
+    </section>
+
+    <section class="lado-form">
+      <div class="aviso-config" id="avisoConfig" hidden>⚠️ Falta ligar o Supabase. Abra o <b>index.html</b>, preencha <b>SUPABASE_URL</b> e <b>SUPABASE_ANON_KEY</b> e recarregue (veja o LEIA-ME).</div>
+      <div class="lcard">
+        <h1 id="lgTitulo">Bem-vindo de volta!</h1>
+        <p class="lsub" data-m="entrar">Ainda não tem conta? <a class="link" href="#" data-ir="criar">Comece a aprender agora</a></p>
+        <p class="lsub" data-m="criar" hidden>Já tem conta? <a class="link" href="#" data-ir="entrar">Entrar</a></p>
+        <p class="lsub" data-m="recuperar" hidden>Digite seu e-mail e enviaremos um link para criar uma nova senha. <a class="link" href="#" data-ir="entrar">Voltar para o login</a></p>
+        <p class="lsub" data-m="novasenha" hidden>Escolha uma nova senha para a sua conta.</p>
+
+        <div data-m="entrar criar">
+          <button class="lgoogle" id="lgGoogle" type="button"><span class="g-logo" aria-hidden="true">G</span> Continuar com Google</button>
+          <div class="ou">ou use seu e-mail</div>
+        </div>
+
+        <div class="okmsg" id="lgOk" role="status"></div>
+
+        <form id="lgForm" novalidate>
+          <div class="grupo" data-m="criar" hidden>
+            <label for="lgNome">Nome</label>
+            <input id="lgNome" type="text" maxlength="30" placeholder="Como quer ser chamado?" autocomplete="name">
+            <div class="erro" id="lgErroNome" role="alert"></div>
+          </div>
+          <div class="grupo" data-m="entrar criar recuperar">
+            <label for="lgEmail">E-mail</label>
+            <input id="lgEmail" type="email" placeholder="voce@email.com" autocomplete="email">
+            <div class="erro" id="lgErroEmail" role="alert"></div>
+          </div>
+          <div class="grupo" data-m="entrar criar">
+            <label for="lgSenha">Senha</label>
+            <div class="cx">
+              <input id="lgSenha" type="password" placeholder="Sua senha" autocomplete="current-password">
+              <button type="button" class="olho" id="lgOlho" aria-label="Mostrar senha">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><line id="lgRisco" x1="3" y1="3" x2="21" y2="21" style="display:none"/></svg>
+              </button>
+            </div>
+            <p class="dicaL" data-m="criar" hidden>Pelo menos 8 caracteres.</p>
+            <div class="erro" id="lgErroSenha" role="alert"></div>
+          </div>
+          <div data-m="novasenha" hidden>
+            <div class="grupo">
+              <label for="lgNova">Nova senha</label>
+              <input id="lgNova" type="password" autocomplete="new-password">
+              <p class="dicaL">Pelo menos 8 caracteres.</p>
+            </div>
+            <div class="grupo">
+              <label for="lgNova2">Confirmar nova senha</label>
+              <input id="lgNova2" type="password" autocomplete="new-password">
+              <div class="erro" id="lgErroNova" role="alert"></div>
+            </div>
+          </div>
+          <div class="linha" data-m="entrar"><a class="link" href="#" data-ir="recuperar">Esqueci minha senha</a></div>
+          <div class="erro" id="lgErroGeral" role="alert" style="margin:0 0 12px"></div>
+          <button class="principal" id="lgEntrar" type="submit">Entrar e continuar</button>
+        </form>
+        <p class="termos">Ao entrar, você concorda com os <a class="link" href="#">Termos</a> e a <a class="link" href="#">Privacidade</a>.</p>
+      </div>
+    </section>
+  </div>
+
+  <footer class="fgrande">
+    <div class="rodape">
+      <div class="marca">
+        <div class="marca-logo"><svg width="38" height="38" aria-hidden="true"><use href="#lg"/></svg><span>Code<b>Stars</b></span></div>
+        <p>Aprenda programação do zero, passo a passo, com aulas práticas e desafios que valem estrelas.</p>
+      </div>
+      <nav aria-label="Cursos"><h2>Cursos</h2><ul><li><a href="#">HTML</a></li><li><a href="#">CSS</a></li><li><a href="#">JavaScript</a></li><li><a href="#">Git</a></li></ul></nav>
+      <nav aria-label="Empresa"><h2>Empresa</h2><ul><li><a href="#">Sobre nós</a></li><li><a href="#">Avaliações</a></li><li><a href="#">Blog</a></li><li><a href="#">Carreiras</a></li></ul></nav>
+      <nav aria-label="Suporte"><h2>Suporte</h2><ul><li><a href="#">Central de ajuda</a></li><li><a href="mailto:contato@codestars.com.br">contato@codestars.com.br</a></li><li><a href="#">Termos de uso</a></li><li><a href="#">Privacidade</a></li></ul></nav>
+    </div>
+    <div class="base">
+      <span>© 2026 CodeStars. Todos os direitos reservados.</span>
+      <span><a href="#">Instagram</a> &nbsp;·&nbsp; <a href="#">YouTube</a> &nbsp;·&nbsp; <a href="#">GitHub</a> &nbsp;·&nbsp; <a href="#">LinkedIn</a></span>
+    </div>
+  </footer>
+</div>
+
+<!-- ============ PAINEL (usuário logado) ============ -->
+<div id="telaApp" hidden>
+  <header id="hdrApp">
+    <a class="logo" id="logoApp" href="#" aria-label="CodeStars"><svg width="36" height="36" aria-hidden="true"><use href="#lg"/></svg><span>Code<b>Stars</b></span></a>
+    <nav class="tabs" aria-label="Principal"><a class="on" href="#" data-v="painel" aria-current="page">Painel</a><a href="#">Praticar</a><a href="#" data-v="projetos">Projetos</a><a href="#">Ranking</a><a href="#">Ajuda</a></nav>
+    <div class="dir">
+      <span class="chip" id="chSeq" role="img" aria-label="0 dias seguidos" title="0 dias seguidos"><i>🔥</i><b id="nSeq">0</b></span>
+      <span class="chip" id="chEst" role="img" aria-label="0 estrelas" title="0 estrelas"><i>⭐</i><b id="nEst">0</b></span>
+      <span class="chip ex" id="chLic" role="img" aria-label="0 lições feitas" title="0 lições feitas"><i>✅</i><b id="nLic">0</b></span>
+      <span class="chip ex" id="chRank" role="img" aria-label="Sem posição no ranking" title="Sem posição no ranking"><i>🏆</i><b id="nRank">—</b></span>
+      <button class="avatar" id="avatar" type="button" aria-label="Abrir perfil">?</button>
+    </div>
+  </header>
+
+  <!-- painel -->
+  <main class="wrap" id="painel">
+    <section class="hero">
+      <button class="mascote" id="mascote" type="button" aria-label="Estrela mascote, clique para ela falar">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><polygon points="50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8" fill="#ffcc00" stroke="#ffcc00" stroke-width="8" stroke-linejoin="round"/><circle class="pisca" cx="42" cy="52" r="3.4" fill="#1e1230"/><circle class="pisca" cx="58" cy="52" r="3.4" fill="#1e1230"/><path d="M43 61Q50 68 57 61" fill="none" stroke="#1e1230" stroke-width="3" stroke-linecap="round"/></svg>
+      </button>
+      <div><h1>Olá, <span id="nomeSaudacao">Estrela</span>!</h1><p class="fala" id="fala" role="status"></p></div>
+    </section>
+
+    <div class="grid">
+      <div>
+        <article class="card cont">
+          <div>
+            <div class="tag" id="cTag">CONTINUANDO</div>
+            <h2 id="cTit">Carregando…</h2>
+            <div class="barra" role="progressbar" id="cProg" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso do módulo"><i id="cBarra"></i></div>
+            <div class="meta"><span id="cMeta1"></span><span id="cMeta2"></span></div>
+            <button class="btn" id="cBtn" type="button">▶ Continuar lição</button>
+          </div>
+          <pre aria-label="Prévia do código" id="cPre"><code id="cCod"></code></pre>
+        </article>
+
+        <h2 class="sec">Sua trilha</h2>
+        <div class="mods" id="mods" role="tablist" aria-label="Módulos"></div>
+        <div class="lista" id="lista"></div>
+      </div>
+
+      <aside>
+        <div class="card mini"><h3>Meta de hoje</h3>
+          <div class="anel"><div class="ring" id="ring"><span id="ringNum">0/2</span></div><p id="metaTxt"></p></div>
+          <div class="dias" id="dias" aria-label="Semana"></div>
+        </div>
+        <div class="card mini"><h3>Ranking da semana</h3>
+          <ol id="rankList"></ol>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- lição -->
+  <section class="wrap" id="licao" hidden>
+    <div class="lc">
+      <button class="voltar" id="lcVoltar" type="button">← Voltar ao painel</button>
+      <div class="card cartao">
+        <div class="tag" id="lcTag"></div>
+        <h2 id="lcTit"></h2>
+        <pre aria-label="Código da lição"><code id="lcCod"></code></pre>
+        <p>O conteúdo completo desta lição (texto, exercícios e correção) ainda vai ser adicionado. Por enquanto, marque como concluída para testar o seu progresso, as estrelas e o ranking.</p>
+        <button class="btn" id="lcConcluir" type="button">✅ Concluir lição</button>
+        <p id="lcFeita" hidden style="margin:0;font-weight:800;color:#0b5a2b">✓ Você já concluiu esta lição.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- perfil -->
+  <section class="wrap" id="perfil" hidden>
+    <div class="perfil">
+      <button class="voltar" id="voltar" type="button">← Voltar ao painel</button>
+      <div class="card pcard">
+        <h1>Meu perfil</h1>
+        <div class="foto">
+          <div class="grande" id="grande" aria-hidden="true">?</div>
+          <div class="acoes">
+            <button class="sec2" id="escolher" type="button">📁 Escolher foto do computador</button>
+            <button class="rm" id="remover" type="button">Remover foto</button>
+            <input type="file" id="arquivo" accept="image/*" hidden>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="nome">Nome</label>
+          <input id="nome" type="text" maxlength="30" autocomplete="name">
+          <p class="dica">Esse nome aparece na saudação e no ranking.</p>
+          <p class="err" id="errnome" role="alert"></p>
+        </div>
+        <div class="sc"><h2>Conta</h2>
+          <div class="campo"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" placeholder="voce@email.com"><p class="dica" id="notaGoogle" hidden>Você entrou com o Google, então o e-mail e a senha são gerenciados pela sua conta Google.</p><p class="err" id="erremail" role="alert"></p></div>
+          <details class="senha" id="detSenha"><summary>🔑 Trocar senha</summary>
+            <div class="campo"><label for="senhaAtual">Senha atual</label><input id="senhaAtual" type="password" autocomplete="current-password"></div>
+            <div class="campo"><label for="senhaNova">Nova senha</label><input id="senhaNova" type="password" autocomplete="new-password"><p class="dica">Pelo menos 8 caracteres.</p></div>
+            <div class="campo"><label for="senhaConf">Confirmar nova senha</label><input id="senhaConf" type="password" autocomplete="new-password"></div>
+            <p class="err" id="errsenha" role="alert"></p>
+          </details>
+        </div>
+        <div class="sc"><h2>Estudos</h2>
+          <fieldset class="opts"><legend>Meta diária de lições</legend>
+            <label class="opt"><input type="radio" name="meta" value="1"><span>1</span></label><label class="opt"><input type="radio" name="meta" value="2"><span>2</span></label><label class="opt"><input type="radio" name="meta" value="3"><span>3</span></label><label class="opt"><input type="radio" name="meta" value="5"><span>5</span></label>
+          </fieldset>
+          <label class="sw"><input type="checkbox" id="lembrete"> Receber lembrete diário</label>
+          <div class="campo" id="horaBox" hidden><label for="hora">Horário do lembrete</label><input id="hora" type="time" value="19:00"></div>
+        </div>
+        <div class="sc"><h2>Preferências</h2>
+          <div class="campo"><label for="idioma">Idioma</label><select id="idioma"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option></select></div>
+          <fieldset class="opts"><legend>Tema</legend>
+            <label class="opt"><input type="radio" name="tema" value="escuro"><span>🌙 Escuro</span></label><label class="opt"><input type="radio" name="tema" value="claro"><span>☀️ Claro</span></label><label class="opt"><input type="radio" name="tema" value="auto"><span>Automático</span></label>
+          </fieldset>
+        </div>
+        <div class="rod2"><button class="btn" id="salvar" type="button">Salvar alterações</button><button class="sec2" id="cancelar" type="button">Cancelar</button></div>
+        <div class="sc">
+          <button class="sair" id="sair" type="button">Sair da conta</button>
+          <div class="conf" id="sairConf" hidden><span>Tem certeza que quer sair?</span><button class="btn" id="sairSim" type="button" style="font-size:15px;padding:9px 18px">Sair</button><button class="sec2" id="sairNao" type="button">Ficar</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- projetos -->
+  <section class="wrap larga" id="projetos" hidden>
+    <div class="ptopo">
+      <div><h1>Projetos</h1><p class="fala">Escreva HTML, CSS e JavaScript e veja o resultado ao lado, ao vivo.</p></div>
+      <div class="pbtns">
+        <button class="btn pb" id="exec" type="button">▶ Executar</button>
+        <button class="sec2" id="exemplo" type="button">✨ Exemplo</button>
+        <button class="sec2" id="limpar" type="button">🧹 Limpar</button>
+      </div>
+    </div>
+    <div class="pbar">
+      <label for="projSel" style="position:absolute;left:-9999px">Projeto</label>
+      <select id="projSel" aria-label="Escolher projeto"></select>
+      <input id="projNome" type="text" maxlength="60" placeholder="Nome do projeto" aria-label="Nome do projeto">
+      <button class="sec2" id="projNovo" type="button">➕ Novo</button>
+      <button class="sec2" id="projDel" type="button">🗑️ Excluir</button>
+      <span id="stSalvo" role="status"></span>
+    </div>
+    <div class="pg">
+      <section class="card" aria-label="Editor de código">
+        <div class="ph"><div class="abas" role="tablist" aria-label="Linguagem">
+          <button class="aba on" role="tab" data-l="html" aria-selected="true" type="button">🖥️ HTML</button>
+          <button class="aba" role="tab" data-l="css" aria-selected="false" type="button">🎨 CSS</button>
+          <button class="aba" role="tab" data-l="js" aria-selected="false" type="button">⚡ JavaScript</button>
+        </div></div>
+        <textarea id="ed" class="ed" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editor de código"></textarea>
+      </section>
+      <section class="card" aria-label="Resultado">
+        <div class="ph"><span class="pt">🌐 Resultado (Visualização)</span><span class="st2" id="stRes" role="status"></span></div>
+        <iframe id="res" title="Resultado do seu código" sandbox="allow-scripts"></iframe>
+        <div class="cons"><div class="ch"><span>CONSOLE</span><button class="rm" id="limpaCons" type="button">limpar</button></div><pre id="cons" aria-live="polite"></pre></div>
+      </section>
+    </div>
+    <p class="dica3">Dica: a tecla Tab insere 2 espaços. Aperte Esc e depois Tab para sair do editor. Seu código é salvo automaticamente na sua conta.</p>
+  </section>
+
+  <footer class="fapp">
+    <div class="logo" style="font-size:18px"><svg width="28" height="28" aria-hidden="true"><use href="#lg"/></svg><span>Code<b>Stars</b></span></div>
+    <nav><a href="#">Ajuda</a><a href="#">Termos</a><a href="#">Privacidade</a></nav>
+    <span>© 2026 CodeStars</span>
+  </footer>
+</div>
+
+<div id="aviso" role="status"></div>
+
+<!-- Biblioteca oficial do Supabase (versão fixada) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* =====================================================================
+   1) CONFIGURAÇÃO DO SUPABASE  ←  PREENCHA AQUI
+   Painel do Supabase → Project Settings → API
+   - SUPABASE_URL: "Project URL"
+   - SUPABASE_ANON_KEY: chave "anon public" (pode ficar no site: quem protege
+     os dados são as regras RLS do schema.sql).
+   NUNCA coloque a chave "service_role" aqui.
+   ===================================================================== */
+const SUPABASE_URL      = 'https://SEU-PROJETO.supabase.co';
+const SUPABASE_ANON_KEY = 'COLE_AQUI_A_CHAVE_ANON';
+
+const CONFIGURADO = !/SEU-PROJETO|COLE_AQUI/.test(SUPABASE_URL + SUPABASE_ANON_KEY);
+const sb = (CONFIGURADO && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+const VOLTA_PARA = location.origin + location.pathname;   // para onde Google/e-mail devolvem o aluno
+
+/* =====================================================================
+   2) UTILIDADES
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const okEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const plural = (n, um, varios) => n === 1 ? um : varios;
+const rmov = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let tmAviso;
+function aviso(t){ const a=$('aviso'); a.textContent=t; a.classList.add('on'); clearTimeout(tmAviso); tmAviso=setTimeout(()=>a.classList.remove('on'),3400); }
+
+function contar(el, alvo, suf=''){
+  const ini = +el.dataset.v || 0; el.dataset.v = alvo;
+  if (rmov || ini === alvo){ el.textContent = alvo + suf; return; }
+  const t0 = performance.now();
+  (function f(t){ const p=Math.min((t-t0)/800,1); el.textContent=Math.round(ini+(alvo-ini)*p)+(p===1?suf:''); if(p<1) requestAnimationFrame(f); })(t0);
+}
+
+// destaque de cores simples para os trechos de código das lições
+function realca(c){
+  const e = String(c).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+  return e.replace(/(&lt;[\s\S]*?&gt;)|("[^"\n]*"|'[^'\n]*')|\b(let|const|function|return|if|else|git)\b|(\.[\w-]+)(?=\s*\{)|([\w-]+)(?=:\s)/g,
+    (m, tag, str, kw, sel, prop) => {
+      if (tag)  return '<span class="k">'+tag+'</span>';
+      if (str)  return '<span class="s">'+str+'</span>';
+      if (kw)   return '<span class="k">'+kw+'</span>';
+      if (sel)  return '<span class="k">'+sel+'</span>';
+      if (prop) return '<span class="p">'+prop+'</span>';
+      return m;
+    });
+}
+
+// traduz os erros do Supabase para português
+function traduz(err){
+  const m = String((err && err.message) || err || '').toLowerCase();
+  if (m.includes('invalid login'))                          return 'E-mail ou senha incorretos. Confira e tente de novo.';
+  if (m.includes('email not confirmed'))                    return 'Falta confirmar seu e-mail. Procure o link na caixa de entrada (e no spam).';
+  if (m.includes('already registered') || m.includes('already been registered')) return 'Esse e-mail já tem conta. Tente entrar.';
+  if (m.includes('same password') || m.includes('different from the old')) return 'A nova senha precisa ser diferente da atual.';
+  if (m.includes('weak') || m.includes('pwned'))            return 'Essa senha é fraca demais. Misture letras, números e símbolos.';
+  if (m.includes('at least') && m.includes('character'))    return 'A senha é curta demais.';
+  if (m.includes('rate limit') || m.includes('too many') || m.includes('security purposes')) return 'Muitas tentativas. Espere um pouco e tente de novo.';
+  if (m.includes('failed to fetch') || m.includes('network') || m.includes('load failed')) return 'Sem conexão com o servidor. Verifique sua internet.';
+  if (err && err.code === 'P0001' && err.message)           return err.message;   // mensagens escritas no schema.sql
+  return 'Algo deu errado. Tente de novo em instantes.';
+}
+
+/* =====================================================================
+   3) TELAS
+   ===================================================================== */
+function telaDe(t){
+  $('carregando').hidden = t !== 'carregando';
+  $('telaLogin').hidden  = t !== 'login';
+  $('telaApp').hidden    = t !== 'app';
+  if (t !== 'app') document.documentElement.dataset.tema = 'escuro';
+}
+const VIEWS = ['painel','licao','perfil','projetos'];
+let editorIniciado = false;
+function vai(v){
+  VIEWS.forEach(id => $(id).hidden = (id !== v));
+  document.querySelectorAll('.tabs a[data-v]').forEach(a => {
+    const on = a.dataset.v === v; a.classList.toggle('on', on);
+    if (on) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+  });
+  if (v === 'projetos' && !editorIniciado){ editorIniciado = true; carregaProjeto(projAtual); }
+  scrollTo(0,0);
+}
+document.querySelectorAll('.tabs a[data-v]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); vai(a.dataset.v); }));
+document.querySelectorAll('.tabs a:not([data-v])').forEach(a => a.addEventListener('click', e => e.preventDefault()));
+$('logoApp').addEventListener('click', e => { e.preventDefault(); vai('painel'); });
+
+/* =====================================================================
+   4) LOGIN / CRIAR CONTA / RECUPERAR SENHA  (Supabase Auth)
+   ===================================================================== */
+let modoAtual = 'entrar';
+let recuperando = /type=recovery/.test(location.hash);
+const TITULOS = {
+  entrar:    ['Bem-vindo de volta!',        'Entrar e continuar'],
+  criar:     ['Crie sua conta',             'Criar conta e começar'],
+  recuperar: ['Recuperar senha',            'Enviar link de recuperação'],
+  novasenha: ['Escolha uma nova senha',     'Salvar nova senha']
+};
+function limpaErros(){
+  document.querySelectorAll('#telaLogin .erro').forEach(e => { e.classList.remove('on'); e.textContent=''; });
+  document.querySelectorAll('#telaLogin input').forEach(i => i.classList.remove('invalido'));
+  $('lgOk').classList.remove('on'); $('lgOk').textContent='';
+}
+function erroL(id, msg, campo){ const e=$(id); e.textContent=msg; e.classList.add('on'); if(campo) $(campo).classList.add('invalido'); }
+function modo(m){
+  modoAtual = m;
+  document.querySelectorAll('#telaLogin [data-m]').forEach(el => { el.hidden = !el.dataset.m.split(' ').includes(m); });
+  $('lgTitulo').textContent = TITULOS[m][0];
+  $('lgEntrar').textContent = TITULOS[m][1];
+  $('lgSenha').autocomplete = m === 'criar' ? 'new-password' : 'current-password';
+  limpaErros();
+}
+document.querySelectorAll('[data-ir]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); modo(a.dataset.ir); }));
+$('hdrEntrar').addEventListener('click', () => { modo('entrar'); $('lgEmail').focus(); });
+$('hdrCriar').addEventListener('click',  () => { modo('criar');  $('lgNome').focus(); });
+
+$('lgOlho').addEventListener('click', () => {
+  const ver = $('lgSenha').type === 'password';
+  ['lgSenha','lgNova','lgNova2'].forEach(i => $(i).type = ver ? 'text' : 'password');
+  $('lgRisco').style.display = ver ? 'block' : 'none';
+  $('lgOlho').setAttribute('aria-label', ver ? 'Ocultar senha' : 'Mostrar senha');
+});
+$('lgEmail').addEventListener('blur', () => {
+  const v = $('lgEmail').value.trim();
+  if (v && !okEmail(v)) erroL('lgErroEmail','Digite um e-mail válido, como voce@email.com.','lgEmail');
+});
+
+// mascote da tela de login
+const estrela = $('estrela'), boca = $('boca'), olhos = $('olhos');
+function anima(c){ estrela.classList.remove('pula','triste','gira'); void estrela.offsetWidth; estrela.classList.add(c); }
+function feliz(){ boca.setAttribute('d','M40 57 Q50 70 60 57'); anima('pula'); }
+function triste(){ boca.setAttribute('d','M42 64 Q50 57 58 64'); anima('triste'); }
+estrela.addEventListener('click', () => anima('pula'));
+
+$('lgGoogle').addEventListener('click', async () => {
+  if (!sb) return erroL('lgErroGeral','Falta ligar o Supabase (veja o aviso acima).');
+  limpaErros();
+  const { error } = await sb.auth.signInWithOAuth({ provider:'google', options:{ redirectTo: VOLTA_PARA } });
+  if (error){ erroL('lgErroGeral', traduz(error)); triste(); }
+});
+
+$('lgForm').addEventListener('submit', async e => {
+  e.preventDefault(); limpaErros();
+  if (!sb) return erroL('lgErroGeral','Falta ligar o Supabase. Preencha SUPABASE_URL e SUPABASE_ANON_KEY no index.html.');
+  const email = $('lgEmail').value.trim(), senha = $('lgSenha').value, nome = $('lgNome').value.trim();
+  let ok = true;
+  if (['entrar','criar','recuperar'].includes(modoAtual) && !okEmail(email)){ erroL('lgErroEmail','Digite um e-mail válido, como voce@email.com.','lgEmail'); ok = false; }
+  if (modoAtual === 'criar' && !nome){ erroL('lgErroNome','Digite seu nome.','lgNome'); ok = false; }
+  if (modoAtual === 'entrar' && !senha){ erroL('lgErroSenha','Digite sua senha.','lgSenha'); ok = false; }
+  if (modoAtual === 'criar' && senha.length < 8){ erroL('lgErroSenha','A senha precisa ter pelo menos 8 caracteres.','lgSenha'); ok = false; }
+  if (modoAtual === 'novasenha'){
+    const n = $('lgNova').value, c = $('lgNova2').value;
+    if (n.length < 8){ erroL('lgErroNova','A nova senha precisa ter pelo menos 8 caracteres.','lgNova'); ok = false; }
+    else if (n !== c){ erroL('lgErroNova','A confirmação não é igual à nova senha.','lgNova2'); ok = false; }
+  }
+  if (!ok){ triste(); return; }
+
+  const btn = $('lgEntrar'), textoBtn = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Aguarde…';
+  try{
+    if (modoAtual === 'entrar'){
+      const { error } = await sb.auth.signInWithPassword({ email, password: senha });
+      if (error) throw error;
+      feliz();                                   // onAuthStateChange abre o painel
+    } else if (modoAtual === 'criar'){
+      const { data, error } = await sb.auth.signUp({ email, password: senha, options:{ data:{ nome }, emailRedirectTo: VOLTA_PARA } });
+      if (error) throw error;
+      if (data.user && data.user.identities && data.user.identities.length === 0) throw { message:'User already registered' };
+      if (!data.session){
+        modo('entrar');
+        $('lgOk').textContent = 'Quase lá! Enviamos um e-mail de confirmação. Clique no link dele para ativar sua conta e depois volte para entrar.';
+        $('lgOk').classList.add('on');
+      } else feliz();
+    } else if (modoAtual === 'recuperar'){
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: VOLTA_PARA });
+      if (error) throw error;
+      $('lgOk').textContent = 'Se esse e-mail tiver conta, você vai receber um link para criar uma nova senha.';
+      $('lgOk').classList.add('on');
+    } else if (modoAtual === 'novasenha'){
+      const { error } = await sb.auth.updateUser({ password: $('lgNova').value });
+      if (error) throw error;
+      recuperando = false; history.replaceState(null, '', location.pathname);
+      const { data } = await sb.auth.getSession();
+      if (data.session){ aviso('✅ Senha alterada!'); await tratar('SIGNED_IN', data.session); }
+      else { modo('entrar'); }
+    }
+  } catch (err){
+    erroL('lgErroGeral', traduz(err)); triste();
+  } finally {
+    btn.disabled = false; if (btn.textContent === 'Aguarde…') btn.textContent = textoBtn;
+  }
+});
+
+// efeitos da vitrine
+(function(){
+  const frases=["Todo bug é uma aula disfarçada.","Errar faz parte: compile, quebre, aprenda.","Um commit por dia mantém a sequência viva.","Código bom começa com uma pergunta boa."];
+  $('frase').textContent = frases[Math.floor(Math.random()*frases.length)];
+  const alvo = 'Bem-vindo de volta!")', el = $('digita'); let i = 0;
+  (function t(){ if(i<=alvo.length){ el.textContent=alvo.slice(0,i++); setTimeout(t,90); } })();
+  if (!rmov){
+    const mira=[[-3,-2],[3,-2],[-3,2],[3,1],[0,-3],[0,0]];
+    setInterval(()=>{ const [x,y]=mira[Math.floor(Math.random()*mira.length)]; olhos.style.transform=`translate(${x}px,${y}px)`; },1800);
+    (function sozinha(){ setTimeout(()=>{ if(!document.hidden && !$('telaLogin').hidden && !estrela.matches(':hover')) anima(Math.random()<.5?'pula':'gira'); sozinha(); },4000+Math.random()*4000); })();
+  }
+})();
+
+/* =====================================================================
+   5) DADOS DO ALUNO (carregados do Supabase depois do login)
+   ===================================================================== */
+let usuario = null;           // usuário do Supabase Auth
+let perfil  = null;           // linha da tabela profiles
+let licoes  = [];             // catálogo (tabela licoes)
+let feitas  = new Set();      // ids das lições concluídas
+let resumo  = { estrelas:0, licoes_feitas:0, hoje:0, sequencia:0, semana_ini:null, dias_semana:[] };
+let ranking = [];             // linhas de ranking_semana()
+let projetos = [], projAtual = null;
+let moduloSel = null, licaoAberta = null;
+
+function nomeInicial(u){
+  const m = u.user_metadata || {};
+  const n = (m.nome || m.full_name || m.name || (u.email||'').split('@')[0] || 'Estrela').trim();
+  return n.slice(0,30) || 'Estrela';
+}
+
+async function carregaTudo(){
+  const uid = usuario.id;
+  const [p, l, pr, rs, rk, pj] = await Promise.all([
+    sb.from('profiles').select('*').eq('id', uid).maybeSingle(),
+    sb.from('licoes').select('*').order('ordem'),
+    sb.from('progresso_licoes').select('licao_id'),
+    sb.rpc('meu_resumo'),
+    sb.rpc('ranking_semana'),
+    sb.from('projetos').select('*').order('criado_em')
+  ]);
+  for (const r of [p, l, pr, rs, rk, pj]) if (r.error) throw r.error;
+  perfil = p.data;
+  if (!perfil){            // se o gatilho do banco ainda não criou o perfil, cria agora
+    const { data, error } = await sb.from('profiles').insert({ id: uid, nome: nomeInicial(usuario) }).select().single();
+    if (error) throw error; perfil = data;
+  }
+  licoes = l.data; feitas = new Set(pr.data.map(x => x.licao_id));
+  resumo = rs.data; ranking = rk.data || []; projetos = pj.data;
+  if (!projetos.length) await criaProjeto('Meu primeiro projeto');
+  projAtual = projetos.slice().sort((a,b) => b.atualizado_em.localeCompare(a.atualizado_em))[0];
+}
+async function recarregaResumo(){
+  const [rs, rk] = await Promise.all([ sb.rpc('meu_resumo'), sb.rpc('ranking_semana') ]);
+  if (rs.error) throw rs.error; if (rk.error) throw rk.error;
+  resumo = rs.data; ranking = rk.data || [];
+}
+
+/* =====================================================================
+   6) PAINEL: trilha, meta, ranking, chips
+   ===================================================================== */
+function modulos(){
+  const mp = new Map();
+  licoes.forEach(l => { if(!mp.has(l.modulo)) mp.set(l.modulo,{ id:l.modulo, nome:l.modulo_nome, l:[] }); mp.get(l.modulo).l.push(l); });
+  const arr = [...mp.values()]; let travaDaqui = false;
+  arr.forEach((m,i) => {
+    m.feitas = m.l.filter(x => feitas.has(x.id)).length; m.total = m.l.length;
+    m.st = travaDaqui ? 'trava' : (m.feitas === m.total ? 'ok' : 'atual');
+    if (m.st === 'atual') travaDaqui = true;
+    m.prev = i > 0 ? arr[i-1].nome : null;
+  });
+  return arr;
+}
+function statusLicoes(m){
+  let achou = false;
+  return m.l.map(l => { if (feitas.has(l.id)) return 'ok'; if (m.st === 'trava') return 'trava'; if (!achou){ achou = true; return 'atual'; } return 'trava'; });
+}
+const ICONE = { ok:'✓', atual:'▶', trava:'🔒' };
+
+function pintaPainel(){
+  const mods = modulos();
+  $('nomeSaudacao').textContent = perfil.nome;
+  if (!mods.length){
+    $('cTag').textContent = 'SEM LIÇÕES'; $('cTit').textContent = 'Nenhuma lição cadastrada ainda';
+    $('cBtn').hidden = true; $('cPre').hidden = true; $('mods').innerHTML=''; $('lista').innerHTML='';
+    $('fala').textContent = 'Rode o schema.sql no Supabase para cadastrar as lições.'; return;
+  }
+  if (!moduloSel || !mods.find(m => m.id === moduloSel && m.st !== 'trava'))
+    moduloSel = (mods.find(m => m.st === 'atual') || mods[mods.length-1]).id;
+
+  // card "Continuando"
+  const prox = licoes.find(l => !feitas.has(l.id));
+  if (prox){
+    const m = mods.find(x => x.id === prox.modulo), n = m.l.indexOf(prox) + 1, pct = Math.round(m.feitas / m.total * 100);
+    $('cTag').textContent = 'CONTINUANDO • ' + m.nome.toUpperCase();
+    $('cTit').textContent = 'Lição ' + n + ': ' + prox.titulo;
+    $('cBarra').style.width = pct + '%'; $('cProg').setAttribute('aria-valuenow', pct);
+    $('cMeta1').textContent = m.feitas + ' de ' + m.total + ' ' + plural(m.total,'lição','lições');
+    $('cMeta2').textContent = '~' + prox.minutos + ' min · +' + prox.estrelas + ' ⭐';
+    $('cCod').innerHTML = realca(prox.preview || ''); $('cPre').hidden = false;
+    $('cBtn').hidden = false; $('cBtn').onclick = () => abreLicao(prox.id);
+  } else {
+    $('cTag').textContent = 'TRILHA COMPLETA'; $('cTit').textContent = 'Você concluiu todas as lições! 🎉';
+    $('cBarra').style.width = '100%'; $('cProg').setAttribute('aria-valuenow', 100);
+    $('cMeta1').textContent = licoes.length + ' lições concluídas'; $('cMeta2').textContent = '';
+    $('cPre').hidden = true; $('cBtn').hidden = true;
+  }
+
+  // módulos e lições
+  $('mods').innerHTML = mods.map(m =>
+    `<button class="mp ${m.st==='trava'?'trava':''} ${m.id===moduloSel?'on':''}" role="tab" aria-selected="${m.id===moduloSel}" data-k="${esc(m.id)}"><span>${ICONE[m.st]}</span>${esc(m.nome)}</button>`).join('');
+  const m = mods.find(x => x.id === moduloSel), st = statusLicoes(m);
+  $('lista').innerHTML = m.l.map((l,i) => {
+    const s = st[i], fim = s==='ok' ? '<span class="ic ok">✓</span>' : s==='atual' ? '<span class="ic go">→</span>' : '<span>🔒</span>';
+    return `<button class="row ${s}" data-s="${s}" data-id="${esc(l.id)}"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${esc(l.titulo)}</span><span class="pill ${l.tipo}">${l.tipo==='a'?'📖 APRENDER':'⚡ PRATICAR'}</span>${fim}</button>`;
+  }).join('');
+
+  pintaMeta(); pintaRank(); pintaChips(); falaPadrao();
+}
+$('mods').addEventListener('click', e => {
+  const b = e.target.closest('.mp'); if (!b) return;
+  const m = modulos().find(x => x.id === b.dataset.k);
+  if (m.st === 'trava'){ aviso('🔒 Conclua o ' + m.prev + ' para desbloquear o ' + m.nome + '.'); return; }
+  moduloSel = m.id; pintaPainel();
+});
+$('lista').addEventListener('click', e => {
+  const r = e.target.closest('.row'); if (!r) return;
+  if (r.dataset.s === 'trava') aviso('🔒 Conclua a lição anterior para liberar esta.');
+  else abreLicao(r.dataset.id);
+});
+
+function pintaMeta(){
+  const m = perfil.meta_diaria, f = resumo.hoje, p = Math.min(f / m, 1) * 100;
+  $('ringNum').textContent = f + '/' + m; $('ring').style.setProperty('--p', p + '%');
+  $('metaTxt').textContent = f >= m ? 'Meta batida! A chama de hoje está acesa 🔥'
+    : (m - f === 1 ? 'Mais uma lição e a chama de hoje fica acesa.' : 'Faltam ' + (m - f) + ' lições para bater a meta de hoje.');
+  const L = ['S','T','Q','Q','S','S','D'], set = new Set(resumo.dias_semana || []);
+  const ini = resumo.semana_ini ? new Date(resumo.semana_ini + 'T00:00:00Z') : null;
+  $('dias').innerHTML = L.map((l,i) => {
+    let on = false; if (ini) on = set.has(new Date(ini.getTime() + i*864e5).toISOString().slice(0,10));
+    return `<span class="${on?'x':''}"><b>${on?'🔥':''}</b>${l}</span>`;
+  }).join('');
+}
+function pintaRank(){
+  $('rankList').innerHTML = ranking.map(r => {
+    const pos = Number(r.posicao), med = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos + 'º';
+    return `<li class="${r.eu?'eu':''}">${med} ${esc(r.nome)}${r.eu?' (você)':''} <em>${r.estrelas} ⭐</em></li>`;
+  }).join('') || '<li>Complete uma lição para entrar no ranking!</li>';
+}
+function pintaChips(){
+  contar($('nSeq'), resumo.sequencia); contar($('nEst'), resumo.estrelas); contar($('nLic'), resumo.licoes_feitas);
+  const eu = ranking.find(r => r.eu), temPos = eu && eu.estrelas > 0;
+  $('nRank').textContent = temPos ? Number(eu.posicao) + 'º' : '—';
+  const set = (id, txt) => { $(id).setAttribute('aria-label', txt); $(id).title = txt; };
+  set('chSeq', resumo.sequencia + ' ' + plural(resumo.sequencia,'dia seguido','dias seguidos'));
+  set('chEst', resumo.estrelas + ' ' + plural(resumo.estrelas,'estrela','estrelas'));
+  set('chLic', resumo.licoes_feitas + ' ' + plural(resumo.licoes_feitas,'lição feita','lições feitas'));
+  set('chRank', temPos ? eu.posicao + 'º no ranking da semana' : 'Sem posição no ranking ainda');
+}
+
+/* mascote do painel */
+const mas = $('mascote'); let fi = 0;
+function falar(t){ $('fala').textContent = t; mas.classList.remove('gira'); void mas.offsetWidth; mas.classList.add('gira'); }
+function falasLista(){
+  const prox = licoes.find(l => !feitas.has(l.id)), m = prox && modulos().find(x => x.id === prox.modulo), a = [];
+  if (m){ const f = m.total - m.feitas; a.push(plural(f,'Falta 1 lição','Faltam '+f+' lições') + ' para fechar o ' + m.nome + '. Bora?'); }
+  else a.push('Você completou a trilha toda! 🎉');
+  a.push('Cada lição vale estrelas ⭐', 'Todo bug é uma aula disfarçada.');
+  a.push(resumo.sequencia > 0 ? 'Sua chama está acesa há ' + resumo.sequencia + ' ' + plural(resumo.sequencia,'dia','dias') + ' 🔥' : 'Que tal acender sua chama hoje? 🔥');
+  return a;
+}
+function falaPadrao(){ $('fala').textContent = falasLista()[0]; fi = 0; }
+mas.addEventListener('click', () => { const a = falasLista(); fi = (fi + 1) % a.length; falar(a[fi]); });
+
+/* =====================================================================
+   7) LIÇÃO: abrir e concluir (a gravação é feita pela função concluir_licao no banco)
+   ===================================================================== */
+function abreLicao(id){
+  const l = licoes.find(x => x.id === id); if (!l) return;
+  licaoAberta = l;
+  const m = modulos().find(x => x.id === l.modulo), n = m.l.indexOf(l) + 1, feita = feitas.has(id);
+  $('lcTag').textContent = m.nome.toUpperCase() + ' • ' + (l.tipo === 'a' ? 'APRENDER' : 'PRATICAR');
+  $('lcTit').textContent = 'Lição ' + n + ': ' + l.titulo;
+  $('lcCod').innerHTML = realca(l.preview || '');
+  $('lcConcluir').hidden = feita; $('lcFeita').hidden = !feita;
+  $('lcConcluir').textContent = '✅ Concluir lição (+' + l.estrelas + ' ⭐)';
+  vai('licao');
+}
+$('lcVoltar').addEventListener('click', () => vai('painel'));
+$('lcConcluir').addEventListener('click', async () => {
+  const l = licaoAberta, btn = $('lcConcluir'); if (!l) return;
+  btn.disabled = true;
+  try{
+    const antes = modulos().find(x => x.id === l.modulo), metaAntes = resumo.hoje >= perfil.meta_diaria;
+    const { data, error } = await sb.rpc('concluir_licao', { p_licao: l.id });
+    if (error) throw error;
+    feitas.add(l.id);
+    await recarregaResumo();
+    const depois = modulos().find(x => x.id === l.modulo);
+    moduloSel = null; pintaPainel(); vai('painel');
+    let msg = data && data.nova ? '⭐ +' + l.estrelas + ' estrelas! Lição concluída.' : 'Lição já estava concluída.';
+    if (antes.feitas < antes.total && depois.feitas === depois.total) msg = '🎉 Módulo ' + depois.nome + ' concluído! ' + msg;
+    else if (!metaAntes && resumo.hoje >= perfil.meta_diaria) msg += ' Meta de hoje batida 🔥';
+    falar('Boa! Mais uma lição no bolso 💪'); aviso(msg);
+  } catch (err){ aviso('Não consegui salvar seu progresso. ' + traduz(err)); }
+  finally { btn.disabled = false; }
+});
+
+/* =====================================================================
+   8) PERFIL (tabela profiles + Storage + Auth)
+   ===================================================================== */
+let rascunho = {};
+function pinta(el, p){
+  el.innerHTML = '';
+  if (p.avatar_url){ const i = new Image(); i.alt = ''; i.referrerPolicy = 'no-referrer'; i.src = p.avatar_url; i.onerror = () => { el.textContent = ((p.nome||'').trim()[0]||'?').toUpperCase(); }; el.appendChild(i); }
+  else el.textContent = ((p.nome||'').trim()[0]||'?').toUpperCase();
+}
+const mqEsc = matchMedia('(prefers-color-scheme: dark)');
+function aplicaTema(t){ document.documentElement.dataset.tema = t === 'auto' ? (mqEsc.matches ? 'escuro' : 'claro') : t; }
+mqEsc.addEventListener('change', () => { if (perfil && !$('telaApp').hidden) aplicaTema(perfil.tema); });
+function pintaApp(){
+  pinta($('avatar'), perfil);
+  $('avatar').setAttribute('aria-label', 'Abrir perfil de ' + perfil.nome);
+  aplicaTema(perfil.tema); pintaPainel();
+}
+const temSenha = () => ((usuario.app_metadata && usuario.app_metadata.providers) || [usuario.app_metadata && usuario.app_metadata.provider]).includes('email');
+
+function abrePerfil(){
+  rascunho = { ...perfil, fotoBlob:null, remover:false };
+  $('nome').value = perfil.nome; $('errnome').textContent = ''; $('nome').classList.remove('erro');
+  pinta($('grande'), rascunho); $('remover').hidden = !rascunho.avatar_url;
+  $('email').value = usuario.email || ''; $('email').classList.remove('erro'); $('erremail').textContent = '';
+  const por = temSenha(); $('email').readOnly = !por; $('detSenha').hidden = !por; $('notaGoogle').hidden = por;
+  document.querySelectorAll('input[name=meta]').forEach(r => r.checked = (+r.value === rascunho.meta_diaria));
+  document.querySelectorAll('input[name=tema]').forEach(r => r.checked = (r.value === rascunho.tema));
+  $('lembrete').checked = rascunho.lembrete; $('hora').value = rascunho.hora_lembrete; $('horaBox').hidden = !rascunho.lembrete;
+  $('idioma').value = rascunho.idioma;
+  ['senhaAtual','senhaNova','senhaConf'].forEach(i => $(i).value = ''); $('errsenha').textContent = ''; $('detSenha').open = false;
+  $('sairConf').hidden = true;
+  vai('perfil'); $('voltar').focus({ preventScroll:true });
+}
+function fechaPerfil(){ aplicaTema(perfil.tema); $('sairConf').hidden = true; vai('painel'); $('avatar').focus(); }
+$('avatar').addEventListener('click', abrePerfil);
+$('cancelar').addEventListener('click', fechaPerfil); $('voltar').addEventListener('click', fechaPerfil);
+$('escolher').addEventListener('click', () => $('arquivo').click());
+$('arquivo').addEventListener('change', e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  if (!f.type.startsWith('image/')){ aviso('Escolha um arquivo de imagem (JPG, PNG...).'); return; }
+  if (f.size > 10*1024*1024){ aviso('Essa imagem é muito grande. Escolha uma de até 10 MB.'); return; }
+  const r = new FileReader();
+  r.onload = () => { const img = new Image();
+    img.onload = () => {
+      const t = 256, c = document.createElement('canvas'); c.width = c.height = t;
+      const l = Math.min(img.width, img.height), sx = (img.width - l)/2, sy = (img.height - l)/2;
+      c.getContext('2d').drawImage(img, sx, sy, l, l, 0, 0, t, t);
+      c.toBlob(b => {
+        if (!b){ aviso('Não consegui preparar essa imagem. Tente outra.'); return; }
+        rascunho.fotoBlob = b; rascunho.remover = false;
+        pinta($('grande'), { ...rascunho, avatar_url: URL.createObjectURL(b) }); $('remover').hidden = false;
+      }, 'image/jpeg', .85);
+    };
+    img.onerror = () => aviso('Não consegui abrir essa imagem. Tente outra.');
+    img.src = r.result; };
+  r.onerror = () => aviso('Não consegui ler o arquivo. Tente de novo.');
+  r.readAsDataURL(f);
+});
+$('remover').addEventListener('click', () => {
+  rascunho.fotoBlob = null; rascunho.remover = true; rascunho.avatar_url = null;
+  pinta($('grande'), { nome: $('nome').value || perfil.nome }); $('remover').hidden = true;
+});
+$('nome').addEventListener('input', () => { $('nome').classList.remove('erro'); $('errnome').textContent = ''; if (!rascunho.avatar_url && !rascunho.fotoBlob) pinta($('grande'), { nome: $('nome').value }); });
+$('email').addEventListener('input', () => { $('email').classList.remove('erro'); $('erremail').textContent = ''; });
+$('lembrete').addEventListener('change', () => { $('horaBox').hidden = !$('lembrete').checked; });
+document.querySelectorAll('input[name=tema]').forEach(r => r.addEventListener('change', () => aplicaTema(r.value)));
+
+function erroSenhaP(m, id){ $('errsenha').textContent = m; $('detSenha').open = true; $(id).focus(); return false; }
+function validaSenha(){   // devolve null (não mexeu), false (erro) ou {atual, nova}
+  const a = $('senhaAtual').value, n = $('senhaNova').value, c = $('senhaConf').value; $('errsenha').textContent = '';
+  if (!a && !n && !c) return null;
+  if (!a) return erroSenhaP('Digite sua senha atual.', 'senhaAtual');
+  if (n.length < 8) return erroSenhaP('A nova senha precisa ter pelo menos 8 caracteres.', 'senhaNova');
+  if (n !== c) return erroSenhaP('A confirmação não é igual à nova senha.', 'senhaConf');
+  return { atual: a, nova: n };
+}
+
+$('salvar').addEventListener('click', async () => {
+  const nome = $('nome').value.trim();
+  if (!nome){ $('nome').classList.add('erro'); $('errnome').textContent = 'Digite um nome para continuar.'; $('nome').focus(); return; }
+  const por = temSenha(), em = $('email').value.trim();
+  if (por && !okEmail(em)){ $('email').classList.add('erro'); $('erremail').textContent = 'Digite um e-mail válido, como voce@email.com.'; $('email').focus(); return; }
+  const ps = por ? validaSenha() : null; if (ps === false) return;
+
+  const btn = $('salvar'); btn.disabled = true; btn.textContent = 'Salvando…';
+  const notas = [];
+  try{
+    // senha: confere a atual antes de trocar
+    if (ps){
+      const { error: e1 } = await sb.auth.signInWithPassword({ email: usuario.email, password: ps.atual });
+      if (e1){ erroSenhaP('A senha atual está incorreta.', 'senhaAtual'); return; }
+      const { error: e2 } = await sb.auth.updateUser({ password: ps.nova }); if (e2) throw e2;
+      notas.push('senha alterada');
+    }
+    // foto: envia para o Storage (pasta do próprio aluno)
+    let avatar_url = perfil.avatar_url;
+    const caminho = usuario.id + '/avatar.jpg';
+    if (rascunho.fotoBlob){
+      const { error } = await sb.storage.from('avatars').upload(caminho, rascunho.fotoBlob, { upsert:true, contentType:'image/jpeg', cacheControl:'3600' });
+      if (error) throw error;
+      avatar_url = sb.storage.from('avatars').getPublicUrl(caminho).data.publicUrl + '?v=' + Date.now();
+    } else if (rascunho.remover){
+      await sb.storage.from('avatars').remove([caminho]); avatar_url = null;
+    }
+    // perfil
+    const novo = {
+      nome, avatar_url,
+      meta_diaria: +document.querySelector('input[name=meta]:checked').value,
+      lembrete: $('lembrete').checked, hora_lembrete: $('hora').value || '19:00',
+      idioma: $('idioma').value, tema: document.querySelector('input[name=tema]:checked').value
+    };
+    const { data, error } = await sb.from('profiles').update(novo).eq('id', usuario.id).select().single();
+    if (error) throw error;
+    perfil = data;
+    // e-mail: o Supabase manda um link de confirmação para o endereço novo
+    if (por && em !== usuario.email){
+      const { error: e3 } = await sb.auth.updateUser({ email: em }, { emailRedirectTo: VOLTA_PARA });
+      if (e3) throw e3;
+      notas.push('confirme o novo e-mail pelo link que enviamos');
+    }
+    pintaApp(); fechaPerfil();
+    aviso('✅ Perfil salvo!' + (notas.length ? ' (' + notas.join('; ') + ')' : ''));
+  } catch (err){ aviso('Não consegui salvar. ' + traduz(err)); }
+  finally { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
+});
+
+$('sair').addEventListener('click', () => { $('sairConf').hidden = false; $('sairSim').focus(); });
+$('sairNao').addEventListener('click', () => { $('sairConf').hidden = true; $('sair').focus(); });
+$('sairSim').addEventListener('click', sairDaConta);
+$('sairErro').addEventListener('click', sairDaConta);
+async function sairDaConta(){
+  try{ await flushProjeto(); }catch(e){}
+  const { error } = await sb.auth.signOut();
+  if (error) aviso('Não consegui sair. ' + traduz(error));
+}
+
+/* =====================================================================
+   9) PROJETOS: editor ao vivo, salvo na tabela projetos
+   ===================================================================== */
+const SEED = { html:'<!' + '-- Escreva seu código abaixo --' + '>\n', css:`/* Escreva seu CSS aqui */
+`, js:`// Escreva seu JavaScript aqui
+` };
+const EX = { html:`<h1>Olá, CodeStars! ⭐</h1>
+<p>Cliques: <b id='n'>0</b></p>
+<button id='b'>Clique em mim</button>
+`, css:`body {
+  font-family: sans-serif;
+  text-align: center;
+  padding: 40px;
+  background: #fffde3;
+}
+h1 { color: #522580; }
+button {
+  background: #f2f26b;
+  border: 0;
+  border-bottom: 5px solid #7ff0c0;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 18px;
+  cursor: pointer;
+}
+`, js:`let n = 0;
+document.getElementById('b').addEventListener('click', () => {
+  n++;
+  document.getElementById('n').textContent = n;
+  console.log('Cliques:', n);
+});
+` };
+let cod = { ...SEED }, lang = 'html', tmr, soltaTab = false;
+let tmrSalva = null, sujo = false, emVoo = false;
+
+async function criaProjeto(nome, base){
+  const b = base || SEED;
+  const { data, error } = await sb.from('projetos').insert({ user_id: usuario.id, nome, html: b.html, css: b.css, js: b.js }).select().single();
+  if (error) throw error;
+  projetos.push(data); return data;
+}
+function pintaSelect(){
+  $('projSel').innerHTML = projetos.map(p => `<option value="${esc(p.id)}" ${p.id===projAtual.id?'selected':''}>${esc(p.nome)}</option>`).join('');
+}
+function carregaProjeto(p){
+  projAtual = p; sujo = false; clearTimeout(tmrSalva);
+  cod = { html: p.html, css: p.css, js: p.js };
+  $('projNome').value = p.nome; $('stSalvo').textContent = '☁️ Salvo';
+  pintaSelect(); mostra(); roda();
+}
+function agendaSalvar(){ sujo = true; $('stSalvo').textContent = 'Salvando…'; clearTimeout(tmrSalva); tmrSalva = setTimeout(salvaAgora, 900); }
+async function salvaAgora(){
+  clearTimeout(tmrSalva);
+  if (emVoo || !sujo || !projAtual) return;
+  emVoo = true; sujo = false;
+  const p = projAtual;
+  const corpo = { nome: $('projNome').value.trim() || 'Sem nome', html: cod.html, css: cod.css, js: cod.js, atualizado_em: new Date().toISOString() };
+  const { error } = await sb.from('projetos').update(corpo).eq('id', p.id);
+  emVoo = false;
+  if (error){ sujo = true; $('stSalvo').textContent = '⚠️ Não salvou. Tentando de novo…'; tmrSalva = setTimeout(salvaAgora, 4000); return; }
+  Object.assign(p, corpo);
+  if (sujo && p === projAtual) salvaAgora(); else $('stSalvo').textContent = '☁️ Salvo';
+}
+async function flushProjeto(){
+  clearTimeout(tmrSalva);
+  while (emVoo) await new Promise(r => setTimeout(r, 50));
+  await salvaAgora();
+  while (emVoo) await new Promise(r => setTimeout(r, 50));
+  return !sujo;
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden && sb && usuario) salvaAgora(); });
+addEventListener('pagehide', () => { if (sb && usuario) salvaAgora(); });
+
+$('projSel').addEventListener('change', async () => {
+  const alvo = projetos.find(p => p.id === $('projSel').value);
+  if (!(await flushProjeto())){ aviso('Ainda não consegui salvar o projeto atual. Tente de novo em instantes.'); pintaSelect(); return; }
+  carregaProjeto(alvo);
+});
+$('projNome').addEventListener('input', () => {
+  const o = $('projSel').selectedOptions[0]; if (o) o.textContent = $('projNome').value.trim() || 'Sem nome';
+  agendaSalvar();
+});
+$('projNovo').addEventListener('click', async () => {
+  try{
+    if (!(await flushProjeto())){ aviso('Ainda não consegui salvar o projeto atual. Tente de novo.'); return; }
+    carregaProjeto(await criaProjeto('Projeto ' + (projetos.length + 1)));
+    $('projNome').focus(); $('projNome').select();
+  }catch(err){ aviso(traduz(err)); }
+});
+
+// IFRAME com o resultado
+const FIM = '<' + '/script>';
+const PONTE = '<script>' + `(function(){function s(t,a){try{parent.postMessage({cs:1,t:t,m:a.map(function(x){try{return typeof x==='object'?JSON.stringify(x):String(x)}catch(e){return String(x)}}).join(' ')},'*')}catch(e){}}['log','warn','error','info'].forEach(function(k){var o=console[k];console[k]=function(){s(k,[].slice.call(arguments));o.apply(console,arguments)}});window.addEventListener('error',function(e){s('error',[e.message])})})();` + FIM;
+function monta(){ return '<!DOCTYPE html><html><head><meta charset=utf-8><style>' + cod.css + '</style>' + PONTE + '</head><body>' + cod.html + '<script>' + cod.js + FIM + '</body></html>'; }
+function roda(){ $('cons').textContent = ''; $('res').srcdoc = monta(); $('stRes').textContent = 'Atualizado ✓'; }
+function mostra(){
+  $('ed').value = cod[lang];
+  document.querySelectorAll('.aba').forEach(a => { const on = a.dataset.l === lang; a.classList.toggle('on', on); a.setAttribute('aria-selected', on); });
+}
+$('ed').addEventListener('input', () => {
+  cod[lang] = $('ed').value; agendaSalvar();
+  clearTimeout(tmr); tmr = setTimeout(roda, 600); $('stRes').textContent = 'Digitando…';
+});
+$('ed').addEventListener('keydown', e => {
+  if (e.key === 'Escape'){ soltaTab = true; return; }
+  if (e.key === 'Tab' && !soltaTab){ e.preventDefault(); const t = $('ed'); t.setRangeText('  ', t.selectionStart, t.selectionEnd, 'end'); t.dispatchEvent(new Event('input')); }
+  else if (e.key.length === 1) soltaTab = false;
+});
+$('ed').addEventListener('blur', () => { soltaTab = false; });
+document.querySelectorAll('.aba').forEach(a => a.addEventListener('click', () => { lang = a.dataset.l; mostra(); $('ed').focus(); }));
+addEventListener('message', e => {
+  if (e.source !== $('res').contentWindow || !e.data || !e.data.cs) return;
+  const c = $('cons'), d = document.createElement('div');
+  d.className = e.data.t === 'error' ? 'e' : e.data.t === 'warn' ? 'w' : '';
+  d.textContent = (e.data.t === 'error' ? '✖ ' : '› ') + e.data.m; c.appendChild(d);
+  while (c.childNodes.length > 200) c.removeChild(c.firstChild);
+  c.scrollTop = c.scrollHeight;
+});
+function dois(btn, fn, msg, pula){
+  let t, arm = false; const orig = btn.textContent;
+  btn.addEventListener('click', () => {
+    if (arm || (pula && pula())){ clearTimeout(t); arm = false; btn.textContent = orig; fn(); return; }
+    arm = true; btn.textContent = msg; t = setTimeout(() => { arm = false; btn.textContent = orig; }, 3000);
+  });
+}
+const semCodigo = () => ['html','css','js'].every(k => !cod[k].trim() || cod[k].trim() === SEED[k].trim());
+function troca(novo){ cod = { ...novo }; mostra(); roda(); agendaSalvar(); }
+dois($('limpar'),  () => troca(SEED), 'Clique de novo para limpar', semCodigo);
+dois($('exemplo'), () => troca(EX),   'Clique de novo para trocar', semCodigo);
+dois($('projDel'), async () => {
+  try{
+    const { error } = await sb.from('projetos').delete().eq('id', projAtual.id); if (error) throw error;
+    projetos = projetos.filter(p => p.id !== projAtual.id); sujo = false; clearTimeout(tmrSalva);
+    if (!projetos.length) await criaProjeto('Meu primeiro projeto');
+    carregaProjeto(projetos[projetos.length - 1]); aviso('Projeto excluído.');
+  }catch(err){ aviso('Não consegui excluir. ' + traduz(err)); }
+}, 'Clique de novo para excluir');
+$('exec').addEventListener('click', roda);
+$('limpaCons').addEventListener('click', () => { $('cons').textContent = ''; });
+
+/* =====================================================================
+   10) ENTRAR / SAIR  (reage ao Supabase Auth)
+   ===================================================================== */
+let entrando = false;
+async function entrou(user){
+  usuario = user; telaDe('carregando');
+  $('cargaErro').hidden = true; $('splTxt').hidden = false;
+  try{
+    await carregaTudo();
+    moduloSel = null; editorIniciado = false;
+    pintaApp(); telaDe('app'); vai('painel');
+  }catch (err){
+    console.error(err);
+    $('splTxt').hidden = true; $('cargaErro').hidden = false;
+  }
+}
+function saiu(avisar){
+  usuario = null; perfil = null; projetos = []; projAtual = null; feitas = new Set(); editorIniciado = false;
+  $('res').srcdoc = ''; $('lgSenha').value = ''; $('lgNova').value = ''; $('lgNova2').value = '';
+  telaDe('login'); modo('entrar');
+  if (avisar) aviso('Você saiu da conta. Até a próxima lição! 👋');
+}
+$('tentar').addEventListener('click', () => { if (usuario) entrou(usuario); });
+
+async function tratar(evento, sessao){
+  if (recuperando){ telaDe('login'); modo('novasenha'); return; }
+  if (evento === 'PASSWORD_RECOVERY'){ recuperando = true; telaDe('login'); modo('novasenha'); return; }
+  if (sessao && sessao.user){
+    if (usuario && usuario.id === sessao.user.id){ usuario = sessao.user; return; }   // renovação de token etc.
+    if (entrando) return;
+    entrando = true; await entrou(sessao.user); entrando = false;
+  } else if (evento === 'SIGNED_OUT' || evento === 'INITIAL_SESSION'){
+    saiu(evento === 'SIGNED_OUT');
+  }
+}
+
+(function iniciar(){
+  telaDe('carregando'); modo('entrar');
+  const h = new URLSearchParams(location.hash.replace(/^#/, ''));
+  if (!sb){ telaDe('login'); $('avisoConfig').hidden = false; return; }
+  sb.auth.onAuthStateChange((evento, sessao) => { setTimeout(() => tratar(evento, sessao), 0); });
+  if (h.get('error_description')){
+    history.replaceState(null, '', location.pathname);
+    setTimeout(() => erroL('lgErroGeral', 'Esse link não vale mais (ele expira). Peça um novo.'), 300);
+  }
+})();
+</script>
+</body>
+</html>
