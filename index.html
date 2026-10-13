@@ -646,8 +646,8 @@ details.senha .campo{margin:14px 0 0}
      os dados são as regras RLS do schema.sql).
    NUNCA coloque a chave "service_role" aqui.
    ===================================================================== */
-const SUPABASE_URL      = 'https://SEU-PROJETO.supabase.co';
-const SUPABASE_ANON_KEY = 'COLE_AQUI_A_CHAVE_ANON';
+const SUPABASE_URL      = 'https://gapibowqqgujgflqxlcd.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhcGlib3dxcWd1amdmbHF4bGNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MjE0NTcsImV4cCI6MjEwNzM5NzQ1N30.QViz4fzlB4s7AJRbqduRvw9NhIHn9ULrW4NvL79eIYs';
 
 const CONFIGURADO = !/SEU-PROJETO|COLE_AQUI/.test(SUPABASE_URL + SUPABASE_ANON_KEY);
 const sb = (CONFIGURADO && window.supabase) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
