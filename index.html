@@ -391,6 +391,28 @@ html.au-aberta{overflow:hidden}
 .acoes{display:grid;gap:10px;justify-items:start}
 .sec2{background:var(--esc);color:#fff;border:0;border-bottom:4px solid var(--fundo-linha);border-radius:10px;padding:10px 16px;font:700 15px 'Chakra Petch',sans-serif}
 .sec2:disabled{opacity:.7;cursor:wait}
+/* ===== PROJETO FINAL ===== */
+#proj{position:fixed;inset:0;z-index:41;display:flex;flex-direction:column;background:var(--roxo)}
+.pj-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:20px;padding:20px;overflow:auto}
+.pj-lado{padding:22px;overflow:auto;align-self:start;max-height:100%}
+.pj-lado h2{font:700 24px/1.2 'Chakra Petch',sans-serif;margin:4px 0 10px}
+.pj-lado h3{font:700 16px 'Chakra Petch',sans-serif;margin:18px 0 8px}
+.pj-lado p{margin:0;line-height:1.55}
+.pj-lado ul{margin:0;padding-left:20px;line-height:1.7}
+.pj-edit{display:flex;flex-direction:column;min-height:340px}
+.pj-abas{display:flex;gap:8px;margin-bottom:10px}
+.pj-abas button{background:rgba(255,255,255,.1);border:2px solid transparent;border-radius:10px;padding:8px 16px;font:700 15px 'Chakra Petch',sans-serif}
+.pj-abas button.on{background:var(--esc);border-color:var(--amarelo)}
+#pjCod{flex:1;min-height:300px;resize:none;background:#2a1148;color:#e9dcff;border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:16px;font:15px/1.7 'Chakra Petch',monospace;tab-size:2;transition:border-color .2s}
+#pjCod:focus{outline:none;border-color:var(--amarelo)}
+#pjVer{flex:1;min-height:300px;border:0;border-radius:14px;background:#fff}
+#pjInfo{font-size:14px;color:var(--claro);font-weight:700}
+.pj-res{margin-top:20px;padding-top:18px;border-top:2px dashed #cfc9ad;animation:aparece .5s cubic-bezier(.2,.8,.2,1) both}
+.pj-nota{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.pj-nota b{display:grid;place-items:center;width:74px;height:74px;border-radius:50%;font:700 28px 'Chakra Petch',sans-serif;background:#ffd9df;color:#8a1b2d;flex:none}
+.pj-res.ok .pj-nota b{background:#c9f7e0;color:#0b5a2b;animation:pula .6s}
+.pj-nota strong{font:700 19px/1.25 'Chakra Petch',sans-serif}
+@media (max-width:860px){.pj-main{grid-template-columns:1fr}.pj-lado{align-self:stretch}}
 .rm{background:none;border:0;color:#8a1f9c;font-weight:800;text-decoration:underline;padding:4px 0}
 .campo{margin-bottom:16px}
 .campo label{display:block;font-weight:800;margin-bottom:6px}
@@ -589,7 +611,10 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
   <symbol id="lg" viewBox="0 0 100 100">
     <polygon points="50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8" transform="translate(3 4)" fill="#1e1230" stroke="#1e1230" stroke-width="8" stroke-linejoin="round"/>
     <polygon points="50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8" fill="#ffcc00" stroke="#ffcc00" stroke-width="8" stroke-linejoin="round"/>
-    <path d="M43 49L35 57L43 65M57 49L65 57L57 65M53 47L47 67" fill="none" stroke="#3d1a61" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="41" cy="50" r="4.6" fill="#1e1230"/><circle cx="59" cy="50" r="4.6" fill="#1e1230"/>
+    <circle cx="42.5" cy="48.4" r="1.5" fill="#fff"/><circle cx="60.5" cy="48.4" r="1.5" fill="#fff"/>
+    <ellipse cx="35.5" cy="60" rx="3.8" ry="2.5" fill="#ff7fa6" opacity=".8"/><ellipse cx="64.5" cy="60" rx="3.8" ry="2.5" fill="#ff7fa6" opacity=".8"/>
+    <path d="M44 59.5 Q50 66.5 56 59.5" fill="none" stroke="#1e1230" stroke-width="3.2" stroke-linecap="round"/>
   </symbol>
 </svg>
 
@@ -1093,6 +1118,38 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
   </div>
 </div>
 
+<div id="proj" hidden role="dialog" aria-modal="true" aria-labelledby="pjTit">
+  <div class="au-top">
+    <button class="au-x" id="pjX" type="button" aria-label="Fechar projeto">✕</button>
+    <span class="au-tit" id="pjTit"></span>
+  </div>
+  <div class="pj-main">
+    <section class="card pj-lado" aria-label="Enunciado">
+      <span class="tag" id="pjTag"></span>
+      <h2 id="pjTema"></h2>
+      <p id="pjDesc"></p>
+      <h3>O que o projeto precisa ter</h3>
+      <ul id="pjReq"></ul>
+      <div class="pj-res" id="pjRes" hidden role="status" aria-live="polite"></div>
+    </section>
+    <section class="pj-edit" aria-label="Seu código">
+      <div class="pj-abas" role="tablist">
+        <button type="button" id="pjAbaCod" class="on" role="tab">Código</button>
+        <button type="button" id="pjAbaVer" role="tab">Resultado</button>
+      </div>
+      <textarea id="pjCod" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Escreva seu código aqui"></textarea>
+      <iframe id="pjVer" sandbox="allow-scripts" title="Resultado do seu código" hidden></iframe>
+    </section>
+  </div>
+  <div class="au-bar">
+    <span id="pjInfo"></span>
+    <div class="au-acoes">
+      <button class="sec2" id="pjReset" type="button">Recomeçar</button>
+      <button class="btn" id="pjEnviar" type="button">Enviar para a correção</button>
+    </div>
+  </div>
+</div>
+
 <div id="aviso" role="status"></div>
 
 <!-- Biblioteca oficial do Supabase (versão fixada) -->
@@ -1327,6 +1384,7 @@ let feitas  = new Set();      // ids das lições concluídas
 let resumo  = { estrelas:0, licoes_feitas:0, hoje:0, sequencia:0, semana_ini:null, dias_semana:[] };
 let ranking = [];             // linhas de ranking_semana()
 let projetos = [], projAtual = null, desafios = [], quizzes = [], praticaOk = true;
+let projetosFinais = [], envios = [];   // projeto final de cada trilha e as notas do aluno
 let moduloSel = null, licaoAberta = null;
 
 function nomeInicial(u){
@@ -1356,6 +1414,9 @@ async function carregaTudo(){
   // Praticar: se as tabelas ainda não existirem, o site continua funcionando e a página Praticar avisa
   const [dz, qz] = await Promise.all([ sb.from('desafios').select('*').order('ordem'), sb.from('quizzes').select('*').order('ordem') ]);
   praticaOk = !dz.error && !qz.error; desafios = dz.error ? [] : dz.data; quizzes = qz.error ? [] : qz.data;
+  // Projeto final: se projeto-final.sql ainda não foi rodado, o site segue sem o projeto
+  const [pf, pe] = await Promise.all([ sb.from('projetos_finais').select('*'), sb.from('projeto_final_envios').select('modulo,nota,aprovado,criado_em').order('criado_em', { ascending:false }) ]);
+  projetosFinais = (pf.error || pe.error) ? [] : pf.data; envios = (pf.error || pe.error) ? [] : pe.data;
   if (!projetos.length) await criaProjeto('Meu primeiro projeto');
   projAtual = projetos.slice().sort((a,b) => b.atualizado_em.localeCompare(a.atualizado_em))[0];
 }
@@ -1374,7 +1435,9 @@ function modulos(){
   const arr = [...mp.values()]; let travaDaqui = false;
   arr.forEach((m,i) => {
     m.feitas = m.l.filter(x => feitas.has(x.id)).length; m.total = m.l.length;
-    m.st = travaDaqui ? 'trava' : (m.feitas === m.total ? 'ok' : 'atual');
+    m.proj = projetosFinais.find(p => p.modulo === m.id) || null;
+    m.projOk = !m.proj || envios.some(e => e.modulo === m.id && e.aprovado);
+    m.st = travaDaqui ? 'trava' : ((m.feitas === m.total && m.projOk) ? 'ok' : 'atual');
     if (m.st === 'atual') travaDaqui = true;
     m.prev = i > 0 ? arr[i-1].nome : null;
   });
@@ -1399,7 +1462,15 @@ function pintaPainel(){
 
   // card "Continuando"
   const prox = licoes.find(l => !feitas.has(l.id));
-  if (prox){
+  const pend = mods.find(x => x.proj && x.st === 'atual' && x.feitas === x.total);
+  const b0 = $('cBtn'); if (b0.dataset.h0 == null) b0.dataset.h0 = b0.innerHTML; b0.innerHTML = b0.dataset.h0;
+  if (pend){
+    $('cTag').textContent = 'PROJETO FINAL • ' + pend.nome.toUpperCase();
+    $('cTit').textContent = pend.proj.titulo;
+    $('cBarra').style.width = '100%'; $('cProg').setAttribute('aria-valuenow', 100);
+    $('cMeta1').textContent = 'Todas as lições concluídas'; $('cMeta2').textContent = 'Passa com nota maior que ' + NOTA_MINIMA;
+    $('cPre').hidden = true; b0.hidden = false; b0.textContent = 'Fazer o projeto 🏆'; b0.onclick = () => abreProjeto(pend.id);
+  } else if (prox){
     const m = mods.find(x => x.id === prox.modulo), n = m.l.indexOf(prox) + 1, pct = Math.round(m.feitas / m.total * 100);
     $('cTag').textContent = 'CONTINUANDO • ' + m.nome.toUpperCase();
     $('cTit').textContent = 'Lição ' + n + ': ' + prox.titulo;
@@ -1424,6 +1495,7 @@ function pintaPainel(){
     return `<button class="row ${s}" data-s="${s}" data-id="${esc(l.id)}"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${esc(l.titulo)}</span><span class="pill ${l.tipo}">${l.tipo==='a'?'📖 APRENDER':'⚡ PRATICAR'}</span>${fim}</button>`;
   }).join('');
 
+  $('lista').insertAdjacentHTML('beforeend', linhaProjeto(m));
   pintaMeta(); pintaRank(); pintaChips(); falaPadrao();
 }
 $('mods').addEventListener('click', e => {
@@ -1434,6 +1506,7 @@ $('mods').addEventListener('click', e => {
 });
 $('lista').addEventListener('click', e => {
   const r = e.target.closest('.row'); if (!r) return;
+  if (r.dataset.proj){ if (r.dataset.s === 'trava') aviso('🔒 Conclua todas as lições do módulo para liberar o projeto final.'); else abreProjeto(r.dataset.proj); return; }
   if (r.dataset.s === 'trava') aviso('🔒 Conclua a lição anterior para liberar esta.');
   else abreLicao(r.dataset.id);
 });
@@ -1480,6 +1553,94 @@ function falasLista(){
 }
 function falaPadrao(){ $('fala').textContent = falasLista()[0]; fi = 0; }
 mas.addEventListener('click', () => { const a = falasLista(); fi = (fi + 1) % a.length; falar(a[fi]); });
+
+/* =====================================================================
+   6b) PROJETO FINAL de cada trilha (corrigido por IA na Edge Function avaliar-projeto)
+   ===================================================================== */
+const NOTA_MINIMA = 5;   // passa com nota MAIOR que isto (a regra de verdade fica na função do servidor)
+let pjAtual = null, pjBusy = false, pjAprovado = false;
+const pjChave = m => 'cs_proj_' + usuario.id + '_' + m;
+function melhorNota(mod){ const n = envios.filter(e => e.modulo === mod).map(e => Number(e.nota)); return n.length ? Math.max(...n) : null; }
+const fmtNota = n => Number(n).toLocaleString('pt-BR', { maximumFractionDigits:1 });
+
+function linhaProjeto(m){
+  if (!m.proj) return '';
+  const s = m.projOk ? 'ok' : (m.st === 'trava' || m.feitas < m.total) ? 'trava' : 'atual', melhor = melhorNota(m.id);
+  const fim = s === 'ok' ? '<span class="pill ref">🔁 REFAZER</span><span class="ic ok">✓</span>' : s === 'atual' ? '<span class="ic go">→</span>' : '<span>🔒</span>';
+  const nota = melhor != null ? `<span class="pill">Melhor nota: ${fmtNota(melhor)}</span>` : '';
+  return `<button class="row ${s}" data-s="${s}" data-proj="${esc(m.id)}"><span class="n">🏆</span><span class="t">Projeto final: ${esc(m.proj.titulo)}</span>${nota}<span class="pill p">PROJETO</span>${fim}</button>`;
+}
+
+function pjAba(a){
+  const ver = a === 'ver';
+  $('pjAbaCod').classList.toggle('on', !ver); $('pjAbaVer').classList.toggle('on', ver);
+  $('pjCod').hidden = ver; $('pjVer').hidden = !ver;
+  if (ver) $('pjVer').srcdoc = $('pjCod').value;
+}
+function abreProjeto(modId){
+  const m = modulos().find(x => x.id === modId); if (!m || !m.proj) return;
+  const p = m.proj; pjAtual = m; pjAprovado = false;
+  $('pjTit').textContent = 'Projeto final · ' + m.nome;
+  $('pjTag').textContent = 'PROJETO FINAL • ' + m.nome.toUpperCase();
+  $('pjTema').textContent = p.titulo; $('pjDesc').textContent = p.tema;
+  $('pjReq').innerHTML = p.requisitos.map(r => `<li>${esc(r)}</li>`).join('');
+  $('pjInfo').textContent = 'Passa com nota maior que ' + NOTA_MINIMA + ' (de 0 a 10).';
+  let rasc = null; try{ rasc = localStorage.getItem(pjChave(m.id)); }catch(e){}
+  $('pjCod').value = rasc != null ? rasc : p.base;
+  $('pjAbaVer').hidden = p.tipo === 'texto'; pjAba('cod');
+  $('pjRes').hidden = true; $('pjRes').className = 'pj-res';
+  $('pjEnviar').disabled = false; $('pjEnviar').textContent = 'Enviar para a correção';
+  $('proj').hidden = false; document.documentElement.classList.add('au-aberta'); $('pjCod').focus();
+}
+function fechaProjeto(){
+  $('proj').hidden = true; $('pjVer').srcdoc = ''; pjAtual = null;
+  document.documentElement.classList.remove('au-aberta');
+}
+function mostraNota(d){
+  const r = $('pjRes'); r.hidden = false; r.className = 'pj-res' + (d.aprovado ? ' ok' : '');
+  const prox = modulos().find(x => x.st === 'atual'), fim = d.aprovado && !prox;
+  r.innerHTML = `<div class="pj-nota"><b>${fmtNota(d.nota)}</b><strong>${d.aprovado ? (fim ? 'Aprovado! Você concluiu a trilha toda 🎉' : 'Aprovado! Próximo módulo liberado 🎉') : 'Quase lá! Ajuste e envie de novo'}</strong></div><p>${esc(d.feedback || '').replace(/\n/g, '<br>')}</p>`;
+  r.scrollIntoView({ behavior: rmov ? 'auto' : 'smooth', block:'nearest' });
+}
+async function enviaProjeto(){
+  if (pjBusy || !pjAtual) return;
+  if (pjAprovado){ fechaProjeto(); falar('Projeto aprovado! 🏆'); return; }
+  const cod = $('pjCod').value;
+  if (cod.trim().length < 30){ aviso('Escreva um pouco mais de código antes de enviar.'); return; }
+  if (cod.length > 8000){ aviso('Seu código passou de 8.000 caracteres. Deixe mais enxuto.'); return; }
+  const btn = $('pjEnviar'); pjBusy = true; btn.disabled = true; btn.textContent = 'Corrigindo…';
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    const r = await fetch(URL_LIMPA + '/functions/v1/avaliar-projeto', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + session.access_token, 'apikey':SUPABASE_ANON_KEY.trim() },
+      body: JSON.stringify({ modulo: pjAtual.id, codigo: cod })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.erro || 'A correção não respondeu. Tente de novo em instantes.');
+    envios.unshift({ modulo: pjAtual.id, nota: d.nota, aprovado: d.aprovado, criado_em: new Date().toISOString() });
+    pjAprovado = !!d.aprovado; mostraNota(d);
+    if (d.aprovado){ moduloSel = null; pintaPainel(); try{ localStorage.removeItem(pjChave(pjAtual.id)); }catch(e){} }
+    btn.textContent = d.aprovado ? 'Concluir 🎉' : 'Enviar de novo';
+  }catch (err){
+    aviso(err.message || 'Não consegui enviar o projeto.'); btn.textContent = 'Enviar para a correção';
+  }
+  btn.disabled = false; pjBusy = false;
+}
+$('pjX').addEventListener('click', fechaProjeto);
+$('pjAbaCod').addEventListener('click', () => pjAba('cod'));
+$('pjAbaVer').addEventListener('click', () => pjAba('ver'));
+$('pjEnviar').addEventListener('click', enviaProjeto);
+$('pjReset').addEventListener('click', () => {
+  if (!pjAtual || !confirm('Voltar ao código inicial? O que você escreveu será apagado.')) return;
+  $('pjCod').value = pjAtual.proj.base; try{ localStorage.removeItem(pjChave(pjAtual.id)); }catch(e){}
+});
+$('pjCod').addEventListener('input', () => { if (pjAtual) try{ localStorage.setItem(pjChave(pjAtual.id), $('pjCod').value); }catch(e){} });
+$('pjCod').addEventListener('keydown', e => {   // Tab escreve 2 espaços em vez de pular o foco
+  if (e.key !== 'Tab' || e.shiftKey) return; e.preventDefault();
+  const t = e.target, a = t.selectionStart; t.value = t.value.slice(0, a) + '  ' + t.value.slice(t.selectionEnd); t.selectionStart = t.selectionEnd = a + 2;
+  t.dispatchEvent(new Event('input'));
+});
 
 /* =====================================================================
    7) AULA em tela cheia, passo a passo (lições da trilha e desafios do Praticar)
@@ -1755,7 +1916,7 @@ async function concluiAula(){
     feitas.add(l.id); await recarregaResumo();
     const depois = modulos().find(x => x.id === l.modulo);
     let msg = data && data.nova ? '⭐ +' + l.estrelas + ' estrelas! Lição concluída.' : 'Lição já estava concluída.';
-    if (antes.feitas < antes.total && depois.feitas === depois.total) msg = '🎉 Módulo ' + depois.nome + ' concluído! ' + msg;
+    if (antes.feitas < antes.total && depois.feitas === depois.total) msg = depois.proj && !depois.projOk ? '🏆 Lições do ' + depois.nome + ' concluídas! Agora faça o projeto final. ' + msg : '🎉 Módulo ' + depois.nome + ' concluído! ' + msg;
     else if (!metaAntes && resumo.hoje >= perfil.meta_diaria) msg += ' Meta de hoje batida 🔥';
     moduloSel = null; pintaPainel(); fechaAula(); falar('Boa! Mais uma lição no bolso 💪'); aviso(msg);
   } catch (err){ aviso('Não consegui salvar seu progresso. ' + traduz(err)); atualizaOk(); }
@@ -2252,8 +2413,8 @@ async function entrou(user){
   }
 }
 function saiu(avisar){
-  $('aula').hidden = true; document.documentElement.classList.remove('au-aberta');
-  usuario = null; perfil = null; projetos = []; projAtual = null; feitas = new Set(); editorIniciado = false;
+  $('aula').hidden = true; $('proj').hidden = true; document.documentElement.classList.remove('au-aberta');
+  usuario = null; projetosFinais = []; envios = []; perfil = null; projetos = []; projAtual = null; feitas = new Set(); editorIniciado = false;
   $('res').srcdoc = ''; $('lgSenha').value = ''; $('lgNova').value = ''; $('lgNova2').value = '';
   telaDe('login'); modo('entrar');
   if (avisar) aviso('Você saiu da conta. Até a próxima lição! 👋');
