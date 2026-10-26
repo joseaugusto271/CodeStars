@@ -30,6 +30,20 @@ button{font:inherit;color:inherit;cursor:pointer}
 .splash .spin{animation:giraL 3s linear infinite;filter:drop-shadow(4px 5px 0 rgba(0,0,0,.3))}
 @keyframes giraL{to{transform:rotate(360deg)}}
 .splash p{font-weight:700;color:var(--claro)}
+/* Tela de carregamento: estrelinha fofa */
+.carga-estrela{position:relative;width:120px;margin:0 auto 10px}
+.carga-estrela svg{display:block;overflow:visible;filter:drop-shadow(4px 6px 0 rgba(0,0,0,.3));transform-origin:50% 92%;animation:cePula 1.3s cubic-bezier(.4,0,.3,1) infinite}
+@keyframes cePula{0%,100%{transform:translateY(0) scale(1.1,.88)}20%{transform:translateY(-8px) scale(.96,1.06)}42%{transform:translateY(-26px) rotate(-8deg) scale(.96,1.06)}62%{transform:translateY(-26px) rotate(8deg) scale(.96,1.06)}85%{transform:translateY(-4px) scale(1,1)}}
+.carga-estrela::after{content:"";display:block;width:76px;height:10px;margin:14px auto 0;border-radius:50%;background:rgba(0,0,0,.3);animation:ceSombra 1.3s cubic-bezier(.4,0,.3,1) infinite}
+@keyframes ceSombra{0%,100%{transform:scale(1.1);opacity:.35}45%,60%{transform:scale(.55);opacity:.18}}
+.ce-olhos{transform-box:fill-box;transform-origin:center;animation:piscar 3.2s infinite}
+.ce-bochecha{animation:ceBochecha 1.3s ease-in-out infinite}
+@keyframes ceBochecha{50%{opacity:1}}
+.ce-fa{position:absolute;font-size:20px;line-height:1;color:var(--amarelo);animation:ceBrilha 1.8s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes ceBrilha{0%,100%{opacity:0;transform:scale(.3) rotate(0)}50%{opacity:1;transform:scale(1) rotate(90deg)}}
+.splash #splTxt{animation:cePulsa 1.8s ease-in-out infinite}
+@keyframes cePulsa{50%{opacity:.55}}
+@media (prefers-reduced-motion:reduce){.carga-estrela svg,.carga-estrela::after,.ce-olhos,.ce-bochecha,.splash #splTxt{animation:none}.ce-fa{animation:none;opacity:.8}}
 #aviso{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--amarelo);color:var(--texto);font-weight:800;padding:12px 20px;border-radius:12px;box-shadow:0 5px 0 var(--fundo-linha);opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center;z-index:50}
 #aviso.on{opacity:1;transform:translate(-50%,0)}
 .marca-logo{display:inline-flex;align-items:center;gap:10px;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:26px;letter-spacing:.3px;color:#fff;line-height:1}
@@ -129,6 +143,86 @@ a.link{color:#8a1f9c;font-weight:700;text-decoration:underline;cursor:pointer}
 .fgrande a:hover{color:#fff;text-decoration:underline}
 .fgrande a:focus-visible{outline:3px solid var(--amarelo);outline-offset:3px;border-radius:4px}
 .base{max-width:1100px;margin:40px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,.15);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;opacity:.85}
+
+/* ===== LOGIN: animações extras ===== */
+.vitrine::before{content:"";position:absolute;left:50%;top:34%;width:440px;height:440px;margin:-220px 0 0 -220px;border-radius:50%;background:radial-gradient(circle,rgba(242,242,107,.2),transparent 65%);animation:aura 5s ease-in-out infinite;pointer-events:none}
+@keyframes aura{50%{transform:scale(1.18);opacity:.55}}
+.lcard{animation:cardEntra .8s cubic-bezier(.2,.8,.2,1) both}
+@keyframes cardEntra{from{opacity:0;transform:translateY(30px) scale(.97)}}
+.lcard input{transition:border-color .2s,background .2s,box-shadow .2s,transform .2s}
+.lcard input:focus{transform:translateY(-1px)}
+.lgoogle{transition:transform .2s,border-color .2s,box-shadow .2s}
+.lgoogle:hover{transform:translateY(-2px);box-shadow:0 5px 0 #d9d4bd}
+.principal{position:relative;overflow:hidden;transition:transform .15s,filter .2s}
+.principal:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-2px)}
+.principal:active:not(:disabled){transform:translateY(3px)}
+.principal::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.6) 50%,transparent 65%);transform:translateX(-120%);pointer-events:none}
+.principal:hover:not(:disabled)::after{transform:translateX(120%);transition:transform .7s}
+#hdrLogin .cta{animation:brilha 3s ease-in-out infinite}
+@keyframes brilha{50%{box-shadow:0 0 28px rgba(139,92,246,.95)}}
+
+/* ===== LOGIN: seções da página (wireframe) ===== */
+.lp{position:relative;overflow:hidden;padding:92px 32px}
+.lp-in{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.lp-roxa{background:var(--roxo-esc);color:#fff}
+.lp-creme{background:var(--creme);color:var(--texto)}
+.lp h2{font:700 clamp(28px,3.4vw,42px)/1.15 'Chakra Petch',sans-serif;margin:0 0 16px}
+.lp .lead{font-size:18px;line-height:1.6;max-width:46ch;margin:0 0 28px}
+.lp-roxa .lead{color:var(--claro)}
+.lp-passos{list-style:none;margin:0;padding:0;display:grid;gap:14px;counter-reset:p}
+.lp-passos li{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px 16px;transition:transform .25s,background .25s}
+.lp-passos li:hover{transform:translateX(6px);background:rgba(255,255,255,.13)}
+.lp-passos li::before{counter-increment:p;content:counter(p);flex:none;width:34px;height:34px;border-radius:50%;background:var(--amarelo);color:var(--texto);display:grid;place-items:center;font:700 16px 'Chakra Petch',sans-serif}
+.lp-passos b{display:block;font-size:17px}
+.lp-passos span{font-size:15px;color:var(--claro)}
+.janela{background:#2a1148;border-radius:16px;box-shadow:0 12px 0 rgba(0,0,0,.3);overflow:hidden;font-family:'Chakra Petch',monospace;transition:transform .35s}
+.janela:hover{transform:translateY(-6px) rotate(-.6deg)}
+.janela-topo{display:flex;gap:7px;align-items:center;padding:12px 16px;background:rgba(0,0,0,.25)}
+.janela-topo i{width:11px;height:11px;border-radius:50%;background:#ff6b8b}
+.janela-topo i:nth-child(2){background:var(--amarelo)}
+.janela-topo i:nth-child(3){background:var(--menta)}
+.janela-topo em{margin-left:auto;font:600 13px Nunito,sans-serif;color:var(--claro);font-style:normal}
+.janela pre{display:block;border-radius:0;background:transparent;padding:18px 20px 8px;font-size:15px;line-height:1.9;white-space:pre-wrap}
+.ln{display:block;opacity:0}
+.vis .ln{animation:linha .5s forwards;animation-delay:calc(var(--i)*.6s + .4s)}
+@keyframes linha{from{opacity:0;transform:translateX(-12px)}to{opacity:1;transform:none}}
+.resultado{margin:6px 16px 18px;background:var(--creme);color:var(--texto);border-radius:12px;padding:16px 18px;opacity:0;transform:scale(.92)}
+.vis .resultado{animation:surge .6s cubic-bezier(.3,1.5,.5,1) 2.4s forwards}
+@keyframes surge{to{opacity:1;transform:none}}
+.resultado h3{font:700 20px 'Chakra Petch',sans-serif;margin:0 0 4px}
+.resultado p{margin:0 0 10px;font:600 15px Nunito,sans-serif}
+.resultado .bt{display:inline-block;background:var(--amarelo);border-bottom:4px solid var(--menta);border-radius:8px;padding:6px 14px;font:700 14px 'Chakra Petch',sans-serif}
+.resultado .st{display:inline-block;animation:respira 3s ease-in-out infinite}
+.lp-beneficios{list-style:none;margin:0;padding:0;display:grid;gap:26px}
+.lp-beneficios li{position:relative;padding-left:24px}
+.lp-beneficios li::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:5px;border-radius:5px;background:var(--amarelo);box-shadow:0 0 0 2px #522580 inset;transform-origin:top;transform:scaleY(0);transition:transform .7s cubic-bezier(.2,.8,.2,1) calc(var(--i)*.2s + .3s)}
+.lp-beneficios li.vis::before{transform:none}
+.lp-beneficios b{display:block;font:700 21px 'Chakra Petch',sans-serif;margin-bottom:4px}
+.lp-beneficios span{font-size:16px;line-height:1.55;color:var(--suave)}
+.lp-centro{max-width:760px;margin:0 auto;text-align:center}
+.lp-centro .lead{margin-left:auto;margin-right:auto}
+.trilha{background:var(--creme);color:var(--texto);border-radius:20px;box-shadow:0 10px 0 rgba(0,0,0,.3);padding:24px 26px;max-width:560px;margin:34px auto;text-align:left}
+.trilha h3{font:700 18px 'Chakra Petch',sans-serif;margin:0 0 6px}
+.trilha-l{display:grid;grid-template-columns:96px 1fr 44px;gap:12px;align-items:center;margin:14px 0;font-weight:800;font-size:15px}
+.trilha-l output{text-align:right;color:var(--suave)}
+.trilha-l .barra i{width:0;transition:width 1.3s cubic-bezier(.2,.8,.2,1) calc(var(--i)*.15s + .4s)}
+.trilha.vis .trilha-l .barra i{width:var(--w)}
+.lp-cta{width:auto;max-width:100%;padding:15px 34px}
+.rv{opacity:0}
+.rv.vis{opacity:1;animation:aparece .8s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:var(--d,0s)}
+.rv.esq.vis{animation-name:apareceEsq}
+@keyframes aparece{from{opacity:0;transform:translateY(32px)}}
+@keyframes apareceEsq{from{opacity:0;transform:translateX(-36px)}}
+@media (max-width:900px){
+  .lp{padding:60px 20px}
+  .lp-in{grid-template-columns:1fr;gap:36px}
+}
+@media (prefers-reduced-motion:reduce){
+  .rv{opacity:1}.rv.vis{animation:none}
+  .ln,.resultado{opacity:1!important;transform:none!important;animation:none!important}
+  .vitrine::before,.lcard,#hdrLogin .cta,.resultado .st{animation:none}
+  .trilha-l .barra i{transition:none}
+}
 
 /* =====================================================================
    PAINEL (depois de entrar)
@@ -504,7 +598,19 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
 <!-- ============ CARREGANDO ============ -->
 <div id="carregando" class="splash" role="status" aria-live="polite">
   <div>
-    <svg class="spin" width="72" height="72" aria-hidden="true"><use href="#lg"/></svg>
+    <div class="carga-estrela" aria-hidden="true">
+      <span class="ce-fa" style="left:-14px;top:8px;--d:0s">✦</span>
+      <span class="ce-fa" style="right:-12px;top:26px;--d:.6s;color:var(--menta)">✦</span>
+      <span class="ce-fa" style="right:6px;top:-12px;--d:1.1s;font-size:14px">✦</span>
+      <svg viewBox="0 0 100 100" width="120" height="120">
+        <polygon points="50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8" transform="translate(3 4)" fill="#1e1230" stroke="#1e1230" stroke-width="8" stroke-linejoin="round"/>
+        <polygon points="50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8" fill="#ffcc00" stroke="#ffcc00" stroke-width="8" stroke-linejoin="round"/>
+        <g class="ce-olhos"><circle cx="42" cy="51" r="4.4" fill="#1e1230"/><circle cx="58" cy="51" r="4.4" fill="#1e1230"/><circle cx="43.4" cy="49.4" r="1.5" fill="#fff"/><circle cx="59.4" cy="49.4" r="1.5" fill="#fff"/></g>
+        <ellipse class="ce-bochecha" cx="35.5" cy="59.5" rx="4" ry="2.6" fill="#ff7fa6" opacity=".75"/>
+        <ellipse class="ce-bochecha" cx="64.5" cy="59.5" rx="4" ry="2.6" fill="#ff7fa6" opacity=".75"/>
+        <path d="M45 59.5 Q50 65.5 55 59.5" fill="none" stroke="#1e1230" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>
+    </div>
     <p id="splTxt">Carregando…</p>
     <div id="cargaErro" hidden>
       <p>Não consegui carregar seus dados. Verifique sua internet e tente de novo.</p>
@@ -628,6 +734,60 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
       </div>
     </section>
   </div>
+
+  <!-- ============ SEÇÕES DA PÁGINA (wireframe) ============ -->
+  <section class="lp lp-roxa" aria-labelledby="lpT1">
+    <div class="lp-in">
+      <div>
+        <h2 id="lpT1">Escreva código de verdade desde a primeira aula</h2>
+        <p class="lead">Cada lição é curta e prática: você lê, digita e vê o resultado na hora, sem instalar nada.</p>
+        <ol class="lp-passos">
+          <li><div><b>Leia a lição</b><span>Explicações curtas, com exemplos simples.</span></div></li>
+          <li><div><b>Escreva o código</b><span>Digite direto no editor do navegador.</span></div></li>
+          <li><div><b>Veja o resultado e ganhe estrelas</b><span>Acertou? A estrela é sua e o ranking sobe.</span></div></li>
+        </ol>
+      </div>
+      <div class="rv" style="--d:.2s">
+        <div class="janela" aria-hidden="true">
+          <div class="janela-topo"><i></i><i></i><i></i><em>index.html</em></div>
+          <pre><code><span class="ln" style="--i:0"><span class="k">&lt;h1&gt;</span>Olá, mundo!<span class="k">&lt;/h1&gt;</span></span><span class="ln" style="--i:1"><span class="k">&lt;p&gt;</span>Minha primeira estrela<span class="k">&lt;/p&gt;</span></span><span class="ln" style="--i:2"><span class="k">&lt;button&gt;</span>Brilhar<span class="k">&lt;/button&gt;</span></span></code></pre>
+          <div class="resultado"><h3>Olá, mundo!</h3><p>Minha primeira estrela <span class="st">⭐</span></p><span class="bt">Brilhar</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp lp-creme" aria-labelledby="lpT2">
+    <div class="lp-in">
+      <div>
+        <h2 id="lpT2">Feito para quem está começando</h2>
+        <p class="lead">Sem jargão e sem pressa. Você avança no seu ritmo e cada conquista aparece no seu painel.</p>
+      </div>
+      <ul class="lp-beneficios">
+        <li style="--i:0"><b>Pratique no navegador</b><span>Editor com resultado ao vivo, direto na página.</span></li>
+        <li style="--i:1"><b>Estrelas e ranking</b><span>Cada lição concluída vale estrelas. Veja em que posição você está.</span></li>
+        <li style="--i:2"><b>Trilhas por módulo</b><span>HTML, CSS, JavaScript e Git, em ordem e com o progresso salvo.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="lp lp-roxa" aria-labelledby="lpT3">
+    <div class="lp-centro">
+      <div>
+        <h2 id="lpT3">Sua trilha começa hoje</h2>
+        <p class="lead">Crie sua conta grátis e acompanhe o progresso em cada módulo.</p>
+      </div>
+      <div class="trilha rv" aria-label="Exemplo de progresso nos módulos">
+        <h3>Exemplo de progresso</h3>
+        <div class="trilha-l" style="--i:0;--w:100%"><span>HTML</span><div class="barra"><i></i></div><output>100%</output></div>
+        <div class="trilha-l" style="--i:1;--w:70%"><span>CSS</span><div class="barra"><i></i></div><output>70%</output></div>
+        <div class="trilha-l" style="--i:2;--w:35%"><span>JavaScript</span><div class="barra"><i></i></div><output>35%</output></div>
+        <div class="trilha-l" style="--i:3;--w:10%"><span>Git</span><div class="barra"><i></i></div><output>10%</output></div>
+      </div>
+      <button class="principal lp-cta" id="lpCriar" type="button">Criar minha conta grátis</button>
+    </div>
+  </section>
+
 
   <footer class="fgrande">
     <div class="rodape">
@@ -2121,6 +2281,36 @@ async function tratar(evento, sessao){
     history.replaceState(null, '', location.pathname);
     setTimeout(() => erroL('lgErroGeral', 'Esse link não vale mais (ele expira). Peça um novo.'), 300);
   }
+})();
+</script>
+<script>
+/* Login: cada item aparece, em sequência, conforme a página desce */
+(function(){
+  var reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var alvos = '#telaLogin .lp h2, #telaLogin .lp .lead, #telaLogin .lp-passos li, #telaLogin .lp-beneficios li, #telaLogin .trilha-l, #telaLogin .rodape > *, #telaLogin .base';
+  document.querySelectorAll(alvos).forEach(function(el){
+    el.classList.add('rv');
+    if (el.matches('.lp-passos li, .lp-beneficios li')) el.classList.add('esq');
+    if (!el.style.getPropertyValue('--d')){
+      var irmaos = Array.prototype.filter.call(el.parentNode.children, function(x){ return x.matches(alvos); });
+      el.style.setProperty('--d', (irmaos.indexOf(el) * .14) + 's');
+    }
+  });
+  var els = document.querySelectorAll('#telaLogin .rv');
+  if (reduz || !('IntersectionObserver' in window)){
+    els.forEach(function(e){ e.classList.add('vis'); });
+  } else {
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('vis'); io.unobserve(e.target); } });
+    }, { threshold: .15, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(function(e){ io.observe(e); });
+  }
+  var b = document.getElementById('lpCriar');
+  if (b) b.addEventListener('click', function(){
+    modo('criar');
+    window.scrollTo({ top: 0, behavior: reduz ? 'auto' : 'smooth' });
+    setTimeout(function(){ var n = document.getElementById('lgNome'); if (n) n.focus({ preventScroll: true }); }, 500);
+  });
 })();
 </script>
 </body>
