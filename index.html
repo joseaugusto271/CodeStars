@@ -203,37 +203,88 @@ ol{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 ol li{display:flex;gap:8px;padding:8px 10px;border-radius:10px;font-weight:700;font-size:15px}
 ol li em{margin-left:auto;font-style:normal;color:var(--suave)}
 ol li.eu{background:var(--amarelo)}
-/* lição */
-.lc-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:20px;align-items:start}
-.lc-grid.so-aula{grid-template-columns:minmax(0,760px);justify-content:center}
-.lc-aula{padding:26px}
-.lc-aula h2{font:700 26px 'Chakra Petch',sans-serif;margin:4px 0 16px}
-.lc-aula h3{font:700 18px 'Chakra Petch',sans-serif;margin:18px 0 8px}
-.lc-aula p{line-height:1.65;margin:0 0 14px}
-.lc-aula code,.lc-ex code,.lc-dicabox code,.lc-dica code{background:#ece6c0;border-radius:6px;padding:1px 6px;font:14px ui-monospace,Menlo,Consolas,monospace}
-.lc-lista{margin:0 0 14px;padding-left:20px;line-height:1.7}
-.lc-dica{background:#f1ecc4;border-radius:12px;padding:12px 14px;font-weight:600;margin:0 0 14px;line-height:1.6}
-.lc-rot{font:800 12px Nunito,sans-serif;letter-spacing:.5px;color:var(--suave);margin:0 0 4px}
-.lc-aula pre.lc-cod{display:block;margin:0 0 16px;overflow-x:auto;white-space:pre;font:14px/1.65 ui-monospace,Menlo,Consolas,monospace}
-.lc-aula pre code{background:none;padding:0;font:inherit}
-.lc-col{display:grid;gap:16px;min-width:0}
-.lc-ex{padding:20px}
-.lc-enun{margin:6px 0 14px;line-height:1.6}
-.checks{list-style:none;margin:0 0 16px;padding:0;display:grid;gap:8px}
-.chk{display:flex;gap:10px;align-items:flex-start;font-weight:700;font-size:15px;color:var(--suave);line-height:1.4}
-.chk .ci{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;flex:none;background:#e6e2d4;color:var(--suave)}
-.chk.ok{color:#0b5a2b}.chk.ok .ci{background:var(--menta);color:#0b3b2a}
-.chk.no{color:#8a1f2f}.chk.no .ci{background:#ffd5db;color:#c2253a}
+/* aula em tela cheia (passo a passo, no estilo dos apps de aprender) */
+html.au-aberta{overflow:hidden}
+#aula{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;background:var(--roxo)}
+.au-top{display:flex;align-items:center;gap:12px;padding:12px 20px;background:var(--esc);border-bottom:1px solid rgba(255,255,255,.1)}
+.au-x{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.1);border:0;font-size:20px;font-weight:800;display:grid;place-items:center;flex:none}
+.au-x:hover:not(:disabled){background:rgba(255,255,255,.2)}
+.au-x:disabled{opacity:.35;cursor:default}
+.au-prog{flex:1;display:flex;gap:6px;max-width:960px;margin:0 auto}
+.au-prog i{flex:1;height:7px;border-radius:99px;background:rgba(255,255,255,.18);transition:background .3s}
+.au-prog i.feito{background:#b79bff}
+.au-prog i.atual{background:var(--amarelo)}
+.au-tit{font-weight:800;font-size:14px;color:var(--claro);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.au-main{flex:1;overflow:auto;padding:30px 20px 24px;display:flex}
+#auConteudo{width:100%;margin:auto 0}
+.au-col{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:16px;text-align:center;outline:none}
+.au-col.larga{max-width:1180px}
+.au-col p{font-size:21px;line-height:1.6;margin:0}
+.au-texto{font-size:21px;line-height:1.6}
+.au-emoji{font-size:96px;line-height:1;margin:4px 0}
+.au-perg{font:700 25px 'Chakra Petch',sans-serif;line-height:1.4;margin:0;outline:none}
+.au-col code{background:rgba(255,255,255,.14);border-radius:6px;padding:1px 6px;font:15px ui-monospace,Menlo,Consolas,monospace}
+.au-col pre code{background:none;padding:0;font:inherit}
+.au-col pre.lc-cod{display:block;text-align:left;margin:0;overflow-x:auto;white-space:pre;font:15px/1.65 ui-monospace,Menlo,Consolas,monospace;background:#1b0f35;color:#e9dcff;border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:16px 18px}
+.au-col .lc-rot{font:800 12px Nunito,sans-serif;letter-spacing:.5px;color:var(--claro);text-align:left;margin:0 0 -8px}
+.au-col .lc-lista{text-align:left;margin:0 auto;padding-left:22px;line-height:1.75;font-size:20px;max-width:600px}
+.au-col .lc-dica{background:#f1ecc4;color:var(--texto);border-radius:12px;padding:12px 16px;font-weight:600;line-height:1.6;text-align:left;font-size:17px}
+.au-col .lc-dica code{background:#ece6c0;color:var(--texto)}
+.au-ops{display:grid;gap:10px;text-align:left;margin-top:4px}
+.au-op{position:relative;display:block}
+.au-op input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.au-op span{display:block;padding:14px 16px;border-radius:12px;background:var(--esc);border:2px solid rgba(255,255,255,.14);font-weight:700;font-size:17px}
+.au-op:hover span{border-color:#b79bff}
+.au-op input:checked+span{border-color:var(--amarelo);background:rgba(242,242,107,.12)}
+.au-op input:focus-visible+span{outline:3px solid var(--amarelo);outline-offset:2px}
+.au-op.certa input+span{background:rgba(127,240,192,.22);border-color:var(--menta)}
+.au-op.errada input+span{background:rgba(194,37,58,.28);border-color:#ff8a9b}
+.au-exp{background:#f1ecc4;color:var(--texto);border-radius:12px;padding:12px 16px;font-weight:600;line-height:1.6;text-align:left;font-size:17px}
+.au-exp code{background:#ece6c0;color:var(--texto)}
+.au-ed{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch;text-align:left}
+.au-card{background:#1b0f35;border:1px solid rgba(255,255,255,.16);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-height:400px}
+.au-tabs{display:flex;align-items:stretch;background:var(--esc);min-height:42px}
+.au-tab{background:none;border:0;border-bottom:3px solid transparent;padding:0 16px;font:700 13px ui-monospace,Menlo,Consolas,monospace;color:var(--claro)}
+.au-tab.on{background:#1b0f35;color:#fff;border-bottom-color:var(--amarelo)}
+.au-tit2{display:flex;align-items:center;padding:0 16px;font:700 13px Nunito,sans-serif;color:var(--claro)}
+.au-ta{flex:1;min-height:320px;width:100%;resize:none;border:0;background:#1b0f35;color:#e9dcff;font:16px/1.65 ui-monospace,Menlo,Consolas,monospace;padding:16px;tab-size:2;white-space:pre;overflow:auto}
+.au-ta:focus{outline:3px solid var(--amarelo);outline-offset:-3px}
+.au-rodaed{border-top:1px solid rgba(255,255,255,.12);padding:8px 12px}
+.au-reset{background:none;border:0;color:var(--claro);font-weight:800;font-size:14px}
+.au-reset:hover{color:#fff}
+#auRes{flex:1;min-height:320px;width:100%;border:0;background:#fff}
+.au-card .cons{height:92px}
+#auCons{margin:0;padding:8px 14px;overflow:auto;flex:1;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;display:block;border-radius:0}
+#auCons .e{color:#ff8a9b}#auCons .w{color:var(--amarelo)}
+.au-chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.au-chip{background:transparent;border:1px solid #b79bff;border-radius:10px;padding:8px 14px;max-width:100%;text-align:left}
+.au-chip:hover{background:rgba(183,155,255,.2)}
+.au-chip code{background:none;padding:0;white-space:normal;overflow-wrap:anywhere}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:8px;text-align:left;max-width:640px;margin:0 auto;width:100%}
+.chk{display:flex;gap:10px;align-items:flex-start;font-weight:700;font-size:15px;color:var(--claro);line-height:1.4}
+.chk .ci{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;flex:none;background:rgba(255,255,255,.14);color:#fff}
+.chk.ok{color:var(--menta)}.chk.ok .ci{background:var(--menta);color:#0b3b2a}
+.chk.no{color:#ffb3bf}.chk.no .ci{background:#ffd5db;color:#c2253a}
 .sr{position:absolute;left:-9999px}
-.lc-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.lc-dicabox{background:#f1ecc4;border-radius:12px;padding:10px 12px;margin:12px 0 0;font-weight:600;line-height:1.6}
-.lc-ed{display:flex;flex-direction:column;overflow:hidden}
-.lc-ed .ed{flex:none;height:240px}
-.lc-ed iframe{flex:none;height:220px;width:100%;border:0;background:#fff}
-.lc-ed .cons{height:96px}
-.lc-fim{position:sticky;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--creme);color:var(--texto);border-radius:16px;padding:12px 16px;box-shadow:0 6px 0 var(--fundo-linha);margin-top:20px;z-index:4}
-.lc-falta{margin:0;font-weight:700;color:var(--suave);font-size:14px}
-.lc-feita{margin:0;font-weight:800;color:#0b5a2b}
+.au-fim-emoji{font-size:92px;line-height:1}
+.au-estrelas{font:700 58px/1 'Chakra Petch',sans-serif;color:var(--amarelo)}
+.au-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 24px;background:var(--esc);border-top:1px solid rgba(255,255,255,.1)}
+.au-mascote{display:flex;align-items:center;gap:14px;min-width:0;flex:1}
+.au-star{flex:none;filter:drop-shadow(3px 4px 0 rgba(0,0,0,.3))}
+.au-star svg{display:block}
+.au-star.pula{animation:pula .6s}
+.au-star.triste{animation:balanca .4s}
+.au-balao{background:rgba(255,255,255,.12);border-radius:14px;padding:10px 14px;font-weight:700;line-height:1.45;max-width:660px}
+.au-acoes{display:flex;align-items:center;gap:10px;flex:none}
+.au-kbd{font:700 12px Nunito,sans-serif;opacity:.6;margin-left:6px}
+.au-modal{position:absolute;inset:0;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:20px;z-index:2}
+.au-modal-card{padding:24px;max-width:420px;text-align:center}
+.au-modal-card h3{font:700 22px 'Chakra Petch',sans-serif;margin:0 0 8px}
+.au-modal-card p{margin:0 0 18px;color:var(--suave);line-height:1.5}
+.au-modal-card .qz-btns{justify-content:center}
+.pill.ref{color:var(--claro)}
+:root[data-tema=claro] .au-col code{background:rgba(82,37,128,.12)}
+:root[data-tema=claro] .au-col pre code{background:none}
 /* perfil */
 .perfil{max-width:560px;margin:0 auto}
 .voltar{background:none;border:0;color:var(--claro);font-weight:800;padding:6px 0;margin-bottom:16px}
@@ -300,8 +351,6 @@ details.senha .campo{margin:14px 0 0}
 .ch .rm{color:var(--amarelo);font-size:12px}
 #cons{margin:0;padding:8px 14px;overflow:auto;flex:1;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;display:block;border-radius:0}
 #cons .e{color:#ff8a9b}#cons .w{color:var(--amarelo)}
-#lcCons{margin:0;padding:8px 14px;overflow:auto;flex:1;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;display:block;border-radius:0}
-#lcCons .e{color:#ff8a9b}#lcCons .w{color:var(--amarelo)}
 .dica3{margin:12px 0 0;font-size:14px;color:var(--claro)}
 /* footer curto do painel */
 .fapp{background:var(--fundo-linha);padding:24px 32px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center;font-size:14px;color:var(--claro)}
@@ -418,7 +467,7 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
   .wrap{padding:24px 16px 40px}
   .grid{grid-template-columns:1fr}aside{position:static}
   .cont{grid-template-columns:1fr}
-  .lc-grid{grid-template-columns:1fr}
+  @media (max-width:900px){.au-ed{grid-template-columns:1fr}.au-card{min-height:260px}.au-tit{display:none}.au-main{padding:22px 14px}.au-perg{font-size:21px}.au-bar{padding:10px 14px;flex-wrap:wrap;gap:10px}.au-mascote{flex:1 1 100%}.au-acoes{flex:1 1 100%}.au-acoes .btn{flex:1}.au-balao{font-size:14px}.au-star svg{width:44px;height:44px}.au-col p,.au-texto{font-size:18px}.au-emoji{font-size:72px}.au-ta,#auRes{min-height:200px}}
   #telaApp h1{font-size:26px}.mascote{width:68px}
   .pg{grid-template-columns:1fr;height:auto}.pg .card{height:420px}.ptopo{align-items:flex-start}
   #stSalvo{margin-left:0;width:100%}
@@ -651,44 +700,6 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
     </div>
   </main>
 
-  <!-- lição -->
-  <section class="wrap larga" id="licao" hidden>
-    <button class="voltar" id="lcVoltar" type="button">← Voltar ao painel</button>
-    <div class="lc-grid" id="lcGrid">
-      <article class="card lc-aula">
-        <div class="tag" id="lcTag"></div>
-        <h2 id="lcTit"></h2>
-        <div id="lcAula"></div>
-      </article>
-      <div class="lc-col" id="lcPratica">
-        <section class="card lc-ex" aria-label="Exercício">
-          <div class="tag">SUA VEZ</div>
-          <p class="lc-enun" id="lcEnun"></p>
-          <ul class="checks" id="lcChecks" aria-live="polite"></ul>
-          <div class="lc-btns">
-            <button class="btn pb" id="lcVerifica" type="button">▶ Executar e verificar</button>
-            <button class="sec2" id="lcDica" type="button">💡 Dica</button>
-            <button class="sec2" id="lcSolucao" type="button">👀 Ver solução</button>
-            <button class="sec2" id="lcReset" type="button">↺ Recomeçar</button>
-          </div>
-          <p class="lc-dicabox" id="lcDicaTxt" hidden></p>
-        </section>
-        <section class="card lc-ed" aria-label="Editor e resultado">
-          <div class="ph"><div class="abas" id="lcAbas" role="tablist" aria-label="Linguagem"></div><span class="st2">Resultado ↓</span></div>
-          <textarea id="lcEd" class="ed" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editor do exercício"></textarea>
-          <iframe id="lcRes" title="Resultado do exercício" sandbox="allow-scripts"></iframe>
-          <div class="cons" id="lcConsBox"><div class="ch"><span>CONSOLE</span></div><pre id="lcCons" aria-live="polite"></pre></div>
-        </section>
-      </div>
-    </div>
-    <div class="lc-fim">
-      <button class="btn" id="lcConcluir" type="button">✅ Concluir lição</button>
-      <p class="lc-falta" id="lcFalta" role="status"></p>
-      <p class="lc-feita" id="lcFeita" hidden>✓ Você já concluiu esta lição.</p>
-      <button class="sec2" id="lcRefazer" type="button" hidden>🔁 Refazer lição</button>
-    </div>
-  </section>
-
   <!-- perfil -->
   <section class="wrap" id="perfil" hidden>
     <div class="perfil">
@@ -889,8 +900,37 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
   <footer class="fapp">
     <div class="logo" style="font-size:18px"><svg width="28" height="28" aria-hidden="true"><use href="#lg"/></svg><span>Code<b>Stars</b></span></div>
     <nav><a href="#" data-v="ajuda">Ajuda</a><a href="#">Termos</a><a href="#">Privacidade</a></nav>
-    <span>© 2026 CodeStars · v5 (escala menor)</span>
+    <span>© 2026 CodeStars · v6 (aulas passo a passo)</span>
   </footer>
+</div>
+
+<!-- aula em tela cheia -->
+<div id="aula" hidden role="dialog" aria-modal="true" aria-label="Lição">
+  <div class="au-top">
+    <button class="au-x" id="auX" type="button" aria-label="Sair da lição">✕</button>
+    <button class="au-x" id="auVolta" type="button" aria-label="Tela anterior">‹</button>
+    <div class="au-prog" id="auProg" role="progressbar" aria-valuemin="1" aria-valuenow="1" aria-valuemax="1" aria-label="Progresso da lição"></div>
+    <span class="au-tit" id="auTit"></span>
+  </div>
+  <div class="au-main" id="auMain"><div id="auConteudo"></div></div>
+  <div class="au-bar">
+    <div class="au-mascote">
+      <div class="au-star" id="auStar" aria-hidden="true"><svg viewBox="0 0 100 100" width="58" height="58"><polygon points="50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8" fill="#ffcc00" stroke="#ffcc00" stroke-width="8" stroke-linejoin="round"/><circle class="pisca" cx="42" cy="52" r="3.4" fill="#1e1230"/><circle class="pisca" cx="58" cy="52" r="3.4" fill="#1e1230"/><path id="auBoca" d="M42 59 Q50 66 58 59" fill="none" stroke="#1e1230" stroke-width="3" stroke-linecap="round"/></svg></div>
+      <div class="au-balao" id="auBalao" role="status" aria-live="polite" hidden></div>
+    </div>
+    <div class="au-acoes">
+      <button class="sec2" id="auDica" type="button" hidden>💡 Dica</button>
+      <button class="sec2" id="auSolucao" type="button" hidden>👀 Ver solução</button>
+      <button class="btn" id="auOk" type="button">Continuar</button>
+    </div>
+  </div>
+  <div class="au-modal" id="auSair" hidden>
+    <div class="card au-modal-card" role="alertdialog" aria-labelledby="auSairT">
+      <h3 id="auSairT">Sair da lição?</h3>
+      <p>Se você sair agora, vai recomeçar esta lição do início depois.</p>
+      <div class="qz-btns"><button class="btn" id="auSairNao" type="button">Continuar lição</button><button class="sec2" id="auSairSim" type="button">Sair</button></div>
+    </div>
+  </div>
 </div>
 
 <div id="aviso" role="status"></div>
@@ -979,11 +1019,11 @@ function telaDe(t){
   $('telaApp').hidden    = t !== 'app';
   if (t !== 'app') document.documentElement.dataset.tema = 'escuro';
 }
-const VIEWS = ['painel','licao','perfil','projetos','praticar','ranking','ajuda'];
+const VIEWS = ['painel','perfil','projetos','praticar','ranking','ajuda'];
 let editorIniciado = false;
 function vai(v){
   VIEWS.forEach(id => $(id).hidden = (id !== v));
-  const aba = (v === 'licao' && ctxLicao.desafio) ? 'praticar' : v;
+  const aba = v;
   document.querySelectorAll('.tabs a[data-v]').forEach(a => {
     const on = a.dataset.v === aba; a.classList.toggle('on', on);
     if (on) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
@@ -1220,7 +1260,7 @@ function pintaPainel(){
     `<button class="mp ${m.st==='trava'?'trava':''} ${m.id===moduloSel?'on':''}" role="tab" aria-selected="${m.id===moduloSel}" data-k="${esc(m.id)}"><span>${ICONE[m.st]}</span>${esc(m.nome)}</button>`).join('');
   const m = mods.find(x => x.id === moduloSel), st = statusLicoes(m);
   $('lista').innerHTML = m.l.map((l,i) => {
-    const s = st[i], fim = s==='ok' ? '<span class="ic ok">✓</span>' : s==='atual' ? '<span class="ic go">→</span>' : '<span>🔒</span>';
+    const s = st[i], fim = s==='ok' ? '<span class="pill ref">🔁 REFAZER</span><span class="ic ok">✓</span>' : s==='atual' ? '<span class="ic go">→</span>' : '<span>🔒</span>';
     return `<button class="row ${s}" data-s="${s}" data-id="${esc(l.id)}"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${esc(l.titulo)}</span><span class="pill ${l.tipo}">${l.tipo==='a'?'📖 APRENDER':'⚡ PRATICAR'}</span>${fim}</button>`;
   }).join('');
 
@@ -1282,14 +1322,15 @@ function falaPadrao(){ $('fala').textContent = falasLista()[0]; fi = 0; }
 mas.addEventListener('click', () => { const a = falasLista(); fi = (fi + 1) % a.length; falar(a[fi]); });
 
 /* =====================================================================
-   7) LIÇÃO: aula, exercício com correção automática e conclusão
-      (a gravação do progresso é feita pela função concluir_licao no banco)
+   7) AULA em tela cheia, passo a passo (lições da trilha e desafios do Praticar)
+      A gravação do progresso é feita pela função concluir_licao no banco.
    ===================================================================== */
-let ctxLicao = { desafio:false, voltar:'painel' };
-let exAtual = null, lcCod = { html:'', css:'', js:'' }, lcLang = 'html';
-let lcRefazendo = false, lcTmr = null, lcRun = 0, lcVerificou = false, lcRes = [], lcPassou = false, lcRecebeu = false, lcSoltaTab = false;
-const rascunhos = {};
-const ROTULO_ABA = { html:'🖥️ HTML', css:'🎨 CSS', js:'⚡ JavaScript' };
+const ARQ = { html:'index.html', css:'style.css', js:'script.js' };
+let aula = null, aulaIdx = 0, aulaOk = [], aulaCod = [], aulaTent = [];
+let aulaRun = 0, aulaRecebeu = false, aulaTmr = null, aulaSoltaTab = false;
+const FRASES_OK = ['Mandou bem! 🎉', 'Isso aí! ⭐', 'Perfeito! 🚀', 'Muito bem! 💪', 'É isso mesmo! ✨'];
+const sorteia = a => a[Math.floor(Math.random() * a.length)];
+const semMarcas = s => String(s || '').replace(/`/g, '').replace(/\*\*/g, '');
 
 // texto simples da aula: `código` e **negrito**
 function md(s){ return esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>'); }
@@ -1355,128 +1396,247 @@ function montaLicao(ex, c, dom, id){
   return '<!DOCTYPE html><html><head><meta charset=utf-8><style>' + c.css + '</style>' + PONTE + LOGS + '</head><body>' + c.html + '<script>' + c.js + fim + check + '</body></html>';
 }
 
-function pintaChecks(){
-  $('lcChecks').innerHTML = exAtual.testes.map((t, i) => {
-    const r = lcVerificou ? lcRes[i] : null, cls = r === true ? 'ok' : r === false ? 'no' : '';
-    return `<li class="chk ${cls}"><span class="ci" aria-hidden="true">${r === true ? '✓' : r === false ? '✗' : '○'}</span><span>${esc(t.msg)}</span><span class="sr">${r === true ? ' (feito)' : r === false ? ' (ainda falta)' : ''}</span></li>`;
-  }).join('');
-}
-function mostraLc(){
-  $('lcEd').value = lcCod[lcLang];
-  document.querySelectorAll('#lcAbas .aba').forEach(a => { const on = a.dataset.l === lcLang; a.classList.toggle('on', on); a.setAttribute('aria-selected', on); });
-}
-function jaFeita(l){ return ctxLicao.desafio ? praticaFeita.has(l.id.replace('desafio:', '')) : feitas.has(l.id); }
-function atualizaConcluir(){
-  const l = licaoAberta, feita = jaFeita(l), btn = $('lcConcluir'), d = ctxLicao.desafio, coisa = d ? 'desafio' : 'lição';
-  btn.hidden = feita; $('lcFeita').hidden = !feita || lcRefazendo;
-  $('lcFeita').textContent = d ? '✓ Você já fez este desafio.' : '✓ Você já concluiu esta lição.';
-  $('lcRefazer').hidden = !feita || !exAtual || lcRefazendo; $('lcRefazer').textContent = '🔁 Refazer ' + coisa;
-  btn.textContent = d ? '✅ Concluir desafio' : '✅ Concluir lição (+' + l.estrelas + ' ⭐)';
-  if (!exAtual){ btn.disabled = false; $('lcFalta').textContent = ''; return; }
-  const falta = exAtual.testes.length - lcRes.filter(Boolean).length, pronto = lcVerificou && falta === 0;
-  btn.disabled = !pronto;
-  $('lcFalta').textContent = feita
-    ? (lcRefazendo ? (pronto ? 'Muito bem! Você refez o ' + coisa + '. ✨' + (d ? '' : ' As estrelas dela você já ganhou antes.') : '🔁 Refazendo para praticar: cumpra os itens da lista.') : '')
-    : pronto ? 'Tudo certo! Pode concluir o ' + coisa + '. ✨' : 'Cumpra todos os itens da lista para concluir.';
-  if (pronto && !lcPassou && (!feita || lcRefazendo)) aviso(feita ? '✨ Muito bem! Você refez o ' + coisa + '.' : '✨ Tudo certo! Agora é só concluir.');
-  lcPassou = pronto;
-}
-function finalizaTestes(id, dr){
-  if (id !== lcRun || !exAtual) return;
-  let k = 0;
-  lcRes = exAtual.testes.map(t => {
-    if (t.t === 'src'){ try{ return new RegExp(t.rx, 'i').test(lcCod[t.em] || ''); }catch(e){ return false; } }
-    return !!dr[k++];
+
+// Lições no formato antigo (aula + exercício) viram telas curtas automaticamente
+function converteAntigo(c){
+  const telas = []; let atual = null;
+  (c.passos || []).forEach(b => {
+    if (b.t === 'texto' || !atual){ atual = { t:'texto', blocos:[b] }; telas.push(atual); }
+    else atual.blocos.push(b);
   });
-  pintaChecks(); atualizaConcluir();
+  if (c.exercicio){ const e = c.exercicio; telas.push({ t:'codigo', texto:e.enunciado, abas:e.abas, inicial:e.inicial, doc:e.doc, testes:e.testes, dica:e.dica, solucao:e.solucao }); }
+  return telas;
 }
-function resultadoLicao(d){ lcRecebeu = true; finalizaTestes(d.id, d.r || []); }
-function rodaLicao(verifica){
-  if (!exAtual) return;
-  rascunhos[licaoAberta.id] = { ...lcCod };
-  if (verifica) lcVerificou = true;
-  const id = ++lcRun; lcRecebeu = false;
-  const dom = exAtual.testes.filter(t => t.t !== 'src');
-  $('lcCons').textContent = '';
-  $('lcRes').srcdoc = montaLicao(exAtual, lcCod, dom, id);
-  setTimeout(() => { if (lcRun === id && !lcRecebeu) finalizaTestes(id, []); }, 2500);   // se o iframe não responder
+function telasDe(c){
+  if (c && c.telas && c.telas.length) return c.telas;
+  if (c && ((c.passos && c.passos.length) || c.exercicio)) return converteAntigo(c);
+  return null;
 }
-function iniciaExercicio(l){
-  const ex = exAtual;
-  lcCod = { html:'', css:'', js:'', ...(rascunhos[l.id] || ex.inicial) };
-  lcLang = ex.abas[0]; lcVerificou = false; lcRes = []; lcPassou = false;
-  $('lcEnun').innerHTML = md(ex.enunciado);
-  $('lcDicaTxt').hidden = true; $('lcDicaTxt').innerHTML = '💡 ' + md(ex.dica || 'Releia a aula e tente de novo.');
-  $('lcAbas').innerHTML = ex.abas.map(a => `<button class="aba" role="tab" data-l="${a}" type="button">${ROTULO_ABA[a]}</button>`).join('');
-  $('lcConsBox').hidden = !ex.abas.includes('js');
-  pintaChecks(); mostraLc();
-}
+
 function abreLicao(id){
   const l = licoes.find(x => x.id === id); if (!l) return;
   const m = modulos().find(x => x.id === l.modulo), n = m.l.indexOf(l) + 1;
-  ctxLicao = { desafio:false, voltar:'painel' };
-  mostraLicao(l, m.nome.toUpperCase() + ' • ' + (l.tipo === 'a' ? 'APRENDER' : 'PRATICAR'), 'Lição ' + n + ': ' + l.titulo);
+  abreAula({ id:l.id, titulo:'Lição ' + n + ': ' + l.titulo, conteudo:l.conteudo, estrelas:l.estrelas, desafio:false, voltar:'painel', feita:feitas.has(l.id) });
 }
-function mostraLicao(l, tag, titulo){
-  licaoAberta = l; clearTimeout(lcTmr); lcRefazendo = false;
-  const c = l.conteudo;
-  exAtual = (c && c.exercicio) || null;
-  $('lcTag').textContent = tag; $('lcTit').textContent = titulo;
-  $('lcAula').innerHTML = (c && c.passos && c.passos.length) ? c.passos.map(blocoAula).join('')
-    : (!licoes.some(x => x.conteudo)
-        ? '<div class="lc-dica">⚠️ <strong>As lições ainda não foram instaladas no banco.</strong> No Supabase, abra o <strong>SQL Editor</strong>, rode o arquivo <strong>licoes-conteudo.sql</strong> e recarregue esta página (Ctrl + Shift + R).</div>'
-        : '<p>O conteúdo desta lição ainda vai ser adicionado. Por enquanto, marque como concluída para testar o seu progresso, as estrelas e o ranking.</p>');
-  $('lcPratica').hidden = !exAtual; $('lcGrid').classList.toggle('so-aula', !exAtual);
-  if (exAtual) iniciaExercicio(l);
-  atualizaConcluir();
-  vai('licao');
-  if (exAtual) rodaLicao(false);
+function abreAula(cfg){
+  let telas = telasDe(cfg.conteudo);
+  if (!telas) telas = [{ t:'texto', emoji:'🚧', blocos:[ (!cfg.desafio && !licoes.some(x => x.conteudo))
+    ? { t:'dica', v:'⚠️ **As lições ainda não foram instaladas no banco.** No Supabase, abra o **SQL Editor**, rode o arquivo **licoes-conteudo.sql** e recarregue esta página (Ctrl + Shift + R).' }
+    : { t:'texto', v:'O conteúdo desta lição ainda vai ser adicionado. Por enquanto, termine a lição para testar o seu progresso, as estrelas e o ranking.' } ] }];
+  aula = { ...cfg, telas:[...telas, { t:'fim' }] };
+  aulaIdx = 0; aulaOk = []; aulaCod = []; aulaTent = [];
+  $('auTit').textContent = cfg.titulo; $('auSair').hidden = true; $('aula').hidden = false;
+  document.documentElement.classList.add('au-aberta');
+  $('auProg').setAttribute('aria-valuemax', aula.telas.length);
+  mostraTela(0);
 }
-function saiLicao(){ clearTimeout(lcTmr); lcRun++; $('lcRes').srcdoc = ''; vai(ctxLicao.voltar); }
-$('lcVoltar').addEventListener('click', saiLicao);
+function fechaAula(){
+  clearTimeout(aulaTmr); aulaRun++;
+  $('aula').hidden = true; $('auSair').hidden = true; $('auConteudo').innerHTML = '';
+  document.documentElement.classList.remove('au-aberta');
+  if (aula) vai(aula.voltar);
+}
 
-$('lcEd').addEventListener('input', () => {
-  lcCod[lcLang] = $('lcEd').value; clearTimeout(lcTmr); lcTmr = setTimeout(() => rodaLicao(true), 700);
-});
-$('lcEd').addEventListener('keydown', e => {
-  if (e.key === 'Escape'){ lcSoltaTab = true; return; }
-  if (e.key === 'Tab' && !lcSoltaTab){ e.preventDefault(); const t = $('lcEd'); t.setRangeText('  ', t.selectionStart, t.selectionEnd, 'end'); t.dispatchEvent(new Event('input')); }
-  else if (e.key.length === 1) lcSoltaTab = false;
-});
-$('lcEd').addEventListener('blur', () => { lcSoltaTab = false; });
-$('lcAbas').addEventListener('click', e => { const b = e.target.closest('.aba'); if (!b) return; lcLang = b.dataset.l; mostraLc(); $('lcEd').focus(); });
-$('lcVerifica').addEventListener('click', () => { clearTimeout(lcTmr); rodaLicao(true); });
-$('lcDica').addEventListener('click', () => { $('lcDicaTxt').hidden = !$('lcDicaTxt').hidden; });
-dois($('lcSolucao'), () => { lcCod = { html:'', css:'', js:'', ...exAtual.solucao }; mostraLc(); rodaLicao(true); }, 'Clique de novo para ver a solução');
-dois($('lcReset'),   () => { lcCod = { html:'', css:'', js:'', ...exAtual.inicial }; lcVerificou = false; lcPassou = false; mostraLc(); rodaLicao(false); }, 'Clique de novo para recomeçar');
+// ---- mascote
+function falaMascote(txt, humor){
+  const b = $('auBalao'); b.textContent = txt || ''; b.hidden = !txt;
+  const s = $('auStar'); s.classList.remove('pula', 'triste'); void s.offsetWidth;
+  $('auBoca').setAttribute('d', humor === 'feliz' ? 'M40 57 Q50 70 60 57' : humor === 'triste' ? 'M42 64 Q50 57 58 64' : 'M42 59 Q50 66 58 59');
+  if (humor === 'feliz') s.classList.add('pula'); else if (humor === 'triste') s.classList.add('triste');
+}
 
-$('lcRefazer').addEventListener('click', () => {
-  if (!exAtual) return;
-  lcRefazendo = true; delete rascunhos[licaoAberta.id];
-  lcCod = { html:'', css:'', js:'', ...exAtual.inicial }; lcLang = exAtual.abas[0];
-  lcVerificou = false; lcPassou = false; lcRes = [];
-  $('lcDicaTxt').hidden = true;
-  pintaChecks(); mostraLc(); rodaLicao(false); atualizaConcluir(); $('lcEd').focus();
-});
-$('lcConcluir').addEventListener('click', async () => {
-  const l = licaoAberta, btn = $('lcConcluir'); if (!l || btn.disabled) return;
-  if (ctxLicao.desafio){   // desafio da página Praticar: só marca como feito, sem estrelas
-    praticaFeita.add(l.id.replace('desafio:', '')); salvaPraticaLocal(); saiLicao(); aviso('✅ Desafio concluído! Mandou bem. 🎉'); return;
+// ---- telas
+function pintaProgresso(){
+  $('auProg').innerHTML = aula.telas.map((_, k) => `<i class="${k < aulaIdx ? 'feito' : k === aulaIdx ? 'atual' : ''}"></i>`).join('');
+  $('auProg').setAttribute('aria-valuenow', aulaIdx + 1);
+}
+function mostraTela(i){
+  aulaIdx = i; clearTimeout(aulaTmr); aulaRun++;
+  const t = aula.telas[i], box = $('auConteudo');
+  pintaProgresso(); $('auVolta').disabled = i === 0;
+  $('auDica').hidden = !t.dica; $('auSolucao').hidden = true;
+  if (t.t === 'texto'){ montaTexto(t, box); falaMascote(i === 0 ? 'Vamos nessa? 🚀' : '', 'neutro'); }
+  else if (t.t === 'escolha'){ montaEscolha(t, box); falaMascote(aulaOk[i] ? 'Já acertou esta! Clique em Continuar.' : 'Escolha uma resposta e clique em Verificar.', 'neutro'); }
+  else if (t.t === 'codigo'){ montaCodigo(t, box); }
+  else montaFim(box);
+  atualizaOk();
+  $('auMain').scrollTop = 0;
+  const alvo = box.querySelector('[tabindex="-1"]'); if (alvo) alvo.focus({ preventScroll:true });
+}
+function avanca(){ if (aulaIdx < aula.telas.length - 1) mostraTela(aulaIdx + 1); }
+function atualizaOk(){
+  const t = aula.telas[aulaIdx], b = $('auOk'), kbd = ' <span class="au-kbd">Ctrl+⏎</span>';
+  let txt = 'Continuar', dis = false;
+  if (t.t === 'escolha' && !aulaOk[aulaIdx]){ txt = 'Verificar'; dis = !document.querySelector('#auConteudo input[name=auop]:checked'); }
+  else if (t.t === 'codigo' && !aulaOk[aulaIdx]) txt = 'Verificar';
+  else if (t.t === 'fim') txt = aula.desafio ? '✅ Concluir desafio' : aula.feita ? 'Voltar' : '✅ Concluir e ganhar +' + aula.estrelas + ' ⭐';
+  b.innerHTML = txt + kbd; b.disabled = dis;
+}
+function acaoOk(){
+  const t = aula.telas[aulaIdx];
+  if (t.t === 'texto') return avanca();
+  if (t.t === 'escolha') return aulaOk[aulaIdx] ? avanca() : verificaEscolha();
+  if (t.t === 'codigo') return aulaOk[aulaIdx] ? avanca() : verificaCodigo();
+  return concluiAula();
+}
+
+function montaTexto(t, box){
+  box.innerHTML = `<div class="au-col" tabindex="-1">${t.emoji ? '<div class="au-emoji" aria-hidden="true">' + t.emoji + '</div>' : ''}${(t.blocos || []).map(blocoAula).join('')}</div>`;
+}
+
+// pergunta de múltipla escolha
+function montaEscolha(t, box){
+  const i = aulaIdx; if (!aulaCod[i]) aulaCod[i] = { ordem: embaralha(t.opcoes.map((_, k) => k)), erradas: [] };
+  const st = aulaCod[i], ok = aulaOk[i];
+  box.innerHTML = `<div class="au-col"><h2 class="au-perg" tabindex="-1">${md(t.p)}</h2><div class="au-ops" role="radiogroup" aria-label="Respostas">`
+    + st.ordem.map(o => `<label class="au-op ${ok && o === t.certa ? 'certa' : st.erradas.includes(o) ? 'errada' : ''}"><input type="radio" name="auop" value="${o}"${ok || st.erradas.includes(o) ? ' disabled' : ''}${ok && o === t.certa ? ' checked' : ''}><span>${md(t.opcoes[o])}</span></label>`).join('')
+    + `</div><p class="au-exp" id="auExp" role="status"${ok || st.erradas.length >= 2 ? '' : ' hidden'}>${md(t.explicacao)}</p></div>`;
+}
+function verificaEscolha(){
+  const i = aulaIdx, t = aula.telas[i], st = aulaCod[i], sel = document.querySelector('#auConteudo input[name=auop]:checked'); if (!sel) return;
+  const o = +sel.value; aulaTent[i] = (aulaTent[i] || 0) + 1;
+  if (o === t.certa){ aulaOk[i] = true; montaEscolha(t, $('auConteudo')); falaMascote(sorteia(FRASES_OK), 'feliz'); }
+  else { st.erradas.push(o); montaEscolha(t, $('auConteudo')); falaMascote('Quase! Tente outra opção. 😉', 'triste'); }
+  atualizaOk();
+}
+
+// exercício de código: editor à esquerda, resultado à direita
+const chipRot = c => typeof c === 'string' ? c : c.r;
+const chipVal = c => typeof c === 'string' ? c : c.v;
+const testeSrc = (x, cod) => { try{ return new RegExp(x.rx, 'i').test(cod[x.em] || ''); }catch(e){ return false; } };
+function montaCodigo(t, box){
+  const i = aulaIdx;
+  if (!aulaCod[i]){
+    let base = { html:'', css:'', js:'', ...(t.inicial || {}) };
+    if (t.continua){ for (let k = i - 1; k >= 0; k--){ if (aula.telas[k].t === 'codigo' && aulaCod[k]){ base = { ...base, ...aulaCod[k].cod }; break; } } }
+    aulaCod[i] = { cod:base, ini:{ ...base }, aba:t.abas[0], res:null };
   }
-  btn.disabled = true;
+  box.innerHTML = `<div class="au-col larga"><div class="au-texto" tabindex="-1">${md(t.texto)}</div>
+    <div class="au-ed">
+      <section class="au-card" aria-label="Editor de código"><div class="au-tabs" role="tablist" id="auAbas">${t.abas.map(a => `<button class="au-tab" role="tab" data-l="${a}" type="button">${ARQ[a]}</button>`).join('')}</div>
+        <textarea id="auEd" class="au-ta" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editor de código"></textarea>
+        <div class="au-rodaed"><button class="au-reset" id="auReset" type="button">↺ Reset</button></div></section>
+      <section class="au-card" aria-label="Resultado"><div class="au-tabs"><span class="au-tit2">Resultado</span></div><iframe id="auRes" title="Resultado do seu código" sandbox="allow-scripts"></iframe>${t.abas.includes('js') ? '<div class="cons"><div class="ch"><span>CONSOLE</span></div><pre id="auCons" aria-live="polite"></pre></div>' : ''}</section>
+    </div>
+    <div class="au-chips" id="auChips">${(t.chips || []).map((c, k) => `<button class="au-chip" data-k="${k}" type="button" title="Inserir no editor"><code>${esc(chipRot(c))}</code></button>`).join('')}</div>
+    <ul class="checks" id="auChecks" aria-live="polite"></ul></div>`;
+  mostraAba(); pintaChecks(); rodaPreview();
+  falaMascote(aulaOk[i] ? 'Etapa concluída! Clique em Continuar.' : (t.chips && t.chips.length ? 'Clique no botão com o código para inseri-lo no editor. 👇' : 'Escreva o código e clique em Verificar.'), 'neutro');
+  if (aulaTent[i] >= 2 && !aulaOk[i]) $('auSolucao').hidden = false;
+}
+function mostraAba(){
+  const st = aulaCod[aulaIdx]; $('auEd').value = st.cod[st.aba];
+  document.querySelectorAll('#auAbas .au-tab').forEach(a => { const on = a.dataset.l === st.aba; a.classList.toggle('on', on); a.setAttribute('aria-selected', on); });
+}
+function pintaChecks(){
+  const t = aula.telas[aulaIdx], st = aulaCod[aulaIdx], ul = $('auChecks'); if (!ul) return;
+  ul.innerHTML = st.res ? t.testes.map((x, k) => { const r = st.res[k];
+    return `<li class="chk ${r ? 'ok' : 'no'}"><span class="ci" aria-hidden="true">${r ? '✓' : '✗'}</span><span>${esc(x.msg)}</span><span class="sr">${r ? ' (feito)' : ' (ainda falta)'}</span></li>`; }).join('') : '';
+}
+function rodaPreview(){
+  const t = aula && aula.telas[aulaIdx], f = $('auRes'); if (!t || t.t !== 'codigo' || !f) return;
+  if ($('auCons')) $('auCons').textContent = '';
+  f.srcdoc = montaLicao({ doc:!!t.doc }, aulaCod[aulaIdx].cod, [], 0);
+}
+function insereChip(k){
+  const t = aula.telas[aulaIdx], st = aulaCod[aulaIdx], ta = $('auEd'), v = chipVal(t.chips[k]);
+  const atual = ta.value, solo = /^\s*(<!--[\s\S]*-->|\/\*[\s\S]*\*\/|\/\/[^\n]*)?\s*$/.test(atual);
+  let novo, pos;
+  if (solo){ novo = v + '\n'; pos = novo.length; }
+  else {
+    const a = ta.selectionStart, b = ta.selectionEnd;
+    if (a >= atual.length){ novo = atual + (atual.endsWith('\n') ? '' : '\n') + v + '\n'; pos = novo.length; }
+    else { novo = atual.slice(0, a) + v + atual.slice(b); pos = a + v.length; }
+  }
+  ta.value = novo; ta.focus(); ta.setSelectionRange(pos, pos); ta.dispatchEvent(new Event('input', { bubbles:true }));
+}
+function verificaCodigo(){
+  const i = aulaIdx, t = aula.telas[i], st = aulaCod[i]; aulaTent[i] = (aulaTent[i] || 0) + 1;
+  const dom = t.testes.filter(x => x.t !== 'src'), id = ++aulaRun; aulaRecebeu = false;
+  $('auOk').disabled = true; $('auOk').textContent = 'Verificando…';
+  if ($('auCons')) $('auCons').textContent = '';
+  $('auRes').srcdoc = montaLicao({ doc:!!t.doc }, st.cod, dom, id);
+  setTimeout(() => { if (aulaRun === id && !aulaRecebeu) finalizaCodigo(id, []); }, 2500);   // se o iframe não responder
+}
+function resultadoAula(d){ aulaRecebeu = true; finalizaCodigo(d.id, d.r || []); }
+function finalizaCodigo(id, dr){
+  if (id !== aulaRun) return;
+  const i = aulaIdx, t = aula.telas[i], st = aulaCod[i]; let k = 0;
+  st.res = t.testes.map(x => x.t === 'src' ? testeSrc(x, st.cod) : !!dr[k++]);
+  pintaChecks();
+  const falhou = t.testes.filter((_, j) => !st.res[j]);
+  if (!falhou.length){ aulaOk[i] = true; $('auSolucao').hidden = true; falaMascote(sorteia(FRASES_OK), 'feliz'); }
+  else { aulaOk[i] = false; falaMascote('Quase! Ainda falta: ' + semMarcas(falhou[0].msg), 'triste'); if (aulaTent[i] >= 2) $('auSolucao').hidden = false; }
+  atualizaOk();
+}
+
+// tela final
+function montaFim(box){
+  const nCod = aula.telas.filter(x => x.t === 'codigo').length, nEsc = aula.telas.filter(x => x.t === 'escolha').length;
+  const resumoTxt = (nCod ? nCod + ' ' + plural(nCod, 'exercício de código', 'exercícios de código') : '') + (nCod && nEsc ? ' e ' : '') + (nEsc ? nEsc + ' ' + plural(nEsc, 'pergunta', 'perguntas') : '');
+  const d = aula.desafio;
+  box.innerHTML = `<div class="au-col" tabindex="-1"><div class="au-fim-emoji" aria-hidden="true">🎉</div><h2 class="au-perg">${d ? 'Desafio completo!' : 'Lição completa!'}</h2>`
+    + (resumoTxt ? `<p>Você fez ${resumoTxt}.</p>` : '')
+    + (d ? '<p>Aqui não vale estrela, mas é treino de verdade! 💪</p>'
+        : aula.feita ? '<p>Você já tinha concluído esta lição, então as estrelas não são dadas de novo. Mas praticar nunca é demais!</p>'
+        : `<div class="au-estrelas">+${aula.estrelas} ⭐</div><p>Conclua a lição para ganhar as estrelas.</p>`) + '</div>';
+  falaMascote('Mandou muito bem! 🌟', 'feliz');
+}
+async function concluiAula(){
+  const btn = $('auOk'); if (btn.disabled) return;
+  if (aula.desafio){ praticaFeita.add(aula.id.replace('desafio:', '')); salvaPraticaLocal(); fechaAula(); aviso('✅ Desafio concluído! Mandou bem. 🎉'); return; }
+  if (aula.feita){ fechaAula(); return; }
+  btn.disabled = true; btn.textContent = 'Salvando…';
   try{
+    const l = licoes.find(x => x.id === aula.id);
     const antes = modulos().find(x => x.id === l.modulo), metaAntes = resumo.hoje >= perfil.meta_diaria;
     const { data, error } = await sb.rpc('concluir_licao', { p_licao: l.id });
     if (error) throw error;
-    feitas.add(l.id);
-    await recarregaResumo();
+    feitas.add(l.id); await recarregaResumo();
     const depois = modulos().find(x => x.id === l.modulo);
-    moduloSel = null; pintaPainel(); saiLicao();
     let msg = data && data.nova ? '⭐ +' + l.estrelas + ' estrelas! Lição concluída.' : 'Lição já estava concluída.';
     if (antes.feitas < antes.total && depois.feitas === depois.total) msg = '🎉 Módulo ' + depois.nome + ' concluído! ' + msg;
     else if (!metaAntes && resumo.hoje >= perfil.meta_diaria) msg += ' Meta de hoje batida 🔥';
-    falar('Boa! Mais uma lição no bolso 💪'); aviso(msg);
-  } catch (err){ aviso('Não consegui salvar seu progresso. ' + traduz(err)); btn.disabled = false; }
+    moduloSel = null; pintaPainel(); fechaAula(); falar('Boa! Mais uma lição no bolso 💪'); aviso(msg);
+  } catch (err){ aviso('Não consegui salvar seu progresso. ' + traduz(err)); atualizaOk(); }
+}
+
+// ---- eventos da tela de aula
+$('auOk').addEventListener('click', acaoOk);
+$('auVolta').addEventListener('click', () => { if (aulaIdx > 0) mostraTela(aulaIdx - 1); });
+$('auX').addEventListener('click', () => { if (aulaIdx > 0 && aulaIdx < aula.telas.length - 1){ $('auSair').hidden = false; $('auSairNao').focus(); } else fechaAula(); });
+$('auSairSim').addEventListener('click', fechaAula);
+$('auSairNao').addEventListener('click', () => { $('auSair').hidden = true; $('auX').focus(); });
+$('auDica').addEventListener('click', () => { const t = aula.telas[aulaIdx]; if (t.dica) falaMascote(semMarcas(t.dica), 'neutro'); });
+dois($('auSolucao'), () => {
+  const t = aula.telas[aulaIdx], st = aulaCod[aulaIdx];
+  st.cod = { ...st.cod, ...t.solucao }; st.res = null; aulaOk[aulaIdx] = false; mostraAba(); pintaChecks(); rodaPreview(); atualizaOk();
+  falaMascote('Aqui está uma resposta. Agora clique em Verificar! 😉', 'neutro');
+}, 'Clique de novo para ver a solução');
+$('auConteudo').addEventListener('input', e => {
+  if (e.target.id !== 'auEd') return;
+  const st = aulaCod[aulaIdx]; st.cod[st.aba] = e.target.value; clearTimeout(aulaTmr); aulaTmr = setTimeout(rodaPreview, 450);
+  if (aulaOk[aulaIdx] || st.res){ aulaOk[aulaIdx] = false; st.res = null; pintaChecks(); atualizaOk(); }
+});
+$('auConteudo').addEventListener('change', e => { if (e.target.name === 'auop') atualizaOk(); });
+$('auConteudo').addEventListener('click', e => {
+  const tab = e.target.closest('.au-tab'), chip = e.target.closest('.au-chip');
+  if (tab){ aulaCod[aulaIdx].aba = tab.dataset.l; mostraAba(); $('auEd').focus(); }
+  else if (chip) insereChip(+chip.dataset.k);
+  else if (e.target.closest('#auReset')){
+    const st = aulaCod[aulaIdx]; st.cod = { ...st.ini }; st.res = null; aulaOk[aulaIdx] = false;
+    mostraAba(); pintaChecks(); rodaPreview(); atualizaOk(); falaMascote('Código reiniciado. Pode tentar de novo!', 'neutro');
+  }
+});
+$('auConteudo').addEventListener('keydown', e => {
+  if (e.target.id !== 'auEd') return;
+  if (e.key === 'Escape'){ aulaSoltaTab = true; return; }
+  if (e.key === 'Tab' && !aulaSoltaTab){ e.preventDefault(); const t = e.target; t.setRangeText('  ', t.selectionStart, t.selectionEnd, 'end'); t.dispatchEvent(new Event('input', { bubbles:true })); }
+  else if (e.key.length === 1) aulaSoltaTab = false;
+});
+document.addEventListener('keydown', e => {
+  if ($('aula').hidden || e.key !== 'Enter' || !(e.ctrlKey || e.metaKey)) return;
+  e.preventDefault(); if (!$('auOk').disabled) $('auOk').click();
 });
 
 /* =====================================================================
@@ -1734,7 +1894,8 @@ function linhaConsole(c, d){
 }
 addEventListener('message', e => {
   const d = e.data; if (!d || !d.cs) return;
-  if (e.source === $('lcRes').contentWindow){ if (d.cs === 2) resultadoLicao(d); else linhaConsole($('lcCons'), d); return; }
+  const au = $('auRes');
+  if (au && e.source === au.contentWindow){ if (d.cs === 2) resultadoAula(d); else if ($('auCons')) linhaConsole($('auCons'), d); return; }
   if (e.source === $('res').contentWindow && d.cs === 1) linhaConsole($('cons'), d);
 });
 function dois(btn, fn, msg, pula){
@@ -1794,8 +1955,7 @@ $('qzLista').addEventListener('click', e => { const c = e.target.closest('.pr-ca
 
 function abreDesafio(id){
   const d = desafios.find(x => x.id === id); if (!d) return;
-  ctxLicao = { desafio:true, voltar:'praticar' };
-  mostraLicao({ id:'desafio:' + d.id, titulo:d.titulo, estrelas:0, tipo:'p', conteudo:d.conteudo }, 'DESAFIO • ' + (d.nivel === 'facil' ? 'FÁCIL' : 'MÉDIO'), d.titulo);
+  abreAula({ id:'desafio:' + d.id, titulo:'Desafio: ' + d.titulo, conteudo:d.conteudo, estrelas:0, desafio:true, voltar:'praticar', feita:praticaFeita.has(d.id) });
 }
 
 // ---- Quiz
@@ -1932,6 +2092,7 @@ async function entrou(user){
   }
 }
 function saiu(avisar){
+  $('aula').hidden = true; document.documentElement.classList.remove('au-aberta');
   usuario = null; perfil = null; projetos = []; projAtual = null; feitas = new Set(); editorIniciado = false;
   $('res').srcdoc = ''; $('lgSenha').value = ''; $('lgNova').value = ''; $('lgNova2').value = '';
   telaDe('login'); modo('entrar');
