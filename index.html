@@ -344,6 +344,10 @@ html.au-aberta{overflow:hidden}
 .au-card .cons{height:92px}
 #auCons{margin:0;padding:8px 14px;overflow:auto;flex:1;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;display:block;border-radius:0}
 #auCons .e{color:#ff8a9b}#auCons .w{color:var(--amarelo)}
+.au-saida{margin:0;flex:1;min-height:320px;padding:16px;overflow:auto;background:#1b0f35;color:#e9dcff;font:15px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;display:block;border-radius:0}
+.au-saida .e{color:#ff8a9b}
+.au-rodaed{display:flex;gap:18px;align-items:center}
+.au-rodar{background:var(--amarelo);color:var(--texto);border:0;border-radius:8px;padding:6px 16px;font:800 14px Nunito,sans-serif}
 .au-chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .au-chip{background:transparent;border:1px solid #b79bff;border-radius:10px;padding:8px 14px;max-width:100%;text-align:left}
 .au-chip:hover{background:rgba(183,155,255,.2)}
@@ -839,6 +843,7 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
         <div><dt>CSS</dt><dd>Cores, espaçamento e layout, para a página ficar com a sua cara.</dd></div>
         <div><dt>JavaScript</dt><dd>Fazer a página reagir a cliques e ao que a pessoa digita.</dd></div>
         <div><dt>Git</dt><dd>Guardar o histórico do seu código e publicar no GitHub.</dd></div>
+        <div><dt>Python</dt><dd>Variáveis, decisões, listas e funções, com o código rodando no próprio navegador.</dd></div>
       </dl>
     </div>
   </section>
@@ -1244,6 +1249,13 @@ function realca(c){
       if (prop) return '<span class="p">'+prop+'</span>';
       return m;
     });
+}
+
+// realce simples para blocos de código Python nas lições
+function realcaPy(c){
+  const e = String(c).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+  return e.replace(/(#[^\n]*)|(f?"[^"\n]*"|f?'[^'\n]*')|\b(def|return|if|elif|else|for|in|while|and|or|not|True|False|None|print|range|len|import)\b/g,
+    (m, com, str, kw) => com ? '<span class="p">' + com + '</span>' : str ? '<span class="s">' + str + '</span>' : '<span class="k">' + kw + '</span>');
 }
 
 // traduz os erros do Supabase para português
@@ -1682,7 +1694,7 @@ $('pjCod').addEventListener('keydown', e => {   // Tab escreve 2 espaços em vez
    7) AULA em tela cheia, passo a passo (lições da trilha e desafios do Praticar)
       A gravação do progresso é feita pela função concluir_licao no banco.
    ===================================================================== */
-const ARQ = { html:'index.html', css:'style.css', js:'script.js' };
+const ARQ = { html:'index.html', css:'style.css', js:'script.js', py:'main.py' };
 let aula = null, aulaIdx = 0, aulaOk = [], aulaCod = [], aulaTent = [];
 let aulaRun = 0, aulaRecebeu = false, aulaTmr = null, aulaSoltaTab = false;
 const FRASES_OK = ['Mandou bem!', 'Isso aí!', 'Perfeito!', 'Muito bem!', 'É isso mesmo!'];
@@ -1697,7 +1709,7 @@ function blocoAula(b){
   if (b.t === 'titulo') return '<h3>' + md(b.v) + '</h3>';
   if (b.t === 'lista')  return '<ul class="lc-lista">' + b.v.map(i => '<li>' + md(i) + '</li>').join('') + '</ul>';
   if (b.t === 'dica')   return '<div class="lc-dica">' + ICO('bulb') + ' ' + md(b.v) + '</div>';
-  if (b.t === 'codigo') return (b.rotulo ? '<div class="lc-rot">' + esc(b.rotulo) + '</div>' : '') + '<pre class="lc-cod"><code>' + realca(b.v) + '</code></pre>';
+  if (b.t === 'codigo') return (b.rotulo ? '<div class="lc-rot">' + esc(b.rotulo) + '</div>' : '') + '<pre class="lc-cod"><code>' + (b.l === 'py' ? realcaPy(b.v) : realca(b.v)) + '</code></pre>';
   return '';
 }
 
@@ -1816,6 +1828,7 @@ function mostraTela(i){
   if (t.t === 'texto'){ montaTexto(t, box); falaMascote(i === 0 ? 'Vamos nessa?' : '', 'neutro'); }
   else if (t.t === 'escolha'){ montaEscolha(t, box); falaMascote(aulaOk[i] ? 'Já acertou esta! Clique em Continuar.' : 'Escolha uma resposta e clique em Verificar.', 'neutro'); }
   else if (t.t === 'codigo'){ montaCodigo(t, box); }
+  else if (t.t === 'python'){ montaPython(t, box); }
   else montaFim(box);
   atualizaOk();
   $('auMain').scrollTop = 0;
@@ -1826,7 +1839,7 @@ function atualizaOk(){
   const t = aula.telas[aulaIdx], b = $('auOk'), kbd = ' <span class="au-kbd">Ctrl+⏎</span>';
   let txt = 'Continuar', dis = false;
   if (t.t === 'escolha' && !aulaOk[aulaIdx]){ txt = 'Verificar'; dis = !document.querySelector('#auConteudo input[name=auop]:checked'); }
-  else if (t.t === 'codigo' && !aulaOk[aulaIdx]) txt = 'Verificar';
+  else if ((t.t === 'codigo' || t.t === 'python') && !aulaOk[aulaIdx]) txt = 'Verificar';
   else if (t.t === 'fim') txt = aula.desafio ? 'Concluir desafio' : aula.feita ? 'Voltar' : 'Concluir e ganhar +' + aula.estrelas + '';
   b.innerHTML = txt + kbd; b.disabled = dis;
 }
@@ -1835,6 +1848,7 @@ function acaoOk(){
   if (t.t === 'texto') return avanca();
   if (t.t === 'escolha') return aulaOk[aulaIdx] ? avanca() : verificaEscolha();
   if (t.t === 'codigo') return aulaOk[aulaIdx] ? avanca() : verificaCodigo();
+  if (t.t === 'python') return aulaOk[aulaIdx] ? avanca() : verificaPython();
   return concluiAula();
 }
 
@@ -1881,6 +1895,94 @@ function montaCodigo(t, box){
   mostraAba(); pintaChecks(); rodaPreview();
   falaMascote(aulaOk[i] ? 'Etapa concluída! Clique em Continuar.' : (t.chips && t.chips.length ? 'Clique no botão com o código para inseri-lo no editor.' : 'Escreva o código e clique em Verificar.'), 'neutro');
   if (aulaTent[i] >= 2 && !aulaOk[i]) $('auSolucao').hidden = false;
+}
+// ---- exercício de Python: roda no navegador (Pyodide) dentro de um Worker que pode ser parado
+const PY_URL = 'https://cdn.jsdelivr.net/pyodide/v0.28.0/full/';
+function pyWorkerMain(URL_PY){
+  importScripts(URL_PY + 'pyodide.js');
+  let py = null;
+  const pronto = loadPyodide({ indexURL: URL_PY }).then(p => { py = p; postMessage({ pronto:true }); }, () => { postMessage({ falhou:true }); });
+  self.onmessage = async ev => {
+    const d = ev.data; await pronto;
+    const linhas = []; let erro = null;
+    py.setStdout({ batched: l => linhas.push(l) }); py.setStderr({ batched: l => linhas.push(l) });
+    const g = py.globals.get('dict')();
+    try{ await py.runPythonAsync(d.codigo, { globals:g }); }
+    catch(e){ erro = String((e && e.message) || e).trim().split('\n').slice(-2).join('\n'); }
+    const txt = linhas.join('\n');
+    const r = d.testes.map(t => {
+      try{
+        if (t.t === 'saida') return t.rx ? new RegExp(t.rx, 'i').test(txt) : txt.toLowerCase().indexOf(String(t.contem).toLowerCase()) > -1;
+        if (t.t === 'var'){
+          if (!g.has(t.nome)) return false;
+          if (t.tipo) return py.runPython('type(' + t.nome + ').__name__', { globals:g }) === t.tipo;
+          let v = g.get(t.nome); if (v && v.toJs) v = v.toJs();
+          return JSON.stringify(v) === JSON.stringify(t.val);
+        }
+        if (t.t === 'fn'){
+          g.set('__a', py.toPy(t.args));
+          const out = py.runPython('import json\njson.dumps(' + t.nome + '(*__a), ensure_ascii=False)', { globals:g });
+          return JSON.stringify(JSON.parse(out)) === JSON.stringify(t.ret);
+        }
+      }catch(e){ return false; }
+      return false;
+    });
+    try{ g.destroy(); }catch(e){}
+    postMessage({ id:d.id, saida:txt, erro:erro, r:r });
+  };
+}
+let pyWorker = null, pyPronto = null, pyOk = false, pyId = 0, pyFila = Promise.resolve();
+function pyGarante(){
+  if (pyPronto) return pyPronto;
+  const w = new Worker(URL.createObjectURL(new Blob(['(' + pyWorkerMain.toString() + ')(' + JSON.stringify(PY_URL) + ')'], { type:'text/javascript' })));
+  pyWorker = w;
+  pyPronto = new Promise((ok, no) => { w.onmessage = ev => { if (ev.data && ev.data.pronto){ pyOk = true; ok(); } else if (ev.data && ev.data.falhou) no(new Error('falhou')); }; w.onerror = () => no(new Error('worker')); });
+  pyPronto.catch(() => { if (pyWorker === w){ pyWorker = null; pyPronto = null; pyOk = false; } try{ w.terminate(); }catch(e){} });
+  return pyPronto;
+}
+async function pyRoda(codigo, testes){
+  const nada = erro => ({ saida:'', erro, r:testes.map(() => false) });
+  try{ await Promise.race([pyGarante(), new Promise((_, no) => setTimeout(() => no(new Error('tempo')), 60000))]); }
+  catch(e){ if (pyWorker){ try{ pyWorker.terminate(); }catch(x){} } pyWorker = null; pyPronto = null; pyOk = false; return nada('Não consegui carregar o Python. Verifique sua internet e tente de novo.'); }
+  const w = pyWorker, id = ++pyId;
+  return new Promise(resolve => {
+    const fim = setTimeout(() => { w.terminate(); if (pyWorker === w){ pyWorker = null; pyPronto = null; pyOk = false; } resolve(nada('O programa demorou demais e foi parado. Será que tem um laço que nunca termina?')); }, 6000);
+    w.onmessage = ev => { const d = ev.data; if (!d || d.id !== id) return; clearTimeout(fim); resolve({ saida:d.saida, erro:d.erro, r:d.r }); };
+    w.postMessage({ id, codigo, testes });
+  });
+}
+async function rodaPython(codigo, testes){
+  const box = $('auSaida');
+  if (box){ box.textContent = pyOk ? 'Executando…' : 'Carregando o Python (só na primeira vez, pode levar alguns segundos)…'; }
+  const p = pyFila.then(() => pyRoda(codigo, testes || [])); pyFila = p.catch(() => {});
+  const r = await p, b = $('auSaida');
+  if (b && aula && aula.telas[aulaIdx] && aula.telas[aulaIdx].t === 'python'){
+    b.textContent = r.saida || (r.erro ? '' : '(o programa não mostrou nada)');
+    if (r.erro){ const e = document.createElement('span'); e.className = 'e'; e.textContent = (r.saida ? '\n' : '') + r.erro; b.appendChild(e); }
+  }
+  return r;
+}
+function montaPython(t, box){
+  const i = aulaIdx;
+  if (!aulaCod[i]){ const base = { py:'', ...(t.inicial || {}) }; aulaCod[i] = { cod:base, ini:{ ...base }, aba:'py', res:null }; }
+  box.innerHTML = `<div class="au-col larga"><div class="au-texto" tabindex="-1">${md(t.texto)}</div>
+    <div class="au-ed">
+      <section class="au-card" aria-label="Editor de código"><div class="au-tabs" role="tablist" id="auAbas"><button class="au-tab on" role="tab" data-l="py" type="button">main.py</button></div>
+        <textarea id="auEd" class="au-ta" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editor de código Python"></textarea>
+        <div class="au-rodaed"><button class="au-rodar" id="auRodar" type="button">Executar</button><button class="au-reset" id="auReset" type="button">↺ Reset</button></div></section>
+      <section class="au-card" aria-label="Saída do programa"><div class="au-tabs"><span class="au-tit2">Saída</span></div><pre id="auSaida" class="au-saida" aria-live="polite">Clique em Executar para ver a saída do seu programa.</pre></section>
+    </div>
+    <ul class="checks" id="auChecks" aria-live="polite"></ul></div>`;
+  mostraAba(); pintaChecks();
+  falaMascote(aulaOk[i] ? 'Etapa concluída! Clique em Continuar.' : 'Escreva o código, teste em Executar e depois clique em Verificar.', 'neutro');
+  if (aulaTent[i] >= 2 && !aulaOk[i]) $('auSolucao').hidden = false;
+}
+async function verificaPython(){
+  const i = aulaIdx, t = aula.telas[i], st = aulaCod[i]; aulaTent[i] = (aulaTent[i] || 0) + 1;
+  const id = ++aulaRun; $('auOk').disabled = true; $('auOk').textContent = 'Verificando…';
+  const r = await rodaPython(st.cod.py, t.testes.filter(x => x.t !== 'src'));
+  if (id !== aulaRun) return;
+  finalizaCodigo(id, r.r);
 }
 function mostraAba(){
   const st = aulaCod[aulaIdx]; $('auEd').value = st.cod[st.aba];
@@ -1930,7 +2032,7 @@ function finalizaCodigo(id, dr){
 
 // tela final
 function montaFim(box){
-  const nCod = aula.telas.filter(x => x.t === 'codigo').length, nEsc = aula.telas.filter(x => x.t === 'escolha').length;
+  const nCod = aula.telas.filter(x => x.t === 'codigo' || x.t === 'python').length, nEsc = aula.telas.filter(x => x.t === 'escolha').length;
   const resumoTxt = (nCod ? nCod + ' ' + plural(nCod, 'exercício de código', 'exercícios de código') : '') + (nCod && nEsc ? ' e ' : '') + (nEsc ? nEsc + ' ' + plural(nEsc, 'pergunta', 'perguntas') : '');
   const d = aula.desafio;
   box.innerHTML = `<div class="au-col" tabindex="-1"><svg class="au-fim-ico" aria-hidden="true"><use href="#lg"/></svg><h2 class="au-perg">${d ? 'Desafio completo!' : 'Lição completa!'}</h2>`
@@ -1981,8 +2083,10 @@ $('auConteudo').addEventListener('click', e => {
   const tab = e.target.closest('.au-tab'), chip = e.target.closest('.au-chip');
   if (tab){ aulaCod[aulaIdx].aba = tab.dataset.l; mostraAba(); $('auEd').focus(); }
   else if (chip) insereChip(+chip.dataset.k);
+  else if (e.target.closest('#auRodar')) rodaPython(aulaCod[aulaIdx].cod.py, []);
   else if (e.target.closest('#auReset')){
     const st = aulaCod[aulaIdx]; st.cod = { ...st.ini }; st.res = null; aulaOk[aulaIdx] = false;
+    if ($('auSaida')) $('auSaida').textContent = 'Clique em Executar para ver a saída do seu programa.';
     mostraAba(); pintaChecks(); rodaPreview(); atualizaOk(); falaMascote('Código reiniciado. Pode tentar de novo!', 'neutro');
   }
 });
