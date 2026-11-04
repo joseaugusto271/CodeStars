@@ -1727,7 +1727,14 @@ function blocoAula(b){
 
 // Roda DENTRO do iframe do exercício (por isso não pode usar nada de fora). Confere o resultado e avisa a página.
 function verificador(T, id){
+  // O próprio script verificador (e o JS do aluno) ficam no HTML da página. Se o aluno deixar uma tag aberta
+  // (ex.: <h1 abc> sem fechar), esses <script> viram FILHOS dela e o textContent passa a incluir o código dos
+  // testes (que contém o texto esperado). Como todos já executaram, removemos antes de conferir.
+  Array.prototype.slice.call(document.querySelectorAll('script')).forEach(function(s){ s.remove(); });
   function el(s){ try{ return document.querySelector(s); }catch(e){ return null; } }
+  function els(s){ try{ return Array.prototype.slice.call(document.querySelectorAll(s)); }catch(e){ return []; } }
+  // texto visível do elemento: ignora conteúdo de <style>, <noscript> e <template>
+  function texto(e){ var c = e.cloneNode(true); Array.prototype.slice.call(c.querySelectorAll('script,style,noscript,template')).forEach(function(x){ x.remove(); }); return c.textContent; }
   function norm(p, v){ var e = document.createElement('div'); document.body.appendChild(e); e.style.setProperty('border-style', 'solid'); e.style.setProperty(p, v); var r = getComputedStyle(e).getPropertyValue(p); e.remove(); return r; }
   var R = T.map(function(t){
     try{
@@ -1736,17 +1743,21 @@ function verificador(T, id){
         case 'existe':  return !!el(t.sel);
         case 'quantos': return document.querySelectorAll(t.sel).length >= t.min;
         case 'texto':
-          e = el(t.sel); if (!e) return false;
-          if (t.contem != null) return e.textContent.toLowerCase().indexOf(t.contem.toLowerCase()) > -1;
-          return e.textContent.trim().length > 0;
+          // vale se QUALQUER elemento que combine com o seletor atender (ex.: dois <a>, só o segundo tem o texto)
+          return els(t.sel).some(function(x){
+            var tx = texto(x);
+            if (t.contem != null) return tx.toLowerCase().indexOf(t.contem.toLowerCase()) > -1;
+            return tx.trim().length > 0;
+          });
         case 'attr':
-          e = el(t.sel); if (!e) return false; a = e.getAttribute(t.attr); if (a == null) return false;
-          if (t.contem != null) return a.indexOf(t.contem) > -1;
-          if (t.naoVazio) return a.trim().length > 0;
-          return true;
+          return els(t.sel).some(function(x){
+            var a = x.getAttribute(t.attr); if (a == null) return false;
+            if (t.contem != null) return a.indexOf(t.contem) > -1;
+            if (t.naoVazio) return a.trim().length > 0;
+            return true;
+          });
         case 'css':
-          e = el(t.sel); if (!e) return false;
-          return getComputedStyle(e).getPropertyValue(t.prop) === norm(t.prop, t.val);
+          return els(t.sel).some(function(x){ return getComputedStyle(x).getPropertyValue(t.prop) === norm(t.prop, t.val); });
         case 'colunas':
           e = el(t.sel); if (!e) return false;
           v = getComputedStyle(e).getPropertyValue('grid-template-columns').trim().split(/\s+/);
@@ -2012,7 +2023,7 @@ function rodaPreview(){
 }
 function insereChip(k){
   const t = aula.telas[aulaIdx], st = aulaCod[aulaIdx], ta = $('auEd'), v = chipVal(t.chips[k]);
-  const atual = ta.value, solo = /^\s*(<!--[\s\S]*-->|\/\*[\s\S]*\*\/|\/\/[^\n]*)?\s*$/.test(atual);
+  const atual = ta.value, solo = /^\s*(<!-{2}[\s\S]*-{2}>|\/\*[\s\S]*\*\/|\/\/[^\n]*)?\s*$/.test(atual);
   let novo, pos;
   if (solo){ novo = v + '\n'; pos = novo.length; }
   else {
