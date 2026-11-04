@@ -1899,6 +1899,41 @@ function verificaEscolha(){
 const chipRot = c => typeof c === 'string' ? c : c.r;
 const chipVal = c => typeof c === 'string' ? c : c.v;
 const testeSrc = (x, cod) => { try{ return new RegExp(x.rx, 'i').test(cod[x.em] || ''); }catch(e){ return false; } };
+// Confere o HTML DIGITADO (o navegador "conserta" tags abertas sozinho, então o DOM sozinho não mostra esse erro).
+// Devolve a mensagem do primeiro problema, ou null se as tags estão bem fechadas.
+const HTML_VAZIAS = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+const HTML_OPCIONAIS = new Set(['html','head','body']);      // tags que podem ficar sem fechar sem prejudicar o aluno
+const HTML_BRUTAS = ['script','style','textarea','title'];   // o conteúdo delas é texto puro, não é conferido
+function htmlProblema(src){
+  let s = String(src || '').replace(/<!-{2}[\s\S]*?-{2}>/g, '');                  // tira comentários HTML
+  if (/<!-{2}/.test(s)) return 'Um comentário ficou sem fechar (falta o -->).';
+  const MAL = 'Uma tag está mal formada: falta um ">" ou uma aspa.';
+  const re = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)((?:"[^"]*"|'[^']*'|[^'">])*)>/g, pilha = [];
+  let m, ult = 0;
+  while ((m = re.exec(s))){
+    if (/<\/?[a-zA-Z]/.test(s.slice(ult, m.index))) return MAL;
+    ult = re.lastIndex;
+    const nome = m[2].toLowerCase();
+    if (!m[1]){                                                                    // tag de abertura
+      if (HTML_VAZIAS.has(nome) || /\/\s*$/.test(m[3])) continue;
+      pilha.push(nome);
+      if (HTML_BRUTAS.includes(nome)){
+        const rel = s.slice(re.lastIndex).search(new RegExp('</' + nome + '[\\s>/]', 'i'));
+        if (rel < 0) return 'A tag <' + nome + '> não foi fechada. Falta o </' + nome + '>.';
+        re.lastIndex += rel; ult = re.lastIndex;
+      }
+    } else {                                                                       // tag de fechamento
+      const k = pilha.lastIndexOf(nome);
+      if (k < 0) return 'Sobrou um </' + nome + '> sem a tag de abertura <' + nome + '>.';
+      const aberta = pilha.slice(k + 1).find(n => !HTML_OPCIONAIS.has(n));
+      if (aberta) return 'A tag <' + aberta + '> não foi fechada. Falta o </' + aberta + '>.';
+      pilha.length = k;
+    }
+  }
+  if (/<\/?[a-zA-Z]/.test(s.slice(ult))) return MAL;
+  const aberta = pilha.find(n => !HTML_OPCIONAIS.has(n));
+  return aberta ? 'A tag <' + aberta + '> não foi fechada. Falta o </' + aberta + '>.' : null;
+}
 function montaCodigo(t, box){
   const i = aulaIdx;
   if (!aulaCod[i]){
@@ -2014,7 +2049,8 @@ function mostraAba(){
 function pintaChecks(){
   const t = aula.telas[aulaIdx], st = aulaCod[aulaIdx], ul = $('auChecks'); if (!ul) return;
   ul.innerHTML = st.res ? t.testes.map((x, k) => { const r = st.res[k];
-    return `<li class="chk ${r ? 'ok' : 'no'}"><span class="ci" aria-hidden="true">${r ? '✓' : '✗'}</span><span>${esc(x.msg)}</span><span class="sr">${r ? ' (feito)' : ' (ainda falta)'}</span></li>`; }).join('') : '';
+    return `<li class="chk ${r ? 'ok' : 'no'}"><span class="ci" aria-hidden="true">${r ? '✓' : '✗'}</span><span>${esc(x.msg)}</span><span class="sr">${r ? ' (feito)' : ' (ainda falta)'}</span></li>`; }).join('')
+    + (st.prob ? `<li class="chk no"><span class="ci" aria-hidden="true">✗</span><span>${esc(st.prob)}</span><span class="sr"> (ainda falta)</span></li>` : '') : '';
 }
 function rodaPreview(){
   const t = aula && aula.telas[aulaIdx], f = $('auRes'); if (!t || t.t !== 'codigo' || !f) return;
@@ -2046,10 +2082,11 @@ function finalizaCodigo(id, dr){
   if (id !== aulaRun) return;
   const i = aulaIdx, t = aula.telas[i], st = aulaCod[i]; let k = 0;
   st.res = t.testes.map(x => x.t === 'src' ? testeSrc(x, st.cod) : !!dr[k++]);
+  st.prob = (t.t === 'codigo' && (t.abas || []).includes('html')) ? htmlProblema(st.cod.html) : null;   // tag aberta sem fechar etc.
   pintaChecks();
   const falhou = t.testes.filter((_, j) => !st.res[j]);
-  if (!falhou.length){ aulaOk[i] = true; $('auSolucao').hidden = true; falaMascote(sorteia(FRASES_OK), 'feliz'); }
-  else { aulaOk[i] = false; falaMascote('Quase! Ainda falta: ' + semMarcas(falhou[0].msg), 'triste'); if (aulaTent[i] >= 2) $('auSolucao').hidden = false; }
+  if (!falhou.length && !st.prob){ aulaOk[i] = true; $('auSolucao').hidden = true; falaMascote(sorteia(FRASES_OK), 'feliz'); }
+  else { aulaOk[i] = false; falaMascote('Quase! Ainda falta: ' + semMarcas(falhou.length ? falhou[0].msg : st.prob), 'triste'); if (aulaTent[i] >= 2) $('auSolucao').hidden = false; }
   atualizaOk();
 }
 
