@@ -391,26 +391,25 @@ html.au-aberta{overflow:hidden}
 .sec2:disabled{opacity:.7;cursor:wait}
 /* ===== PROJETO FINAL ===== */
 #proj{position:fixed;inset:0;z-index:41;display:flex;flex-direction:column;background:var(--roxo)}
-.pj-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:20px;padding:20px;overflow:auto}
+.pj-main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(280px,340px) 1fr;gap:20px;padding:20px;overflow:auto}
 .pj-lado{padding:22px;overflow:auto;align-self:start;max-height:100%}
 .pj-lado h2{font:700 24px/1.2 'Chakra Petch',sans-serif;margin:4px 0 10px}
 .pj-lado h3{font:700 16px 'Chakra Petch',sans-serif;margin:18px 0 8px}
 .pj-lado p{margin:0;line-height:1.55}
 .pj-lado ul{margin:0;padding-left:20px;line-height:1.7}
-.pj-edit{display:flex;flex-direction:column;min-height:340px}
-.pj-abas{display:flex;gap:8px;margin-bottom:10px}
-.pj-abas button{background:rgba(255,255,255,.1);border:2px solid transparent;border-radius:10px;padding:8px 16px;font:700 15px 'Chakra Petch',sans-serif}
-.pj-abas button.on{background:var(--esc);border-color:var(--amarelo)}
-#pjCod{flex:1;min-height:300px;resize:none;background:#2a1148;color:#e9dcff;border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:16px;font:15px/1.7 'Chakra Petch',monospace;tab-size:2;transition:border-color .2s}
-#pjCod:focus{outline:none;border-color:var(--amarelo)}
-#pjVer{flex:1;min-height:300px;border:0;border-radius:14px;background:#fff}
+.pj-edit{display:grid;grid-template-columns:1fr 1fr;gap:16px;min-height:380px;align-items:stretch}
+.pj-edit.sem{grid-template-columns:1fr}
+#pjCod{min-height:340px}
+#pjVer{flex:1;min-height:340px;width:100%;border:0;background:#fff}
+.au-tabs .au-rodar{margin:6px 10px 6px auto}
+@media (max-width:760px){.pj-edit{grid-template-columns:1fr}}
 #pjInfo{font-size:14px;color:var(--claro);font-weight:700}
 .pj-res{margin-top:20px;padding-top:18px;border-top:2px dashed #cfc9ad;animation:aparece .5s cubic-bezier(.2,.8,.2,1) both}
 .pj-nota{display:flex;align-items:center;gap:14px;margin-bottom:10px}
 .pj-nota b{display:grid;place-items:center;width:74px;height:74px;border-radius:50%;font:700 28px 'Chakra Petch',sans-serif;background:#ffd9df;color:#8a1b2d;flex:none}
 .pj-res.ok .pj-nota b{background:#c9f7e0;color:#0b5a2b;animation:pula .6s}
 .pj-nota strong{font:700 19px/1.25 'Chakra Petch',sans-serif}
-@media (max-width:860px){.pj-main{grid-template-columns:1fr}.pj-lado{align-self:stretch}}
+@media (max-width:1100px){.pj-main{grid-template-columns:1fr}.pj-lado{align-self:stretch}}
 .rm{background:none;border:0;color:#8a1f9c;font-weight:800;text-decoration:underline;padding:4px 0}
 .campo{margin-bottom:16px}
 .campo label{display:block;font-weight:800;margin-bottom:6px}
@@ -964,7 +963,9 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
             <label class="opt"><input type="radio" name="meta" value="1"><span>1</span></label><label class="opt"><input type="radio" name="meta" value="2"><span>2</span></label><label class="opt"><input type="radio" name="meta" value="3"><span>3</span></label><label class="opt"><input type="radio" name="meta" value="5"><span>5</span></label>
           </fieldset>
           <label class="sw"><input type="checkbox" id="lembrete"> Receber lembrete diário</label>
-          <div class="campo" id="horaBox" hidden><label for="hora">Horário do lembrete</label><input id="hora" type="time" value="19:00"></div>
+          <div class="campo" id="horaBox" hidden><label for="hora">Horário do lembrete</label><input id="hora" type="time" value="19:00">
+            <p class="dica">Você recebe um e-mail todo dia nesse horário, se ainda não tiver estudado. O horário vale depois de salvar.</p>
+            <button class="sec2" id="lembreteTeste" type="button" style="margin-top:10px">Enviar e-mail de teste</button></div>
         </div>
         <div class="sc"><h2>Preferências</h2>
           <div class="campo"><label for="idioma">Idioma</label><select id="idioma"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option></select></div>
@@ -1085,7 +1086,7 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
       <details class="faq"><summary>Como o ranking é calculado?</summary><p>O Ranking soma todas as estrelas que você ganhou nas lições. Em caso de empate, fica na frente quem criou a conta primeiro. No Painel você também vê o ranking da semana.</p></details>
       <details class="faq"><summary>Meus projetos ficam salvos?</summary><p>Sim. O que você escreve em Projetos é salvo automaticamente na sua conta (procure o aviso <svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg> Salvo). Você pode abrir de qualquer computador.</p></details>
       <details class="faq"><summary>Esqueci minha senha. Como recupero?</summary><p>Na tela de entrada, clique em <strong>Esqueci minha senha</strong> e digite o seu e-mail: enviaremos um link para criar uma nova senha. Se você entra com o Google, não existe senha do CodeStars; use o botão <strong>Continuar com Google</strong>.</p></details>
-      <details class="faq"><summary>O lembrete diário e o idioma já funcionam?</summary><p>O horário do lembrete e o idioma são salvos no seu perfil, mas ainda não enviamos notificações nem traduzimos os textos do site. Esses recursos ainda estão em construção.</p></details>
+      <details class="faq"><summary>Como funciona o lembrete diário?</summary><p>Ligue o <strong>lembrete diário</strong> no seu perfil e escolha o horário. Todo dia nesse horário você recebe um e-mail avisando da sua meta, a não ser que já tenha estudado naquele dia. O idioma salvo no perfil ainda não traduz os textos do site.</p></details>
       <details class="faq"><summary>Como apago minha conta?</summary><p>Ainda não existe um botão para isso. Envie uma mensagem pelo formulário aqui embaixo (assunto <strong>Outro</strong>) pedindo a exclusão da conta.</p></details>
     </div>
 
@@ -1171,13 +1172,16 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
       <ul id="pjReq"></ul>
       <div class="pj-res" id="pjRes" hidden role="status" aria-live="polite"></div>
     </section>
-    <section class="pj-edit" aria-label="Seu código">
-      <div class="pj-abas" role="tablist">
-        <button type="button" id="pjAbaCod" class="on" role="tab">Código</button>
-        <button type="button" id="pjAbaVer" role="tab">Resultado</button>
+    <section class="pj-edit" id="pjEdit" aria-label="Seu código e o resultado">
+      <div class="au-card">
+        <div class="au-tabs"><span class="au-tit2" id="pjArq">index.html</span></div>
+        <textarea id="pjCod" class="au-ta" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Escreva seu código aqui"></textarea>
       </div>
-      <textarea id="pjCod" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Escreva seu código aqui"></textarea>
-      <iframe id="pjVer" sandbox="allow-scripts" title="Resultado do seu código" hidden></iframe>
+      <div class="au-card" id="pjResBox">
+        <div class="au-tabs"><span class="au-tit2">Resultado</span><button class="au-rodar" id="pjRodar" type="button" hidden>Executar</button></div>
+        <iframe id="pjVer" sandbox="allow-scripts" title="Resultado do seu código"></iframe>
+        <pre id="pjSaida" class="au-saida" hidden aria-live="polite"></pre>
+      </div>
     </section>
   </div>
   <div class="au-bar">
@@ -1618,11 +1622,10 @@ function linhaProjeto(m){
   return `<button class="row ${s}" data-s="${s}" data-proj="${esc(m.id)}"><span class="n">${ICO('trophy')}</span><span class="t">Projeto final: ${esc(m.proj.titulo)}</span>${nota}<span class="pill p">PROJETO</span>${fim}</button>`;
 }
 
-function pjAba(a){
-  const ver = a === 'ver';
-  $('pjAbaCod').classList.toggle('on', !ver); $('pjAbaVer').classList.toggle('on', ver);
-  $('pjCod').hidden = ver; $('pjVer').hidden = !ver;
-  if (ver) $('pjVer').srcdoc = $('pjCod').value;
+let pjTmr = null;
+function pjAtualiza(){   // o resultado acompanha o que a pessoa digita
+  if (!pjAtual || (pjAtual.proj.tipo || 'web') !== 'web') return;
+  $('pjVer').srcdoc = $('pjCod').value;
 }
 function abreProjeto(modId){
   const m = modulos().find(x => x.id === modId); if (!m || !m.proj) return;
@@ -1634,7 +1637,12 @@ function abreProjeto(modId){
   $('pjInfo').textContent = 'Passa com nota maior que ' + NOTA_MINIMA + ' (de 0 a 10).';
   let rasc = null; try{ rasc = localStorage.getItem(pjChave(m.id)); }catch(e){}
   $('pjCod').value = rasc != null ? rasc : p.base;
-  $('pjAbaVer').hidden = p.tipo === 'texto'; pjAba('cod');
+  const tipo = p.tipo || 'web';
+  $('pjArq').textContent = tipo === 'python' ? 'main.py' : tipo === 'texto' ? 'comandos.txt' : 'index.html';
+  $('pjEdit').classList.toggle('sem', tipo === 'texto'); $('pjResBox').hidden = tipo === 'texto';
+  $('pjVer').hidden = tipo !== 'web'; $('pjSaida').hidden = tipo !== 'python'; $('pjRodar').hidden = tipo !== 'python';
+  $('pjSaida').textContent = 'Clique em Executar para ver a saída do seu programa.';
+  pjAtualiza();
   $('pjRes').hidden = true; $('pjRes').className = 'pj-res';
   $('pjEnviar').disabled = false; $('pjEnviar').textContent = 'Enviar para a correção';
   $('proj').hidden = false; document.documentElement.classList.add('au-aberta'); $('pjCod').focus();
@@ -1676,14 +1684,18 @@ async function enviaProjeto(){
   btn.disabled = false; pjBusy = false;
 }
 $('pjX').addEventListener('click', fechaProjeto);
-$('pjAbaCod').addEventListener('click', () => pjAba('cod'));
-$('pjAbaVer').addEventListener('click', () => pjAba('ver'));
+$('pjRodar').addEventListener('click', () => rodaPython($('pjCod').value, [], 'pjSaida'));
 $('pjEnviar').addEventListener('click', enviaProjeto);
 $('pjReset').addEventListener('click', () => {
   if (!pjAtual || !confirm('Voltar ao código inicial? O que você escreveu será apagado.')) return;
   $('pjCod').value = pjAtual.proj.base; try{ localStorage.removeItem(pjChave(pjAtual.id)); }catch(e){}
+  pjAprovado = false; $('pjRes').hidden = true; $('pjRes').className = 'pj-res';
+  $('pjEnviar').disabled = false; $('pjEnviar').textContent = 'Enviar para a correção'; pjAtualiza();
 });
-$('pjCod').addEventListener('input', () => { if (pjAtual) try{ localStorage.setItem(pjChave(pjAtual.id), $('pjCod').value); }catch(e){} });
+$('pjCod').addEventListener('input', () => {
+  if (pjAtual) try{ localStorage.setItem(pjChave(pjAtual.id), $('pjCod').value); }catch(e){}
+  clearTimeout(pjTmr); pjTmr = setTimeout(pjAtualiza, 350);
+});
 $('pjCod').addEventListener('keydown', e => {   // Tab escreve 2 espaços em vez de pular o foco
   if (e.key !== 'Tab' || e.shiftKey) return; e.preventDefault();
   const t = e.target, a = t.selectionStart; t.value = t.value.slice(0, a) + '  ' + t.value.slice(t.selectionEnd); t.selectionStart = t.selectionEnd = a + 2;
@@ -1951,12 +1963,12 @@ async function pyRoda(codigo, testes){
     w.postMessage({ id, codigo, testes });
   });
 }
-async function rodaPython(codigo, testes){
-  const box = $('auSaida');
+async function rodaPython(codigo, testes, alvo){
+  const idSaida = alvo || 'auSaida', box = $(idSaida);
   if (box){ box.textContent = pyOk ? 'Executando…' : 'Carregando o Python (só na primeira vez, pode levar alguns segundos)…'; }
   const p = pyFila.then(() => pyRoda(codigo, testes || [])); pyFila = p.catch(() => {});
-  const r = await p, b = $('auSaida');
-  if (b && aula && aula.telas[aulaIdx] && aula.telas[aulaIdx].t === 'python'){
+  const r = await p, b = $(idSaida);
+  if (b && (alvo ? pjAtual : (aula && aula.telas[aulaIdx] && aula.telas[aulaIdx].t === 'python'))){
     b.textContent = r.saida || (r.erro ? '' : '(o programa não mostrou nada)');
     if (r.erro){ const e = document.createElement('span'); e.className = 'e'; e.textContent = (r.saida ? '\n' : '') + r.erro; b.appendChild(e); }
   }
@@ -2166,6 +2178,12 @@ $('remover').addEventListener('click', () => {
 $('nome').addEventListener('input', () => { $('nome').classList.remove('erro'); $('errnome').textContent = ''; if (!rascunho.avatar_url && !rascunho.fotoBlob) pinta($('grande'), { nome: $('nome').value }); });
 $('email').addEventListener('input', () => { $('email').classList.remove('erro'); $('erremail').textContent = ''; });
 $('lembrete').addEventListener('change', () => { $('horaBox').hidden = !$('lembrete').checked; });
+$('lembreteTeste').addEventListener('click', async () => {
+  const b = $('lembreteTeste'); b.disabled = true; b.textContent = 'Enviando…';
+  try{ await chamaFuncao('enviar-lembretes', { teste:true }); aviso('E-mail de teste enviado. Olhe a caixa de entrada e o spam.'); }
+  catch(err){ aviso(err.message || 'Não consegui enviar o teste.'); }
+  b.disabled = false; b.textContent = 'Enviar e-mail de teste';
+});
 document.querySelectorAll('input[name=tema]').forEach(r => r.addEventListener('change', () => aplicaTema(r.value)));
 
 function erroSenhaP(m, id){ $('errsenha').textContent = m; $('detSenha').open = true; $(id).focus(); return false; }
@@ -2513,6 +2531,19 @@ async function carregaRankingGeral(){
 }
 
 // ---- Ajuda
+// chama uma função do Supabase (Edge Function) como o aluno logado
+async function chamaFuncao(nome, corpo){
+  const { data:{ session } } = await sb.auth.getSession();
+  if (!session) throw new Error('Entre na sua conta de novo e tente outra vez.');
+  const r = await fetch(URL_LIMPA + '/functions/v1/' + nome, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + session.access_token, 'apikey':SUPABASE_ANON_KEY.trim() },
+    body: JSON.stringify(corpo), signal: AbortSignal.timeout(30000)
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.erro || 'Não consegui enviar o e-mail agora.');
+  return d;
+}
 const ASSUNTOS = { duvida:'Dúvida', problema:'Problema técnico', sugestao:'Sugestão', outro:'Outro' };
 document.querySelectorAll('[data-aj]').forEach(b => b.addEventListener('click', () => $(b.dataset.aj).scrollIntoView({ behavior: rmov ? 'auto' : 'smooth', block:'start' })));
 $('ajMsg').addEventListener('input', () => { $('ajConta').textContent = $('ajMsg').value.length + '/1000'; $('ajErro').textContent = ''; });
@@ -2529,16 +2560,21 @@ $('ajForm').addEventListener('submit', async e => {
   const msg = $('ajMsg').value.trim(), er = $('ajErro'); er.textContent = '';
   if (msg.length < 10){ er.textContent = 'Escreva pelo menos 10 caracteres para a gente entender.'; $('ajMsg').focus(); return; }
   const btn = $('ajEnviar'); btn.disabled = true; btn.textContent = 'Enviando…';
-  const { error } = await sb.from('mensagens_ajuda').insert({ user_id: usuario.id, assunto: $('ajAssunto').value, mensagem: msg });
-  btn.disabled = false; btn.textContent = 'Enviar mensagem';
+  const assunto = $('ajAssunto').value;
+  const { error } = await sb.from('mensagens_ajuda').insert({ user_id: usuario.id, assunto, mensagem: msg });
   if (error){
+    btn.disabled = false; btn.textContent = 'Enviar mensagem';
     er.textContent = /relation|schema cache|does not exist|could not find/i.test(error.message || '')
       ? 'O formulário ainda não foi instalado no banco (rode o praticar-ranking-ajuda.sql no Supabase).' : traduz(error);
     return;
   }
+  let enviado = true;   // a mensagem já está salva; agora ela também vai por e-mail
+  try{ await chamaFuncao('fale-conosco', { assunto, mensagem: msg }); }catch(err){ enviado = false; console.warn(err); }
+  btn.disabled = false; btn.textContent = 'Enviar mensagem';
   $('ajMsg').value = ''; $('ajConta').textContent = '0/1000';
-  aviso('Mensagem enviada! Obrigado por escrever.'); carregaMensagens();
+  aviso(enviado ? 'Mensagem enviada! Obrigado por escrever.' : 'Mensagem salva, mas o e-mail não saiu agora. Vamos ver por aqui.'); carregaMensagens();
 });
+
 
 /* =====================================================================
    10) ENTRAR / SAIR  (reage ao Supabase Auth)
