@@ -698,7 +698,40 @@ function verificaEscolha(){
 // exercício de código: editor à esquerda, resultado à direita
 const chipRot = c => typeof c === 'string' ? c : c.r;
 const chipVal = c => typeof c === 'string' ? c : c.v;
-const testeSrc = (x, cod) => { try{ return new RegExp(x.rx, 'i').test(cod[x.em] || ''); }catch(e){ return false; } };
+// Devolve o código SEM os comentários (respeitando textos entre aspas, onde // ou # não são comentário).
+// Sem isso, um comentário como "// Escreva seu if / else aqui" (que vem no código inicial) faz o teste achar "if" e "else".
+function semComentarios(txt, em){
+  const s = String(txt || ''), n = s.length;
+  if (em === 'html') return s.replace(/<!-{2}[\s\S]*?(?:-{2}>|$)/g, ' ');
+  if (em !== 'js' && em !== 'css' && em !== 'py') return s;
+  const bloco = em === 'js' || em === 'css', barras = em === 'js', hash = em === 'py';
+  let out = '', i = 0;
+  while (i < n){
+    const c = s[i], d = s[i + 1];
+    if (bloco && c === '/' && d === '*'){ const f = s.indexOf('*/', i + 2); i = f < 0 ? n : f + 2; out += ' '; continue; }
+    if ((barras && c === '/' && d === '/') || (hash && c === '#')){ while (i < n && s[i] !== '\n') i++; continue; }
+    if (c === '"' || c === "'" || (em === 'js' && c === '`')){
+      const tri = hash && s.substr(i, 3) === c.repeat(3), q = tri ? c.repeat(3) : c;
+      let j = i + q.length;
+      while (j < n && !s.startsWith(q, j)){
+        if (s[j] === '\\'){ j += 2; continue; }
+        if (!tri && c !== '`' && s[j] === '\n') break;           // texto simples não atravessa linha
+        j++;
+      }
+      const fim = Math.min(n, j + (s.startsWith(q, j) ? q.length : 0));
+      out += s.slice(i, fim); i = fim; continue;
+    }
+    out += c; i++;
+  }
+  return out;
+}
+// O teste está procurando o próprio comentário? (lições que ensinam comentários) -> aí vale o texto cru
+const procuraComentario = (rx, em) => { const r = String(rx).replace(/\\/g, '');
+  return em === 'html' ? /<!-|-->/.test(r) : em === 'py' ? /#/.test(r) : /\/\*|\*\/|\/\//.test(r); };
+const testeSrc = (x, cod) => { try{
+  const t = cod[x.em] || '';
+  return new RegExp(x.rx, 'i').test(x.comentarios || procuraComentario(x.rx, x.em) ? t : semComentarios(t, x.em));
+}catch(e){ return false; } };
 // Confere o HTML DIGITADO (o navegador "conserta" tags abertas sozinho, então o DOM sozinho não mostra esse erro).
 // Devolve a mensagem do primeiro problema, ou null se as tags estão bem fechadas.
 const HTML_VAZIAS = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
