@@ -1,4 +1,4 @@
-#CodeStars
+# CodeStars
 
 > **CodeStars** é uma plataforma web gamificada focada no ensino prático e de alto nível de programação (HTML, CSS e JavaScript), desenvolvida como Trabalho de Conclusão de Curso (TCC).
 
