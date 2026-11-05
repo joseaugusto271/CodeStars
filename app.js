@@ -734,6 +734,70 @@ function htmlProblema(src){
   const aberta = pilha.find(n => !HTML_OPCIONAIS.has(n));
   return aberta ? 'A tag <' + aberta + '> não foi fechada. Falta o </' + aberta + '>.' : null;
 }
+// Confere o CSS DIGITADO. O navegador perdoa o ; da última declaração de um bloco e o } que falta no fim do arquivo
+// (fecha sozinho), então getComputedStyle sozinho não mostra esses erros. Aqui TODA declaração precisa terminar em ;
+// e TODO bloco precisa de }. Devolve a mensagem do primeiro problema, ou null se está tudo certo.
+// "color: red font-size: 40px" (faltou o ; entre duas declarações): devolve o trecho da 1ª declaração, ou null
+function cssFaltaPontoVirgula(seg){
+  if (/^\s*@/.test(seg)) return null;                                                  // @import, @charset... não são declarações
+  let m = seg.replace(/"[^"]*"|'[^']*'/g, x => 'x'.repeat(x.length)), ant;             // ignora o que está entre aspas e dentro de ( )
+  do { ant = m; m = m.replace(/\([^()]*\)/g, x => 'x'.repeat(x.length)); } while (m !== ant);
+  const c1 = m.indexOf(':'); if (c1 < 0) return null;
+  const r = /\s([-a-zA-Z][-\w]*)\s*:/g; r.lastIndex = c1;
+  const f = r.exec(m);
+  return f ? seg.slice(0, f.index) : null;
+}
+function cssProblema(src){
+  const s = String(src || ''), n = s.length, pilha = [];
+  const resume = t => { t = t.replace(/\s+/g, ' ').trim(); return t.length > 40 ? t.slice(0, 40) + '…' : t; };
+  let seg = '', par = 0, i = 0;                       // seg = texto desde o último { ; ou }   |   par = profundidade de ( )
+  while (i < n){
+    const c = s[i];
+    if (c === '/' && s[i + 1] === '*'){                // comentário /* ... */
+      const f = s.indexOf('*/', i + 2);
+      if (f < 0) return 'Um comentário ficou sem fechar (falta o */).';
+      i = f + 2; seg += ' '; continue;
+    }
+    if (c === '"' || c === "'"){                       // texto entre aspas: ; { } dentro dele não contam
+      let j = i + 1;
+      while (j < n && s[j] !== c && s[j] !== '\n'){ if (s[j] === '\\') j++; j++; }
+      if (j >= n || s[j] !== c) return 'Faltou fechar uma aspa (' + c + ').';
+      seg += s.slice(i, j + 1); i = j + 1; continue;
+    }
+    if (c === '\\'){ seg += s.slice(i, i + 2); i += 2; continue; }
+    if (c === '(') par++; else if (c === ')' && par > 0) par--;
+    if (par === 0 && c === '{'){ pilha.push(resume(seg)); seg = ''; }                        // abre bloco
+    else if (par === 0 && c === ';'){                                                       // declaração terminada
+      const antes = cssFaltaPontoVirgula(seg);
+      if (antes) return 'Falta o ; no final de "' + resume(antes) + '".';
+      seg = '';
+    }
+    else if (par === 0 && c === '}'){                                                       // fecha bloco
+      if (seg.trim()) return 'Falta o ; no final de "' + resume(seg) + '".';
+      if (!pilha.length) return 'Sobrou um } sem o { de abertura.';
+      pilha.pop(); seg = '';
+    } else seg += c;
+    i++;
+  }
+  if (par > 0) return 'Faltou fechar um parêntese ")".';
+  if (pilha.length){
+    if (seg.trim()) return 'Falta o ; no final de "' + resume(seg) + '".';
+    return 'Falta fechar o bloco "' + pilha[pilha.length - 1] + ' {" com }.';
+  }
+  return null;
+}
+// Junta as conferências do código digitado (HTML, CSS e <style> dentro do HTML) numa mensagem só
+function problemaCodigo(t, cod){
+  if (!t || t.t !== 'codigo') return null;
+  const abas = t.abas || []; let p = null;
+  if (abas.includes('html')) p = htmlProblema(cod.html);
+  if (!p && abas.includes('css')) p = cssProblema(cod.css);
+  if (!p && abas.includes('html')){
+    const re = /<style\b[^>]*>([\s\S]*?)<\/style\s*>/gi; let m;
+    while (!p && (m = re.exec(cod.html || ''))) p = cssProblema(m[1]);
+  }
+  return p;
+}
 function montaCodigo(t, box){
   const i = aulaIdx;
   if (!aulaCod[i]){
@@ -882,7 +946,7 @@ function finalizaCodigo(id, dr){
   if (id !== aulaRun) return;
   const i = aulaIdx, t = aula.telas[i], st = aulaCod[i]; let k = 0;
   st.res = t.testes.map(x => x.t === 'src' ? testeSrc(x, st.cod) : !!dr[k++]);
-  st.prob = (t.t === 'codigo' && (t.abas || []).includes('html')) ? htmlProblema(st.cod.html) : null;   // tag aberta sem fechar etc.
+  st.prob = problemaCodigo(t, st.cod);   // tag aberta sem fechar, falta de ; ou } etc.
   pintaChecks();
   const falhou = t.testes.filter((_, j) => !st.res[j]);
   if (!falhou.length && !st.prob){ aulaOk[i] = true; $('auSolucao').hidden = true; falaMascote(sorteia(FRASES_OK), 'feliz'); }
