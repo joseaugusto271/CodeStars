@@ -1,4 +1,4 @@
-# 🌟 CodeStars
+#CodeStars
 
 > **CodeStars** é uma plataforma web gamificada focada no ensino prático e de alto nível de programação (HTML, CSS e JavaScript), desenvolvida como Trabalho de Conclusão de Curso (TCC).
 
@@ -8,7 +8,7 @@ O grande diferencial do projeto é a integração com um **Tutor Socrático base
 
 ---
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 - 💻 **IDE Interativa (Split-Screen):** Ambiente de desenvolvimento com editor de código de um lado e renderização visual em tempo real do outro.
 - 🤖 **Tutor Socrático por IA:** Integração com o Google Gemini para fornecer dicas pedagógicas e reflexivas em momentos de dificuldade.
@@ -18,7 +18,7 @@ O grande diferencial do projeto é a integração com um **Tutor Socrático base
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 **Front-end**
 - HTML5, CSS3, JavaScript
@@ -35,7 +35,7 @@ O grande diferencial do projeto é a integração com um **Tutor Socrático base
 
 ---
 
-## 🚀 Como executar o projeto localmente
+## Como executar o projeto localmente
 
 Como o projeto já está hospedado no GitHub Pages, você pode acessá-lo diretamente pelo link acima. Caso deseje rodar uma versão local para desenvolvimento, siga os passos:
 
