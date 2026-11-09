@@ -507,7 +507,7 @@ $('pjCod').addEventListener('keydown', e => {   // Tab escreve 2 espaços em vez
       A gravação do progresso é feita pela função concluir_licao no banco.
    ===================================================================== */
 const ARQ = { html:'index.html', css:'style.css', js:'script.js', py:'main.py' };
-let aula = null, aulaIdx = 0, aulaOk = [], aulaCod = [], aulaTent = [];
+let aula = null, aulaIdx = 0, aulaOk = [], aulaCod = [], aulaTent = [], aulaNota = [];
 let aulaRun = 0, aulaRecebeu = false, aulaTmr = null, aulaSoltaTab = false;
 const FRASES_OK = ['Mandou bem!', 'Isso aí!', 'Perfeito!', 'Muito bem!', 'É isso mesmo!'];
 const sorteia = a => a[Math.floor(Math.random() * a.length)];
@@ -617,7 +617,7 @@ function abreAula(cfg){
     ? { t:'dica', v:'**As lições ainda não foram instaladas no banco.** No Supabase, abra o **SQL Editor**, rode o arquivo **licoes-conteudo.sql** e recarregue esta página (Ctrl + Shift + R).' }
     : { t:'texto', v:'O conteúdo desta lição ainda vai ser adicionado. Por enquanto, termine a lição para testar o seu progresso, as estrelas e o ranking.' } ] }];
   aula = { ...cfg, telas:[...telas, { t:'fim' }] };
-  aulaIdx = 0; aulaOk = []; aulaCod = []; aulaTent = [];
+  aulaIdx = 0; aulaOk = []; aulaCod = []; aulaTent = []; aulaNota = [];
   $('auTit').textContent = cfg.titulo; $('auSair').hidden = true; $('aula').hidden = false;
   document.documentElement.classList.add('au-aberta');
   $('auProg').setAttribute('aria-valuemax', aula.telas.length);
@@ -638,6 +638,52 @@ function falaMascote(txt, humor){
   if (humor === 'feliz') s.classList.add('pula'); else if (humor === 'triste') s.classList.add('triste');
 }
 
+// ---- estrelas
+// Cada ETAPA de exercício (pergunta, código ou Python) começa valendo 3 e vai perdendo:
+//  • resposta errada na verificação ......... -1
+//  • usar a dica (1x por etapa) ............. -1
+//  • (erro e dica nunca deixam abaixo de 1)
+//  • "Ver solução" .......................... zera (0)
+// A NOTA DA LIÇÃO (no máximo 3 estrelas) é a média das etapas, arredondada PARA BAIXO: 3 estrelas só sem nenhum erro, dica
+// ou solução; errar tudo sem ver solução dá 1; ver a solução em tudo dá 0. Quando uma etapa é concluída a nota dela fica travada.
+// Desafios e lições já concluídas não valem estrela.
+const ESTRELAS_MAX = 3;
+const contaEstrelas = () => !!aula && !aula.desafio && !aula.feita;
+const valeNota = t => !!t && (t.t === 'escolha' || t.t === 'codigo' || t.t === 'python');
+const notaDe = i => aulaNota[i] || (aulaNota[i] = { e: ESTRELAS_MAX, dica: false, fechada: false });
+const notaAberta = i => contaEstrelas() && valeNota(aula.telas[i]) && !notaDe(i).fechada;
+const exercicios = () => aula.telas.map((x, k) => valeNota(x) ? k : -1).filter(k => k >= 0);
+function mediaLicao(){                                   // 0..3 (etapas ainda não feitas contam 3)
+  const ex = exercicios(); if (!ex.length) return ESTRELAS_MAX;
+  return ex.reduce((a, k) => a + notaDe(k).e, 0) / ex.length;
+}
+const estrelasLicao = () => Math.floor(mediaLicao() + 1e-9);    // 0..3: é o que a lição vale no fim (estrela só conta quando está cheia)
+function fechaNota(i){ if (contaEstrelas() && valeNota(aula.telas[i])) notaDe(i).fechada = true; }
+// motivo: 'erro' | 'dica' | 'solucao'. Devolve true se a nota da etapa realmente caiu.
+function perdeEstrela(motivo){
+  const i = aulaIdx; if (!notaAberta(i)) return false;
+  const n = notaDe(i), antes = n.e;
+  if (motivo === 'solucao') n.e = 0;
+  else if (motivo === 'dica'){ if (n.dica) return false; n.dica = true; if (n.e > 1) n.e--; }
+  else if (n.e > 1) n.e--;
+  pintaNota(n.e !== antes);
+  return n.e !== antes;
+}
+// 3 estrelas no cabeçalho com a nota da lição; cada estrela esvazia aos poucos conforme a média cai
+function pintaNota(anima){
+  const el = $('auNota'), t = aula && aula.telas[aulaIdx];
+  const etapa = !!aula && contaEstrelas() && valeNota(t), vale = !!aula && contaEstrelas() && t.t !== 'fim' && exercicios().length > 0;
+  $('auDica').title = etapa ? 'Usar a dica reduz a nota desta etapa' : '';
+  $('auSolucao').title = etapa ? 'Ver a solução zera a nota desta etapa' : '';
+  if (!el) return;
+  el.hidden = !vale; if (!vale) return;
+  const m = mediaLicao(), n = estrelasLicao();
+  el.innerHTML = Array.from({ length: ESTRELAS_MAX }, (_, k) => `<span class="est"><span class="est-fundo">${ICO('star', 1)}</span><span class="est-cheia" style="width:${Math.round(Math.max(0, Math.min(1, m - k)) * 100)}%">${ICO('star', 1)}</span></span>`).join('');
+  const txt = 'Nota da lição: ' + n + ' de ' + ESTRELAS_MAX + ' ' + plural(ESTRELAS_MAX, 'estrela', 'estrelas');
+  el.setAttribute('aria-label', txt); el.title = txt + '. Erros, dicas e soluções diminuem a nota.';
+  if (anima){ el.classList.remove('perdeu'); void el.offsetWidth; el.classList.add('perdeu'); }
+}
+
 // ---- telas
 function pintaProgresso(){
   $('auProg').innerHTML = aula.telas.map((_, k) => `<i class="${k < aulaIdx ? 'feito' : k === aulaIdx ? 'atual' : ''}"></i>`).join('');
@@ -646,7 +692,7 @@ function pintaProgresso(){
 function mostraTela(i){
   aulaIdx = i; clearTimeout(aulaTmr); aulaRun++;
   const t = aula.telas[i], box = $('auConteudo');
-  pintaProgresso(); $('auVolta').disabled = i === 0;
+  pintaProgresso(); pintaNota(); $('auVolta').disabled = i === 0;
   $('auDica').hidden = !t.dica; $('auSolucao').hidden = true;
   if (t.t === 'texto'){ montaTexto(t, box); falaMascote(i === 0 ? 'Vamos nessa?' : '', 'neutro'); }
   else if (t.t === 'escolha'){ montaEscolha(t, box); falaMascote(aulaOk[i] ? 'Já acertou esta! Clique em Continuar.' : 'Escolha uma resposta e clique em Verificar.', 'neutro'); }
@@ -663,7 +709,7 @@ function atualizaOk(){
   let txt = 'Continuar', dis = false;
   if (t.t === 'escolha' && !aulaOk[aulaIdx]){ txt = 'Verificar'; dis = !document.querySelector('#auConteudo input[name=auop]:checked'); }
   else if ((t.t === 'codigo' || t.t === 'python') && !aulaOk[aulaIdx]) txt = 'Verificar';
-  else if (t.t === 'fim') txt = aula.desafio ? 'Concluir desafio' : aula.feita ? 'Voltar' : 'Concluir e ganhar +' + aula.estrelas + '';
+  else if (t.t === 'fim') txt = aula.desafio ? 'Concluir desafio' : aula.feita ? 'Voltar' : estrelasLicao() > 0 ? 'Concluir e ganhar +' + estrelasLicao() : 'Concluir lição';
   b.innerHTML = txt + kbd; b.disabled = dis;
 }
 function acaoOk(){
@@ -690,8 +736,8 @@ function montaEscolha(t, box){
 function verificaEscolha(){
   const i = aulaIdx, t = aula.telas[i], st = aulaCod[i], sel = document.querySelector('#auConteudo input[name=auop]:checked'); if (!sel) return;
   const o = +sel.value; aulaTent[i] = (aulaTent[i] || 0) + 1;
-  if (o === t.certa){ aulaOk[i] = true; montaEscolha(t, $('auConteudo')); falaMascote(sorteia(FRASES_OK), 'feliz'); }
-  else { st.erradas.push(o); montaEscolha(t, $('auConteudo')); falaMascote('Quase! Tente outra opção.', 'triste'); }
+  if (o === t.certa){ aulaOk[i] = true; fechaNota(i); montaEscolha(t, $('auConteudo')); falaMascote(sorteia(FRASES_OK), 'feliz'); }
+  else { st.erradas.push(o); const perdeu = perdeEstrela('erro'); montaEscolha(t, $('auConteudo')); falaMascote('Quase! Tente outra opção.' + (perdeu ? ' (a nota da lição diminuiu)' : ''), 'triste'); }
   atualizaOk();
 }
 
@@ -896,9 +942,9 @@ function pyGarante(){
   return pyPronto;
 }
 async function pyRoda(codigo, testes){
-  const nada = erro => ({ saida:'', erro, r:testes.map(() => false) });
+  const nada = (erro, sistema) => ({ saida:'', erro, sistema, r:testes.map(() => false) });
   try{ await Promise.race([pyGarante(), new Promise((_, no) => setTimeout(() => no(new Error('tempo')), 60000))]); }
-  catch(e){ if (pyWorker){ try{ pyWorker.terminate(); }catch(x){} } pyWorker = null; pyPronto = null; pyOk = false; return nada('Não consegui carregar o Python. Verifique sua internet e tente de novo.'); }
+  catch(e){ if (pyWorker){ try{ pyWorker.terminate(); }catch(x){} } pyWorker = null; pyPronto = null; pyOk = false; return nada('Não consegui carregar o Python. Verifique sua internet e tente de novo.', true); }
   const w = pyWorker, id = ++pyId;
   return new Promise(resolve => {
     const fim = setTimeout(() => { w.terminate(); if (pyWorker === w){ pyWorker = null; pyPronto = null; pyOk = false; } resolve(nada('O programa demorou demais e foi parado. Será que tem um laço que nunca termina?')); }, 6000);
@@ -937,7 +983,7 @@ async function verificaPython(){
   const id = ++aulaRun; $('auOk').disabled = true; $('auOk').textContent = 'Verificando…';
   const r = await rodaPython(st.cod.py, t.testes.filter(x => x.t !== 'src'));
   if (id !== aulaRun) return;
-  finalizaCodigo(id, r.r);
+  finalizaCodigo(id, r.r, r.sistema);
 }
 function mostraAba(){
   const st = aulaCod[aulaIdx]; $('auEd').value = st.cod[st.aba];
@@ -975,19 +1021,27 @@ function verificaCodigo(){
   setTimeout(() => { if (aulaRun === id && !aulaRecebeu) finalizaCodigo(id, []); }, 2500);   // se o iframe não responder
 }
 function resultadoAula(d){ aulaRecebeu = true; finalizaCodigo(d.id, d.r || []); }
-function finalizaCodigo(id, dr){
+function finalizaCodigo(id, dr, semPenal){   // semPenal: falha do sistema (ex.: sem internet para carregar o Python), não é erro do aluno
   if (id !== aulaRun) return;
   const i = aulaIdx, t = aula.telas[i], st = aulaCod[i]; let k = 0;
   st.res = t.testes.map(x => x.t === 'src' ? testeSrc(x, st.cod) : !!dr[k++]);
   st.prob = problemaCodigo(t, st.cod);   // tag aberta sem fechar, falta de ; ou } etc.
   pintaChecks();
   const falhou = t.testes.filter((_, j) => !st.res[j]);
-  if (!falhou.length && !st.prob){ aulaOk[i] = true; $('auSolucao').hidden = true; falaMascote(sorteia(FRASES_OK), 'feliz'); }
-  else { aulaOk[i] = false; falaMascote('Quase! Ainda falta: ' + semMarcas(falhou.length ? falhou[0].msg : st.prob), 'triste'); if (aulaTent[i] >= 2) $('auSolucao').hidden = false; }
+  if (!falhou.length && !st.prob){ aulaOk[i] = true; fechaNota(i); $('auSolucao').hidden = true; falaMascote(sorteia(FRASES_OK), 'feliz'); }
+  else { aulaOk[i] = false; const perdeu = !semPenal && perdeEstrela('erro'); falaMascote('Quase! Ainda falta: ' + semMarcas(falhou.length ? falhou[0].msg : st.prob) + (perdeu ? ' (a nota da lição diminuiu)' : ''), 'triste'); if (aulaTent[i] >= 2) $('auSolucao').hidden = false; }
   atualizaOk();
 }
 
 // tela final
+function resultadoFim(){     // as 3 estrelas que a lição vale
+  const n = estrelasLicao();
+  const fileira = Array.from({ length: ESTRELAS_MAX }, (_, k) => `<span class="${k < n ? 'on' : 'off'}">${ICO('star', 1)}</span>`).join('');
+  return `<div class="au-fim-nota" role="img" aria-label="${n} de ${ESTRELAS_MAX} ${plural(ESTRELAS_MAX, 'estrela', 'estrelas')}">${fileira}</div>`
+    + '<p>' + (n === ESTRELAS_MAX ? 'Nota máxima: nenhuma estrela perdida!'
+        : n > 0 ? `Você ganhou <b>${n} de ${ESTRELAS_MAX}</b> ${plural(ESTRELAS_MAX, 'estrela', 'estrelas')}. Erros, dicas e soluções diminuem a nota.`
+        : 'Desta vez não deu para ganhar estrelas, mas a lição conta como concluída.') + '</p>';
+}
 function montaFim(box){
   const nCod = aula.telas.filter(x => x.t === 'codigo' || x.t === 'python').length, nEsc = aula.telas.filter(x => x.t === 'escolha').length;
   const resumoTxt = (nCod ? nCod + ' ' + plural(nCod, 'exercício de código', 'exercícios de código') : '') + (nCod && nEsc ? ' e ' : '') + (nEsc ? nEsc + ' ' + plural(nEsc, 'pergunta', 'perguntas') : '');
@@ -996,8 +1050,9 @@ function montaFim(box){
     + (resumoTxt ? `<p>Você fez ${resumoTxt}.</p>` : '')
     + (d ? '<p>Aqui não vale estrela, mas é treino de verdade!</p>'
         : aula.feita ? '<p>Você já tinha concluído esta lição, então as estrelas não são dadas de novo. Mas praticar nunca é demais!</p>'
-        : `<div class="au-estrelas">+${aula.estrelas} ${ICO('star',1)}</div><p>Conclua a lição para ganhar as estrelas.</p>`) + '</div>';
-  falaMascote('Mandou muito bem!', 'feliz');
+        : resultadoFim()) + '</div>';
+  const ne = (d || aula.feita) ? ESTRELAS_MAX : estrelasLicao();     // a fala do mascote acompanha a nota
+  falaMascote(ne === ESTRELAS_MAX ? 'Mandou muito bem!' : ne === 0 ? 'Lição concluída! Na próxima, tente sem a solução.' : 'Lição concluída! Dá para melhorar na próxima.', ne === ESTRELAS_MAX ? 'feliz' : 'neutro');
 }
 async function concluiAula(){
   const btn = $('auOk'); if (btn.disabled) return;
@@ -1007,11 +1062,17 @@ async function concluiAula(){
   try{
     const l = licoes.find(x => x.id === aula.id);
     const antes = modulos().find(x => x.id === l.modulo), metaAntes = resumo.hoje >= perfil.meta_diaria;
-    const { data, error } = await sb.rpc('concluir_licao', { p_licao: l.id });
+    const estAntes = resumo.estrelas, nota = estrelasLicao();
+    let { data, error } = await sb.rpc('concluir_licao', { p_licao: l.id, p_estrelas: nota });
+    // Banco ainda sem o parâmetro p_estrelas (função antiga): conclui do jeito antigo, valendo o valor fixo da lição.
+    if (error && (error.code === 'PGRST202' || /schema cache|could not find the function/i.test(error.message || ''))){
+      console.warn('concluir_licao ainda não aceita p_estrelas: atualize a função no Supabase para a nota valer no ranking.');
+      ({ data, error } = await sb.rpc('concluir_licao', { p_licao: l.id }));
+    }
     if (error) throw error;
     feitas.add(l.id); await recarregaResumo();
-    const depois = modulos().find(x => x.id === l.modulo);
-    let msg = data && data.nova ? '+' + l.estrelas + ' estrelas! Lição concluída.' : 'Lição já estava concluída.';
+    const depois = modulos().find(x => x.id === l.modulo), ganhas = Math.max(0, (resumo.estrelas || 0) - (estAntes || 0));   // o que o servidor deu de verdade
+    let msg = data && data.nova ? (ganhas > 0 ? '+' + ganhas + ' ' + plural(ganhas, 'estrela', 'estrelas') + '! Lição concluída.' : 'Lição concluída.') : 'Lição já estava concluída.';
     if (antes.feitas < antes.total && depois.feitas === depois.total) msg = depois.proj && !depois.projOk ? 'Lições do ' + depois.nome + ' concluídas! Agora faça o projeto final. ' + msg : 'Módulo ' + depois.nome + ' concluído! ' + msg;
     else if (!metaAntes && resumo.hoje >= perfil.meta_diaria) msg += ' Meta de hoje batida';
     moduloSel = null; pintaPainel(); fechaAula(); falar('Boa! Mais uma lição no bolso'); aviso(msg);
@@ -1024,12 +1085,17 @@ $('auVolta').addEventListener('click', () => { if (aulaIdx > 0) mostraTela(aulaI
 $('auX').addEventListener('click', () => { if (aulaIdx > 0 && aulaIdx < aula.telas.length - 1){ $('auSair').hidden = false; $('auSairNao').focus(); } else fechaAula(); });
 $('auSairSim').addEventListener('click', fechaAula);
 $('auSairNao').addEventListener('click', () => { $('auSair').hidden = true; $('auX').focus(); });
-$('auDica').addEventListener('click', () => { const t = aula.telas[aulaIdx]; if (t.dica) falaMascote(semMarcas(t.dica), 'neutro'); });
+$('auDica').addEventListener('click', () => {
+  const t = aula.telas[aulaIdx]; if (!t.dica) return;
+  const perdeu = perdeEstrela('dica');                       // só a 1ª dica da etapa reduz a nota
+  falaMascote(semMarcas(t.dica) + (perdeu ? ' (a nota da lição diminuiu)' : ''), 'neutro');
+});
 dois($('auSolucao'), () => {
   const t = aula.telas[aulaIdx], st = aulaCod[aulaIdx];
+  const zerou = perdeEstrela('solucao');                     // ver a solução zera a nota da etapa
   st.cod = { ...st.cod, ...t.solucao }; st.res = null; aulaOk[aulaIdx] = false; mostraAba(); pintaChecks(); rodaPreview(); atualizaOk();
-  falaMascote('Aqui está uma resposta. Agora clique em Verificar!', 'neutro');
-}, 'Clique de novo para ver a solução');
+  falaMascote('Aqui está uma resposta. Agora clique em Verificar!' + (zerou ? ' (a nota desta etapa foi zerada)' : ''), 'neutro');
+}, () => notaAberta(aulaIdx) && notaDe(aulaIdx).e > 0 ? 'Clique de novo: zera a nota da etapa' : 'Clique de novo para ver a solução');
 $('auConteudo').addEventListener('input', e => {
   if (e.target.id !== 'auEd') return;
   const st = aulaCod[aulaIdx]; st.cod[st.aba] = e.target.value; clearTimeout(aulaTmr); aulaTmr = setTimeout(rodaPreview, 450);
@@ -1327,7 +1393,7 @@ function dois(btn, fn, msg, pula){
   let t, arm = false; const orig = btn.textContent;
   btn.addEventListener('click', () => {
     if (arm || (pula && pula())){ clearTimeout(t); arm = false; btn.textContent = orig; fn(); return; }
-    arm = true; btn.textContent = msg; t = setTimeout(() => { arm = false; btn.textContent = orig; }, 3000);
+    arm = true; btn.textContent = typeof msg === 'function' ? msg() : msg; t = setTimeout(() => { arm = false; btn.textContent = orig; }, 3000);
   });
 }
 const semCodigo = () => ['html','css','js'].every(k => !cod[k].trim() || cod[k].trim() === SEED[k].trim());
