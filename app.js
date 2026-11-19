@@ -1636,33 +1636,189 @@ async function tratar(evento, sessao){
 })();
 
 /* =====================================================================
-   10) EFEITOS DA PÁGINA DE LOGIN (aparecer ao rolar, botão "Criar conta grátis")
+   10) PÁGINA DE LOGIN: editor de teste, trilha desenhada, painel de exemplo,
+       correção de exemplo, profundidade e aparecer ao rolar
    ===================================================================== */
-/* Login: cada item aparece, em sequência, conforme a página desce */
 (function(){
-  var reduz = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var alvos = '#telaLogin .lp h2, #telaLogin .lp .lead, #telaLogin .lp-passos li, #telaLogin .lp-lista > div, #telaLogin .lp-nota, #telaLogin .rodape > *, #telaLogin .base';
-  document.querySelectorAll(alvos).forEach(function(el){
-    el.classList.add('rv');
-    if (el.matches('.lp-passos li, .lp-lista > div')) el.classList.add('esq');
-    if (!el.style.getPropertyValue('--d')){
-      var irmaos = Array.prototype.filter.call(el.parentNode.children, function(x){ return x.matches(alvos); });
-      el.style.setProperty('--d', (irmaos.indexOf(el) * .14) + 's');
-    }
-  });
-  var els = document.querySelectorAll('#telaLogin .rv');
-  if (reduz || !('IntersectionObserver' in window)){
-    els.forEach(function(e){ e.classList.add('vis'); });
-  } else {
-    var io = new IntersectionObserver(function(es){
-      es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('vis'); io.unobserve(e.target); } });
-    }, { threshold: .15, rootMargin: '0px 0px -6% 0px' });
-    els.forEach(function(e){ io.observe(e); });
+  const raiz = $('telaLogin'), probe = $('vpFim');
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const dorme = ms => new Promise(r => setTimeout(r, ms));
+  const suave = t => 1 - Math.pow(1 - t, 3);
+  const mapa = { atualiza(){} };   // o desenho da trilha se registra aqui mais abaixo
+  // altura da janela no mesmo "sistema de medidas" dos getBoundingClientRect (o site usa zoom no CSS)
+  const altJanela = () => probe.getBoundingClientRect().bottom || innerHeight;
+  // anima um valor de 0 a 1 em "ms" milissegundos
+  function anima(ms, passo){
+    return new Promise(ok => {
+      if (rmov){ passo(1); ok(); return; }
+      const t0 = performance.now();
+      (function f(t){ const p = clamp((t - t0) / ms, 0, 1); passo(suave(p)); if (p < 1) requestAnimationFrame(f); else ok(); })(t0);
+    });
   }
-  var b = document.getElementById('lpCriar');
-  if (b) b.addEventListener('click', function(){
+
+  /* ---------- botões que levam para criar a conta ---------- */
+  function criarConta(){
     modo('criar');
-    window.scrollTo({ top: 0, behavior: reduz ? 'auto' : 'smooth' });
-    setTimeout(function(){ var n = document.getElementById('lgNome'); if (n) n.focus({ preventScroll: true }); }, 500);
-  });
+    scrollTo({ top: 0, behavior: rmov ? 'auto' : 'smooth' });
+    setTimeout(() => { const n = $('lgNome'); if (n) n.focus({ preventScroll: true }); }, rmov ? 0 : 550);
+  }
+  $('lpCriar').addEventListener('click', criarConta);
+  $('labCriar').addEventListener('click', criarConta);
+  const desce = raiz.querySelector('.desce');
+  if (desce) desce.addEventListener('click', e => { e.preventDefault(); $('como').scrollIntoView({ behavior: rmov ? 'auto' : 'smooth', block: 'start' }); });
+
+  /* ---------- 1. editor de teste ---------- */
+  (function(){
+    const ed = $('labEd'), res = $('labRes'), checks = [...$('labChecks').children], estrelas = [...$('labNota').querySelectorAll('.i')], fim = $('labFim');
+    const CABECA = '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; img-src data:">'
+      + '<style>body{margin:14px 16px;font:600 16px/1.4 system-ui,sans-serif;color:#1e1230}h1{margin:0 0 6px;font-size:24px}p{margin:0 0 10px}'
+      + 'button{background:#f2f26b;border:0;border-bottom:4px solid #b8b230;border-radius:8px;padding:6px 14px;font:700 14px system-ui,sans-serif}</style>';
+    ed.value = '<h1>Olá, mundo!</h1>\n';
+    let tm = null, certos = 0;
+    function avalia(cod){
+      const d = new DOMParser().parseFromString(cod, 'text/html');
+      const tx = e => e ? e.textContent.trim() : '';
+      const h1 = tx(d.querySelector('h1'));
+      return [h1 !== '' && h1 !== 'Olá, mundo!', tx(d.querySelector('p')) !== '', tx(d.querySelector('button')) !== ''];
+    }
+    function atualiza(){
+      const cod = ed.value; res.srcdoc = CABECA + cod;
+      const r = avalia(cod), n = r.filter(Boolean).length;
+      checks.forEach((li, k) => li.classList.toggle('ok', r[k]));
+      estrelas.forEach((s, k) => {
+        const antes = s.classList.contains('on'), liga = k < n;
+        s.classList.toggle('on', liga);
+        if (liga && !antes){ s.classList.remove('pop'); void s.getBoundingClientRect(); s.classList.add('pop'); }
+      });
+      $('labNota').setAttribute('aria-label', n + ' de 3 estrelas');
+      fim.hidden = n < 3; certos = n;
+    }
+    ed.addEventListener('input', () => { clearTimeout(tm); tm = setTimeout(atualiza, 160); });
+    atualiza();
+  })();
+
+  /* ---------- 2. trilha: o caminho se desenha conforme você rola ---------- */
+  (function(){
+    const w = $('mapaW'), svg = w.querySelector('svg.caminho'), base = svg.querySelector('.c-base'), prog = svg.querySelector('.c-prog');
+    const nos = [...w.querySelectorAll('.no')], portas = [...w.querySelectorAll('.porta')];
+    const tmp = document.createElementNS('http://www.w3.org/2000/svg', 'path'); tmp.setAttribute('fill', 'none'); tmp.setAttribute('stroke', 'none'); svg.appendChild(tmp);   // só serve para medir
+    let total = 0, dist = [];
+    function monta(){
+      const W = w.offsetWidth, H = w.offsetHeight; if (!W || !H) return;
+      svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      const pts = nos.map(n => [n.offsetLeft + n.offsetWidth / 2, n.offsetTop + n.offsetHeight / 2]);
+      let d = 'M' + pts[0][0] + ' ' + pts[0][1]; dist = [0];
+      for (let k = 1; k < pts.length; k++){
+        const [x0, y0] = pts[k - 1], [x1, y1] = pts[k], my = (y0 + y1) / 2;
+        d += ' C' + x0 + ' ' + my + ' ' + x1 + ' ' + my + ' ' + x1 + ' ' + y1;
+        tmp.setAttribute('d', d); dist.push(tmp.getTotalLength());
+      }
+      base.setAttribute('d', d); prog.setAttribute('d', d);
+      total = prog.getTotalLength(); prog.style.strokeDasharray = total;
+      portas.forEach((g, k) => { const p = prog.getPointAtLength((dist[k] + dist[k + 1]) / 2); g.style.left = p.x + 'px'; g.style.top = p.y + 'px'; });
+    }
+    // comprimento do caminho no ponto em que ele passa pela altura y (o caminho só desce, então dá para buscar)
+    function compEmY(y){
+      let a = 0, b = total;
+      for (let i = 0; i < 18; i++){ const m = (a + b) / 2; if (prog.getPointAtLength(m).y < y) a = m; else b = m; }
+      return (a + b) / 2;
+    }
+    function atualiza(){
+      if (!total) return;
+      let len;
+      if (rmov) len = total;
+      else { const r = w.getBoundingClientRect(), z = r.height / w.offsetHeight || 1; len = compEmY((altJanela() * .62 - r.top) / z); }   // z: o site tem zoom no CSS, então a tela e o desenho têm escalas diferentes
+      prog.style.strokeDashoffset = total - len;
+      nos.forEach((n, k) => n.classList.toggle('on', len > 0 && len >= dist[k] - 1));
+      portas.forEach((g, k) => g.classList.toggle('on', len >= (dist[k] + dist[k + 1]) / 2));
+    }
+    mapa.atualiza = atualiza;
+    new ResizeObserver(() => { monta(); atualiza(); }).observe(w);
+  })();
+
+  /* ---------- 3. painel de exemplo: números contam e o ranking muda de lugar ---------- */
+  $('hud').addEventListener('vis', async () => {
+    const lista = [{ n: 'Caio', v: 94 }, { n: 'Bia', v: 90 }, { n: 'Duda', v: 85 }, { n: 'Você', v: 80, eu: true }];
+    const ol = $('hudRank'), eu = lista[3];
+    ol.innerHTML = lista.map(r => '<li class="' + (r.eu ? 'eu' : '') + '"><span class="hp"></span><span class="hn">' + esc(r.n) + '</span><em><b></b><svg class="i f"><use href="#i-star"/></svg></em></li>').join('');
+    const lis = [...ol.children];
+    function desenha(){
+      const ord = lista.slice().sort((a, b) => b.v - a.v);
+      lista.forEach((r, k) => {
+        const pos = ord.indexOf(r); lis[k].style.setProperty('--pos', pos);
+        lis[k].querySelector('.hp').textContent = (pos + 1) + 'º'; lis[k].querySelector('b').textContent = r.v;
+      });
+      $('hudEst').textContent = eu.v; $('hudPos').textContent = (ord.indexOf(eu) + 1) + 'º';
+    }
+    desenha();
+    contar($('hudSeq'), 12);
+    [...$('hudDias').children].slice(0, 5).forEach((s, k) => setTimeout(() => s.classList.add('x'), rmov ? 0 : 500 + k * 140));
+    await dorme(rmov ? 0 : 400);
+    await anima(2600, e => { eu.v = Math.round(80 + 17 * e); $('hudRing').style.setProperty('--p', (66.7 * e) + '%'); desenha(); });
+  }, { once: true });
+
+  /* ---------- 4. correção de exemplo: reprova, ajusta, aprova ---------- */
+  $('boss').addEventListener('vis', async () => {
+    const envios = [
+      { n: 4.5, ok: false, env: 'Envio 1', tit: 'Quase lá! Ajuste e envie de novo', fb: 'O título e a lista estão certos, mas um parágrafo ficou sem fechar e faltam as imagens.' },
+      { n: 7.5, ok: true, env: 'Envio 2', tit: 'Aprovado! Próxima trilha liberada', fb: 'Agora a estrutura está certa. Para melhorar, coloque texto alternativo nas imagens.' }
+    ];
+    const nota = $('bossNota'), fill = $('bossFill'), fb = $('bossFb'), tit = $('bossTit');
+    let atual = 0;
+    for (const e of envios){
+      $('bossEnv').textContent = e.env; tit.textContent = 'Corrigindo…'; fb.textContent = '';
+      fill.classList.toggle('ok', e.ok); fill.style.width = (e.n * 10) + '%';
+      const de = atual;
+      await anima(1300, p => { nota.textContent = fmtNota(de + (e.n - de) * p); });
+      atual = e.n; tit.textContent = e.tit;
+      if (rmov) fb.textContent = e.fb;
+      else for (let i = 1; i <= e.fb.length; i++){ fb.textContent = e.fb.slice(0, i); await dorme(16); }
+      if (!e.ok) await dorme(rmov ? 0 : 1500);
+    }
+    $('bossProx').classList.add('on');
+  }, { once: true });
+
+  /* ---------- profundidade: o fundo se move em velocidades diferentes ---------- */
+  const flutuantes = [...raiz.querySelectorAll('.lp')].map(s => ({ s, f: s.querySelector('.flut') })).filter(x => x.f);
+  let quadro = 0;
+  function aoRolar(){
+    quadro = 0; if (raiz.hidden) return;
+    const v = altJanela();
+    flutuantes.forEach(({ s, f }) => {
+      const r = s.getBoundingClientRect();
+      if (r.bottom < -v || r.top > v * 2) return;
+      f.style.setProperty('--sy', ((r.top + r.height / 2) - v / 2) + 'px');
+    });
+    mapa.atualiza();
+  }
+  const pede = () => { if (!quadro) quadro = requestAnimationFrame(aoRolar); };
+  if (!rmov){ addEventListener('scroll', pede, { passive: true }); addEventListener('resize', pede); }
+  // o mapa precisa ser desenhado mesmo sem rolar (e quando a tela de login aparece)
+  new MutationObserver(pede).observe(raiz, { attributes: true, attributeFilter: ['hidden'] });
+  pede();
+
+  // topo: as peças de código seguem o mouse, cada uma numa distância
+  const vit = raiz.querySelector('.vitrine');
+  if (vit && !rmov && matchMedia('(hover:hover)').matches){
+    let q = 0, mx = 0, my = 0;
+    vit.addEventListener('pointermove', e => {
+      const r = vit.getBoundingClientRect();
+      mx = clamp((e.clientX - r.left) / r.width * 2 - 1, -1, 1); my = clamp((e.clientY - r.top) / r.height * 2 - 1, -1, 1);
+      if (!q) q = requestAnimationFrame(() => { q = 0; vit.style.setProperty('--mx', mx.toFixed(3)); vit.style.setProperty('--my', my.toFixed(3)); });
+    });
+    vit.addEventListener('pointerleave', () => { vit.style.setProperty('--mx', 0); vit.style.setProperty('--my', 0); });
+  }
+  /* ---------- aparecer ao rolar: a peça cai no lugar (por último, para os painéis já estarem escutando) ---------- */
+  (function(){
+  const rvs = raiz.querySelectorAll('.rv');
+  if (rmov || !('IntersectionObserver' in window)){
+    rvs.forEach(e => { e.classList.add('vis'); e.dispatchEvent(new Event('vis')); });
+  } else {
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('vis'); e.target.dispatchEvent(new Event('vis')); io.unobserve(e.target);
+    }), { threshold: .22, rootMargin: '0px 0px -6% 0px' });
+    rvs.forEach(e => io.observe(e));
+  }
+  })();
 })();

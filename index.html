@@ -123,6 +123,7 @@
       </button>
       <div class="codigo" aria-hidden="true"><span class="k">console</span>.log(<span class="s">"<span id="digita"></span></span><span class="cursor"></span></div>
       <p class="frase" id="frase"></p>
+      <a class="desce" href="#como">Veja como funciona <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a>
     </section>
 
     <section class="lado-form">
@@ -184,52 +185,190 @@
     </section>
   </div>
 
-  <!-- ============ SEÇÕES DA PÁGINA (wireframe) ============ -->
-  <section class="lp lp-roxa" aria-labelledby="lpT1">
+  <!-- ============ SEÇÕES DA PÁGINA ============ -->
+  <i id="vpFim" aria-hidden="true"></i>
+
+  <!-- 1. Como funciona + editor de verdade -->
+  <section class="lp lp-esc" id="como" aria-labelledby="lpT1">
+    <div class="flut" aria-hidden="true">
+      <svg class="fl" style="--z:.35;--r:12deg;left:4%;top:12%;width:26px;height:26px"><use href="#i-star"/></svg>
+      <svg class="fl" style="--z:1;--r:-14deg;right:3%;top:8%;width:58px;height:58px;--d:-3s"><use href="#i-star"/></svg>
+      <svg class="fl m" style="--z:.6;--r:8deg;left:46%;bottom:6%;width:34px;height:34px;--d:-5s"><use href="#i-star"/></svg>
+      <span class="fl t" style="--z:.7;--r:-10deg;left:2%;bottom:14%;--d:-2s">&lt;/&gt;</span>
+    </div>
     <div class="lp-in a">
-      <div>
-        <h2 id="lpT1">Você aprende escrevendo código, não só lendo sobre ele</h2>
-        <p class="lead">Cada lição tem uma parte para entender e outra para praticar no editor do próprio site. Você escreve, clica em Executar e vê o que aconteceu.</p>
-        <ol class="lp-passos">
-          <li><div><b>Aprender</b><span>Um conceito por vez, com um exemplo.</span></div></li>
-          <li><div><b>Praticar</b><span>Escreva o código no editor e execute.</span></div></li>
-          <li><div><b>Concluir</b><span>Ganhe estrelas, mantenha a sequência de dias e suba no ranking.</span></div></li>
+      <div class="lp-txt rv">
+        <h2 id="lpT1">Você escreve o código e o site confere na hora</h2>
+        <p class="lead">Cada lição tem uma explicação curta e um exercício. Você digita no editor, clica em Verificar, e cada item da lista fica verde quando está certo.</p>
+        <ol class="passos">
+          <li><b>Leia</b><span>Um conceito por vez, com um exemplo curto.</span></li>
+          <li><b>Escreva</b><span>O resultado aparece ao lado enquanto você digita.</span></li>
+          <li><b>Verifique</b><span>Itens verdes valem estrelas e mantêm a sequência de dias.</span></li>
         </ol>
       </div>
-      <div class="rv" style="--d:.2s">
-        <div class="janela" aria-hidden="true">
-          <div class="janela-topo"><i></i><i></i><i></i><em>index.html</em></div>
-          <pre><code><span class="ln" style="--i:0"><span class="k">&lt;h1&gt;</span>Olá, mundo!<span class="k">&lt;/h1&gt;</span></span><span class="ln" style="--i:1"><span class="k">&lt;p&gt;</span>Minha primeira estrela<span class="k">&lt;/p&gt;</span></span><span class="ln" style="--i:2"><span class="k">&lt;button&gt;</span>Brilhar<span class="k">&lt;/button&gt;</span></span></code></pre>
-          <div class="resultado"><h3>Olá, mundo!</h3><p>Minha primeira estrela <span class="st"><svg class="i f" aria-hidden="true"><use href="#i-star"/></svg></span></p><span class="bt">Brilhar</span></div>
+
+      <div class="lab rv" id="lab" style="--d:.15s">
+        <p class="lab-dica" id="labDica">Teste aqui, sem criar conta: troque o texto do título e escreva um parágrafo (<code>&lt;p&gt;</code>) e um botão (<code>&lt;button&gt;</code>).</p>
+        <div class="lab-jan">
+          <div class="jan-topo" aria-hidden="true"><i></i><i></i><i></i><em>index.html</em></div>
+          <label class="sr" for="labEd">Editor de HTML</label>
+          <textarea id="labEd" class="lab-ed" spellcheck="false" autocapitalize="off" autocomplete="off" rows="5"></textarea>
+          <iframe id="labRes" class="lab-res" title="Resultado do seu código" sandbox=""></iframe>
+        </div>
+        <div class="lab-pe">
+          <ul class="lab-checks" id="labChecks" aria-live="polite">
+            <li><span class="ci" aria-hidden="true"></span><span>Trocou o texto do título <code>&lt;h1&gt;</code></span></li>
+            <li><span class="ci" aria-hidden="true"></span><span>Escreveu um parágrafo <code>&lt;p&gt;</code></span></li>
+            <li><span class="ci" aria-hidden="true"></span><span>Criou um botão <code>&lt;button&gt;</code></span></li>
+          </ul>
+          <div class="lab-nota" id="labNota" role="img" aria-label="0 de 3 estrelas">
+            <svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg><svg class="i"><use href="#i-star"/></svg>
+          </div>
+        </div>
+        <div class="lab-fim" id="labFim" hidden>
+          <p><strong>Exercício completo!</strong> Na lição de verdade, isso rende estrelas.</p>
+          <button class="principal lp-cta" id="labCriar" type="button">Criar conta e continuar</button>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="lp lp-creme" aria-labelledby="lpT2">
-    <div class="lp-in b">
-      <div>
-        <h2 id="lpT2">O que você aprende</h2>
-        <p class="lead curto">As trilhas seguem uma ordem. A próxima só abre quando você termina a anterior e passa no projeto final.</p>
+  <!-- 2. A trilha desenhada no caminho -->
+  <section class="lp lp-creme" id="trilha" aria-labelledby="lpT2">
+    <div class="lp-in col">
+      <div class="lp-cab rv">
+        <h2 id="lpT2">Cinco trilhas, uma de cada vez</h2>
+        <p class="lead">A próxima só abre quando você termina a anterior. O troféu no meio do caminho é o projeto final: passou nele, a porta abre.</p>
       </div>
-      <dl class="lp-lista">
-        <div><dt>HTML</dt><dd>A estrutura da página: títulos, textos, listas, imagens e links.</dd></div>
-        <div><dt>CSS</dt><dd>Cores, espaçamento e layout, para a página ficar com a sua cara.</dd></div>
-        <div><dt>JavaScript</dt><dd>Fazer a página reagir a cliques e ao que a pessoa digita.</dd></div>
-        <div><dt>Git</dt><dd>Guardar o histórico do seu código e publicar no GitHub.</dd></div>
-        <div><dt>Python</dt><dd>Variáveis, decisões, listas e funções, com o código rodando no próprio navegador.</dd></div>
-      </dl>
+      <div class="mapa-w" id="mapaW">
+        <svg class="caminho" aria-hidden="true"><path class="c-base"/><path class="c-prog"/></svg>
+        <span class="porta" aria-hidden="true" title="Projeto final"><svg class="i"><use href="#i-trophy"/></svg></span>
+        <span class="porta" aria-hidden="true" title="Projeto final"><svg class="i"><use href="#i-trophy"/></svg></span>
+        <span class="porta" aria-hidden="true" title="Projeto final"><svg class="i"><use href="#i-trophy"/></svg></span>
+        <span class="porta" aria-hidden="true" title="Projeto final"><svg class="i"><use href="#i-trophy"/></svg></span>
+        <ol class="mapa">
+          <li class="fase">
+            <span class="no" aria-hidden="true"><svg class="i ic-trava"><use href="#i-lock"/></svg><svg class="i ic-livre"><use href="#i-code"/></svg></span>
+            <div class="fase-txt"><h3>HTML</h3><p>A estrutura da página: títulos, textos, listas, imagens e links.</p></div>
+          </li>
+          <li class="fase">
+            <span class="no" aria-hidden="true"><svg class="i ic-trava"><use href="#i-lock"/></svg><svg class="i ic-livre"><use href="#i-drop"/></svg></span>
+            <div class="fase-txt"><h3>CSS</h3><p>Cores, espaçamento e layout, para a página ficar com a sua cara.</p></div>
+          </li>
+          <li class="fase">
+            <span class="no" aria-hidden="true"><svg class="i ic-trava"><use href="#i-lock"/></svg><svg class="i ic-livre"><use href="#i-bolt"/></svg></span>
+            <div class="fase-txt"><h3>JavaScript</h3><p>Fazer a página reagir a cliques e ao que a pessoa digita.</p></div>
+          </li>
+          <li class="fase">
+            <span class="no" aria-hidden="true"><svg class="i ic-trava"><use href="#i-lock"/></svg><svg class="i ic-livre"><use href="#i-folder"/></svg></span>
+            <div class="fase-txt"><h3>Git</h3><p>Guardar o histórico do seu código e publicar no GitHub.</p></div>
+          </li>
+          <li class="fase">
+            <span class="no" aria-hidden="true"><svg class="i ic-trava"><use href="#i-lock"/></svg><svg class="i ic-livre"><use href="#i-book"/></svg></span>
+            <div class="fase-txt"><h3>Python</h3><p>Variáveis, decisões, listas e funções, com o código rodando no próprio navegador.</p></div>
+          </li>
+        </ol>
+      </div>
     </div>
   </section>
 
-  <section class="lp lp-roxa" aria-labelledby="lpT3">
-    <div class="lp-in c">
-      <div>
-        <h2 id="lpT3">No fim de cada trilha, um projeto seu</h2>
-        <p class="lead">Você recebe um tema simples e escreve o código sozinho. Uma IA corrige, dá uma nota de 0 a 10 e diz o que melhorar. Passou da nota 5, a próxima trilha abre.</p>
+  <!-- 3. Estrelas, sequência e ranking -->
+  <section class="lp lp-roxo" id="estrelas" aria-labelledby="lpT3">
+    <div class="flut" aria-hidden="true">
+      <svg class="fl" style="--z:1;--r:10deg;left:2%;top:6%;width:64px;height:64px"><use href="#i-star"/></svg>
+      <svg class="fl m" style="--z:.45;--r:-12deg;left:38%;top:4%;width:30px;height:30px;--d:-4s"><use href="#i-star"/></svg>
+      <svg class="fl r" style="--z:.8;--r:16deg;right:4%;bottom:8%;width:46px;height:46px;--d:-2s"><use href="#i-star"/></svg>
+      <svg class="fl" style="--z:.3;--r:-6deg;left:50%;bottom:5%;width:20px;height:20px;--d:-6s"><use href="#i-star"/></svg>
+      <span class="fl t" style="--z:.9;--r:-8deg;right:8%;top:10%;--d:-1s">{ }</span>
+    </div>
+    <div class="lp-in d">
+      <div class="hud rv" id="hud" role="group" aria-label="Exemplo do painel de um aluno">
+        <div class="hud-chips">
+          <span class="hud-chip"><svg class="i f fl-chama"><use href="#i-flame"/></svg><b id="hudSeq">0</b> dias</span>
+          <span class="hud-chip"><svg class="i f"><use href="#i-star"/></svg><b id="hudEst">80</b> estrelas</span>
+          <span class="hud-chip"><svg class="i"><use href="#i-trophy"/></svg><b id="hudPos">4º</b> no ranking</span>
+        </div>
+        <div class="hud-meta">
+          <div class="hud-ring" id="hudRing"><span>2/3</span></div>
+          <div>
+            <p class="hud-t">Meta de hoje</p>
+            <p class="hud-s">Mais uma lição e a chama de hoje fica acesa.</p>
+            <div class="hud-dias" id="hudDias" aria-hidden="true">
+              <span><b><svg class="i f"><use href="#i-flame"/></svg></b>S</span><span><b><svg class="i f"><use href="#i-flame"/></svg></b>T</span><span><b><svg class="i f"><use href="#i-flame"/></svg></b>Q</span><span><b><svg class="i f"><use href="#i-flame"/></svg></b>Q</span><span><b><svg class="i f"><use href="#i-flame"/></svg></b>S</span><span><b></b>S</span><span><b></b>D</span>
+            </div>
+          </div>
+        </div>
+        <ol class="hud-rank" id="hudRank" aria-hidden="true"></ol>
+        <p class="hud-ex">Exemplo com dados inventados.</p>
+      </div>
+
+      <div class="lp-txt rv" style="--d:.15s">
+        <h2 id="lpT3">Cada lição vale até 3 estrelas</h2>
+        <p class="lead">Erros, dicas e soluções diminuem a nota, então vale tentar sozinho primeiro. As estrelas somam no ranking.</p>
+        <dl class="fatos">
+          <div><dt><svg class="i f"><use href="#i-star"/></svg> Estrelas</dt><dd>Você ganha na primeira vez que conclui a lição. Refazer é só para treinar.</dd></div>
+          <div><dt><svg class="i f"><use href="#i-flame"/></svg> Sequência</dt><dd>Cada dia com meta batida acende uma chama. Você escolhe a meta no perfil.</dd></div>
+          <div><dt><svg class="i"><use href="#i-trophy"/></svg> Ranking</dt><dd>Quem tem mais estrelas fica na frente. Em caso de empate, quem criou a conta primeiro.</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Projeto final: a correção -->
+  <section class="lp lp-esc" id="projeto" aria-labelledby="lpT4">
+    <div class="lp-in e">
+      <div class="lp-txt rv">
+        <h2 id="lpT4">No fim de cada trilha, um projeto seu</h2>
+        <p class="lead">Você recebe um tema simples e escreve o código sozinho. Uma IA corrige, dá uma nota de 0 a 10 e diz o que melhorar. Passou da nota 5, a próxima trilha abre. Não passou, ajuste e envie de novo.</p>
+      </div>
+      <div class="boss rv" id="boss" role="group" aria-label="Exemplo de correção de um projeto final" style="--d:.15s">
+        <div class="boss-topo"><span><svg class="i"><use href="#i-trophy"/></svg> Projeto final de HTML</span><em id="bossEnv">Envio 1</em></div>
+        <div class="boss-nota"><b id="bossNota">0</b><strong id="bossTit">Corrigindo…</strong></div>
+        <div class="boss-barra" aria-hidden="true">
+          <div class="boss-trilho"><div class="boss-fill" id="bossFill"></div><i><span>5</span></i></div>
+          <div class="boss-esc"><span>0</span><span>10</span></div>
+        </div>
+        <p class="boss-fb" id="bossFb" aria-live="polite"></p>
+        <div class="boss-prox" id="bossProx"><span class="porta-mini"><svg class="i ic-trava"><use href="#i-lock"/></svg><svg class="i ic-livre"><use href="#i-check"/></svg></span> Próxima trilha: CSS</div>
+        <p class="hud-ex">Exemplo de correção.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Dúvidas -->
+  <section class="lp lp-creme" id="duvidas" aria-labelledby="lpT5">
+    <div class="lp-in f">
+      <div class="lp-txt rv">
+        <h2 id="lpT5">Dúvidas comuns</h2>
+        <p class="lead curto">Depois de entrar, a página Ajuda tem um formulário para você mandar a sua.</p>
         <button class="principal lp-cta" id="lpCriar" type="button">Criar conta grátis</button>
       </div>
-      <div class="lp-nota rv" aria-hidden="true"><b>&gt;5</b><span>para passar, de 0 a 10</span></div>
+      <div class="duvs rv" style="--d:.15s">
+        <details class="duv" name="duvida" open>
+          <summary>Preciso saber programar antes?</summary>
+          <p>Não. A primeira trilha começa do zero, com HTML, e cada lição explica um conceito por vez.</p>
+        </details>
+        <details class="duv" name="duvida">
+          <summary>Preciso instalar alguma coisa?</summary>
+          <p>Não. O editor e o Python rodam no próprio navegador. Você só precisa de internet.</p>
+        </details>
+        <details class="duv" name="duvida">
+          <summary>E se eu errar?</summary>
+          <p>Você tenta de novo quantas vezes quiser. Só a nota da lição diminui, e a dica e a solução ficam à mão se você travar.</p>
+        </details>
+        <details class="duv" name="duvida">
+          <summary>Quanto custa?</summary>
+          <p>Criar a conta é grátis.</p>
+        </details>
+        <details class="duv" name="duvida">
+          <summary>Posso entrar com o Google?</summary>
+          <p>Pode. Também dá para criar a conta com e-mail e senha.</p>
+        </details>
+        <details class="duv" name="duvida">
+          <summary>Como funciona a sequência de dias?</summary>
+          <p>Cada dia em que você bate a meta diária acende uma chama. Você muda a meta no perfil e pode ligar um lembrete por e-mail.</p>
+        </details>
+      </div>
     </div>
   </section>
 
