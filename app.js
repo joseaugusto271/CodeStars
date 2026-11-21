@@ -459,12 +459,14 @@ function pintaPainel(){
   $('mods').innerHTML = mods.map(m =>
     `<button class="mp ${m.st==='trava'?'trava':''} ${m.id===moduloSel?'on':''}" role="tab" aria-selected="${m.id===moduloSel}" data-k="${esc(m.id)}"><span>${ICONE[m.st]}</span>${imgTec(tecDe(m), 22)}${esc(m.nome)}</button>`).join('');
   const m = mods.find(x => x.id === moduloSel), st = statusLicoes(m);
-  $('lista').innerHTML = m.l.map((l,i) => {
-    const s = st[i], fim = s==='ok' ? '<span class="pill ref">' + ICO('refresh') + ' REFAZER</span><span class="ic ok">✓</span>' : s==='atual' ? '<span class="ic go">→</span>' : '<span>' + ICO('lock') + '</span>';
-    return `<button class="row ${s}" data-s="${s}" data-id="${esc(l.id)}"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${esc(l.titulo)}</span><span class="pill ${l.tipo}">${l.tipo==='a'?ICO('book')+' APRENDER':ICO('bolt')+' PRATICAR'}</span>${fim}</button>`;
+  const ni = mods.indexOf(m) + 1;
+  $('lista').innerHTML = `<div class="mundo"><b>MUNDO ${ni}</b><span>${esc(m.nome)}</span><em>${m.feitas}/${m.total}</em></div>` + m.l.map((l,i) => {
+    const s = st[i], ico = s==='ok' ? ICO('star',1) : s==='atual' ? ICO('play',1) : ICO('lock');
+    return noMapa(i, s, `data-s="${s}" data-id="${esc(l.id)}"`, ico, l.tipo==='a' ? 'APRENDER' : 'PRATICAR', esc(l.titulo));
   }).join('');
 
   $('lista').insertAdjacentHTML('beforeend', linhaProjeto(m));
+  pintaConquistas();
   pintaMeta(); pintaRank(); pintaChips(); falaPadrao();
 }
 $('mods').addEventListener('click', e => {
@@ -532,12 +534,23 @@ const pjChave = m => 'cs_proj_' + usuario.id + '_' + m;
 function melhorNota(mod){ const n = envios.filter(e => e.modulo === mod).map(e => Number(e.nota)); return n.length ? Math.max(...n) : null; }
 const fmtNota = n => Number(n).toLocaleString('pt-BR', { maximumFractionDigits:1 });
 
+const XS = [0,64,96,64,0,-64,-96,-64];   // zigue-zague do caminho
+function noMapa(i, cls, attrs, ico, tipo, titulo){
+  const k = innerWidth < 520 ? .3 : 1, x = XS[i%8]*k, dx = XS[(i+7)%8]*k - x;
+  const len = Math.hypot(dx,120).toFixed(0), a = (Math.atan2(-dx,-120)*180/Math.PI).toFixed(1);
+  return `<button class="row ${x<0?'esq ':''}${cls}" ${attrs} style="--x:${x}px;--len:${len}px;--a:${a}deg"><span class="no">${ico}</span><span class="lb"><small>${tipo}</small><span class="t">${titulo}</span></span></button>`;
+}
 function linhaProjeto(m){
   if (!m.proj) return '';
   const s = m.projOk ? 'ok' : (m.st === 'trava' || m.feitas < m.total) ? 'trava' : 'atual', melhor = melhorNota(m.id);
-  const fim = s === 'ok' ? '<span class="pill ref">' + ICO('refresh') + ' REFAZER</span><span class="ic ok">✓</span>' : s === 'atual' ? '<span class="ic go">→</span>' : '<span>' + ICO('lock') + '</span>';
-  const nota = melhor != null ? `<span class="pill">Melhor nota: ${fmtNota(melhor)}</span>` : '';
-  return `<button class="row ${s}" data-s="${s}" data-proj="${esc(m.id)}"><span class="n">${ICO('trophy')}</span><span class="t">Projeto final: ${esc(m.proj.titulo)}</span>${nota}<span class="pill p">PROJETO</span>${fim}</button>`;
+  return noMapa(m.l.length, 'proj ' + s, `data-s="${s}" data-proj="${esc(m.id)}"`, ICO('trophy'), melhor != null ? 'CHEFÃO · NOTA ' + fmtNota(melhor) : 'CHEFÃO', 'Projeto final: ' + esc(m.proj.titulo));
+}
+function pintaConquistas(){
+  const eu = ranking.find(r => r.eu), pos = eu && eu.estrelas > 0 ? Number(eu.posicao) : 99;
+  const L = [['Primeira lição','star',resumo.licoes_feitas>=1],['5 lições','check',resumo.licoes_feitas>=5],['10 lições','bolt',resumo.licoes_feitas>=10],
+    ['3 dias seguidos','flame',resumo.sequencia>=3],['50 estrelas','star',resumo.estrelas>=50],['Top 3 da semana','trophy',pos<=3]];
+  $('conqN').textContent = L.filter(x => x[2]).length + '/' + L.length;
+  $('conqLista').innerHTML = L.map(x => `<li class="${x[2]?'on':''}"><span>${x[2]?ICO(x[1],x[1]==='star'||x[1]==='flame'||x[1]==='bolt'):ICO('lock')}</span>${x[0]}</li>`).join('');
 }
 
 let pjTmr = null;

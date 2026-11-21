@@ -887,3 +887,37 @@ a.marca-logo:hover img,a.logo:hover img{transform:rotate(-2deg) scale(1.05)}
 .mp.trava .tec{filter:grayscale(1);opacity:.6}
 .aba{display:inline-flex;align-items:center;gap:8px}
 .tec[src$="icone-git.png"]{background:#fff;border-radius:50%}   /* o logo do GitHub é preto: precisa de fundo claro nos menus escuros */
+
+/* ===== MAPA DE FASES: a trilha vira um caminho de jogo ===== */
+.lista{display:flex;flex-direction:column;align-items:center;gap:0;isolation:isolate;padding:0 12px 28px;background:radial-gradient(circle at 20% 12%,rgba(242,242,107,.09) 0 2px,transparent 3px) 0 0/90px 90px,rgba(0,0,0,.2);border-radius:24px;overflow:hidden}
+.mundo{align-self:stretch;display:flex;gap:10px;align-items:baseline;padding:14px 18px;margin:0 -12px 22px;background:var(--fundo-linha);font:700 15px 'Chakra Petch',sans-serif}
+.mundo b{color:var(--amarelo)}.mundo em{margin-left:auto;font-style:normal;color:var(--claro)}
+.lista .row{position:relative;display:flex;flex-direction:column;align-items:center;width:72px;height:120px;padding:0;background:none;border:0;box-shadow:none;border-radius:0;gap:0;text-align:center;translate:var(--x) 0}
+.lista .row::before{content:"";position:absolute;z-index:-1;left:50%;top:36px;height:var(--len);border-left:5px dotted rgba(233,220,255,.28);transform-origin:50% 0;transform:translateX(-2.5px) rotate(var(--a))}
+.lista .mundo+.row::before{display:none}
+.lista .row:not(.trava)::before{border-left-color:var(--amarelo)}
+.no{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--esc);color:var(--claro);box-shadow:0 6px 0 var(--fundo-linha);transition:transform .12s,box-shadow .12s}
+.no .i{width:30px;height:30px}
+.lb{position:absolute;top:12px;left:calc(100% + 16px);width:150px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.esq .lb{left:auto;right:calc(100% + 16px);text-align:right}
+.lista .row small{font:800 10px Nunito,sans-serif;letter-spacing:.8px;color:var(--claro)}
+.lista .row .t{font:800 14px/1.2 Nunito,sans-serif;color:#fff}
+.lista .row.ok .no{background:var(--amarelo);color:var(--texto);box-shadow:0 6px 0 #b8b300}
+.lista .row.atual .no{background:#fff;color:var(--texto);width:84px;height:84px;margin:-6px 0;box-shadow:0 6px 0 #b8b300,0 0 0 6px var(--amarelo);animation:respira 2.4s ease-in-out infinite}
+.lista .row.atual::after{content:"";position:absolute;top:-40px;left:calc(50% - 19px);width:38px;height:38px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8' fill='%23ffcc00' stroke='%23ffcc00' stroke-width='8' stroke-linejoin='round'/%3E%3Ccircle cx='41' cy='50' r='5' fill='%231e1230'/%3E%3Ccircle cx='59' cy='50' r='5' fill='%231e1230'/%3E%3Cpath d='M44 60Q50 67 56 60' fill='none' stroke='%231e1230' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat;animation:flut 1.6s ease-in-out infinite}
+.lista .row.trava{opacity:.75}
+.lista .row.proj .no{border-radius:26px;width:92px;height:92px;margin-top:-10px}
+.lista .row.proj{height:136px}.lista .row.proj{width:92px}.lista .row.proj .lb{top:22px}.lista .row.proj small{color:var(--amarelo)}
+.lista .row:not(.trava):hover .no{transform:translateY(-3px)}
+.lista .row:not(.trava):active .no{transform:translateY(4px);box-shadow:0 2px 0 var(--fundo-linha)}
+:root[data-tema=claro] .lista .row .t{color:#1e1230}
+:root[data-tema=claro] .lista .row.atual .no{box-shadow:0 6px 0 #b8b300,0 0 0 6px var(--amarelo)}
+:root[data-tema=claro] .lista{background:rgba(82,37,128,.07)}
+:root[data-tema=claro] .mundo{background:var(--esc);color:#1e1230}
+:root[data-tema=claro] .mundo b{color:#522580}
+.conq h3{display:flex;justify-content:space-between}.conq h3 em{font-style:normal;color:var(--suave);font-size:15px}
+.conq ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.conq li{display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;background:#e6e0b8;color:var(--suave);font:800 12px/1.2 Nunito,sans-serif}
+.conq li span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(0,0,0,.08);flex:none}
+.conq li.on{background:var(--amarelo);color:var(--texto)}.conq li.on span{background:#fff}
+@media (max-width:480px){.lb{width:84px}.lista .row .t{font-size:12px}}
