@@ -1,3 +1,14 @@
+/* ===== ABERTURA: sai do ar sozinha, ou ao clicar / apertar uma tecla ===== */
+(function(){
+  const el = document.getElementById('intro'); if (!el) return;
+  const tira = () => { if (el.parentNode) el.remove(); };
+  const pula = () => el.classList.add('pula');
+  el.addEventListener('animationend', e => { if (e.target === el && e.animationName === 'introSai') tira(); });
+  el.addEventListener('click', pula);
+  addEventListener('keydown', pula, { once: true });
+  setTimeout(tira, 4500);   // garantia, caso a animação não rode
+})();
+
 /* =====================================================================
    1) CONFIGURAÇÃO DO SUPABASE  ←  PREENCHA AQUI
    Painel do Supabase → Project Settings → API

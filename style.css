@@ -38,8 +38,6 @@ button{font:inherit;color:inherit;cursor:pointer}
 #aviso.on{opacity:1;transform:translate(-50%,0)}
 .marca-logo{display:inline-flex;align-items:center;gap:10px;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:26px;letter-spacing:.3px;color:#fff;line-height:1}
 .marca-logo b{color:var(--amarelo);font-weight:700}
-.marca-logo svg{transition:transform .3s}
-a.marca-logo:hover svg{transform:rotate(-14deg) scale(1.08)}
 
 /* Cada tela ocupa a altura toda e o rodapé fica sempre no fim */
 #telaLogin,#telaApp{display:flex;flex-direction:column;min-height:var(--vh100)}
@@ -768,3 +766,37 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
 }
 @media (max-width:480px){.pcard{padding:22px 16px}.foto{justify-content:center}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== ABERTURA: o logo se desenha quando o site abre ===== */
+#intro{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#2c1450;cursor:pointer;animation:introSai .5s ease 2.55s forwards}
+#intro.pula{animation:introSai .25s ease forwards}
+@keyframes introSai{to{opacity:0;visibility:hidden;transform:scale(1.04)}}
+.in-logo{position:relative;width:min(720px,86vw);filter:drop-shadow(0 18px 40px rgba(0,0,0,.35))}
+.in-svg{display:block;width:100%;height:auto;overflow:visible}
+.in-star{transform-box:fill-box;transform-origin:50% 55%;animation:introEstrela .75s cubic-bezier(.3,1.5,.5,1) .12s backwards}
+@keyframes introEstrela{0%{transform:scale(0) rotate(-35deg)}100%{transform:scale(1) rotate(0)}}
+.in-svg .lt{stroke-dasharray:1 1;stroke-dashoffset:1;animation:introTraco .42s cubic-bezier(.5,0,.2,1) forwards;animation-delay:calc(.62s + var(--i) * .085s)}
+.in-svg .sh .lt{animation-delay:calc(.8s + var(--i) * .085s)}
+@keyframes introTraco{to{stroke-dashoffset:0}}
+/* faíscas saindo da estrela */
+.fg{position:absolute;left:12.5%;top:51%;width:16px;height:16px;margin:-8px 0 0 -8px;background:#f2f26b;clip-path:polygon(50% 0,62% 36%,100% 38%,70% 60%,80% 100%,50% 76%,20% 100%,30% 60%,0 38%,38% 36%);opacity:0;animation:introFagulha .7s ease-out var(--d) forwards}
+@keyframes introFagulha{0%{opacity:1;transform:translate(0,0) scale(.3) rotate(0)}100%{opacity:0;transform:translate(calc(var(--dx) * 90px),calc(var(--dy) * 70px)) scale(1) rotate(160deg)}}
+@media (prefers-reduced-motion:reduce){
+  #intro{animation:introSai .4s ease 1s forwards !important}
+  .in-star,.fg{animation:none !important}
+  .fg{display:none}
+  .in-svg .lt{animation:none !important;stroke-dashoffset:0}
+}
+
+/* ===== logo novo (imagem) no cabeçalho, no rodapé e no painel ===== */
+.marca-logo img,.logo img{display:block;width:auto;transition:transform .3s}
+#hdrLogin .marca-logo img{height:44px}
+.fgrande .marca-logo img{height:42px}
+.logo img{height:42px}
+a.marca-logo:hover img,a.logo:hover img{transform:rotate(-2deg) scale(1.05)}
+:root[data-tema=claro] .logo img{box-sizing:content-box;height:36px;padding:5px 12px;background:#2c1450;border-radius:12px}
+@media (max-width:600px){
+  #hdrLogin .marca-logo img{height:34px}
+  .logo img{height:32px}
+  :root[data-tema=claro] .logo img{height:28px;padding:4px 10px}
+}
