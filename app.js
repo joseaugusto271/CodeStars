@@ -10,6 +10,107 @@
 })();
 
 /* =====================================================================
+   AUTOCOMPLETAR NOS EDITORES (como no VS Code): fecha tags, aspas e
+   parênteses, completa "</" e recua o código ao apertar Enter
+   ===================================================================== */
+const TAGS_VAZIAS = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+const PARES = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'", '`': '`' };
+const FECHADORES = new Set([')', ']', '}', '"', "'", '`']);
+let pjTipoEd = '', autoOcupado = false;
+
+// troca o trecho [de, ate) por "texto" sem perder o desfazer (Ctrl+Z); o cursor vai para de + cursor
+function autoInsere(ta, de, ate, texto, cursor){
+  autoOcupado = true;
+  try{
+    ta.focus(); ta.setSelectionRange(de, ate);
+    let ok = false;
+    try{ ok = texto === '' ? document.execCommand('delete') : document.execCommand('insertText', false, texto); }catch(_){}
+    if (!ok){ ta.setRangeText(texto, de, ate, 'end'); ta.dispatchEvent(new Event('input', { bubbles: true })); }
+    const c = de + (cursor == null ? texto.length : cursor);
+    ta.setSelectionRange(c, c);
+  } finally { autoOcupado = false; }
+}
+// tags que ainda estão abertas no fim do texto (ignora comentários, tags vazias e o miolo de <script>/<style>)
+function tagsAbertas(txt){
+  const pilha = [], re = /<!--[\s\S]*?(?:-->|$)|<(\/?)([a-zA-Z][\w:-]*)((?:"[^"]*"|'[^']*'|[^'">])*)>/g;
+  let m;
+  while ((m = re.exec(txt))){
+    if (m[0].startsWith('<!--')) continue;
+    const nome = m[2].toLowerCase();
+    if (m[1]){ const k = pilha.lastIndexOf(nome); if (k >= 0) pilha.length = k; continue; }
+    if (TAGS_VAZIAS.has(nome) || /\/\s*$/.test(m[3])) continue;
+    pilha.push(nome);
+    if (nome === 'script' || nome === 'style'){ const f = txt.toLowerCase().indexOf('</' + nome, re.lastIndex); re.lastIndex = f < 0 ? txt.length : f; }
+  }
+  return pilha;
+}
+const dentroDeScriptOuStyle = txt => { const p = tagsAbertas(txt); return p.includes('script') || p.includes('style'); };
+
+// ligado ao evento "beforeinput" do textarea (funciona também no teclado do celular)
+function autoEditor(e, lang){
+  if (autoOcupado || e.isComposing || !lang) return;
+  const ta = e.target, v = ta.value, a = ta.selectionStart, b = ta.selectionEnd, t = e.inputType, d = e.data;
+  const antes = v.slice(0, a), dep = v.slice(b), cA = v[a - 1] || '', cD = v[b] || '';
+  const html = lang === 'html', py = lang === 'py', un = py ? '    ' : '  ';
+  const lin = antes.slice(antes.lastIndexOf('\n') + 1), ind = lin.match(/^[ \t]*/)[0];
+  const faz = (de, ate, txt, cur) => { e.preventDefault(); autoInsere(ta, de, ate, txt, cur); };
+
+  /* Enter: mantém o recuo e abre um bloco entre { } ( ) [ ] ou <tag></tag> */
+  if (t === 'insertLineBreak' || t === 'insertParagraph'){
+    if (a !== b) return;
+    const abre = html ? /<([a-zA-Z][\w:-]*)((?:"[^"]*"|'[^']*'|[^'"<>])*)>$/.exec(antes) : null;
+    const vazio = abre && (TAGS_VAZIAS.has(abre[1].toLowerCase()) || /\/\s*$/.test(abre[2]));
+    const entreTags = abre && !vazio && new RegExp('^</' + abre[1] + '\\s*>', 'i').test(dep);
+    const entrePares = PARES[cA] && ')]}'.includes(PARES[cA]) && cD === PARES[cA];
+    if (entreTags || entrePares){ faz(a, b, '\n' + ind + un + '\n' + ind, 1 + ind.length + un.length); return; }
+    const fimLin = lin.trimEnd();
+    const extra = (/[{(\[]$/.test(fimLin) || (py && /:$/.test(fimLin)) || (abre && !vazio)) ? un : '';
+    if (ind || extra) faz(a, b, '\n' + ind + extra);
+    return;
+  }
+
+  /* Backspace entre um par vazio apaga os dois: (|) "|" {|} */
+  if (t === 'deleteContentBackward'){
+    if (a === b && cA && PARES[cA] === cD) faz(a - 1, a + 1, '', 0);
+    return;
+  }
+
+  if (t !== 'insertText' || !d || d.length !== 1) return;
+
+  /* digitou o fechamento que já está logo depois: só anda o cursor */
+  if (a === b && FECHADORES.has(d) && cD === d){ e.preventDefault(); ta.setSelectionRange(a + 1, a + 1); return; }
+
+  /* abre ( [ { " ' ` e já fecha (com texto selecionado, envolve a seleção) */
+  if (PARES[d]){
+    if (a !== b){ faz(a, b, d + v.slice(a, b) + PARES[d], 1 + (b - a)); return; }
+    const aspas = d === '"' || d === "'" || d === '`';
+    const antesOk = d !== "'" || !/\w/.test(cA);              // apóstrofo no meio da palavra não fecha
+    const depOk = cD === '' || /[\s)\]}>,;:<]/.test(cD);
+    if (antesOk && depOk && !(aspas && cA === d)) faz(a, b, d + PARES[d], 1);
+    return;
+  }
+
+  if (!html || a !== b) return;
+
+  /* HTML: ao digitar ">" de uma tag de abertura, escreve o fechamento: <p> vira <p></p> */
+  if (d === '>'){
+    const m = /<([a-zA-Z][\w:-]*)((?:"[^"]*"|'[^']*'|[^'"<>])*)$/.exec(antes);
+    if (!m || dentroDeScriptOuStyle(antes.slice(0, m.index))) return;
+    if (cD === '>'){ e.preventDefault(); ta.setSelectionRange(a + 1, a + 1); return; }
+    const nome = m[1];
+    if (TAGS_VAZIAS.has(nome.toLowerCase()) || /\/\s*$/.test(m[2]) || new RegExp('^</' + nome + '\\s*>', 'i').test(dep)) return;
+    faz(a, b, '></' + nome + '>', 1);
+    return;
+  }
+  /* HTML: ao digitar "</", completa com o nome da tag aberta mais próxima */
+  if (d === '/' && cA === '<'){
+    const pilha = tagsAbertas(antes.slice(0, a - 1)), n = pilha[pilha.length - 1];
+    if (!n || pilha.includes('script') || pilha.includes('style') || new RegExp('^</' + n + '\\s*>', 'i').test(dep)) return;
+    faz(a, b, '/' + n + '>', 1 + n.length + 1);
+  }
+}
+
+/* =====================================================================
    1) CONFIGURAÇÃO DO SUPABASE  ←  PREENCHA AQUI
    Painel do Supabase → Project Settings → API
    - SUPABASE_URL: "Project URL"
@@ -310,6 +411,12 @@ function statusLicoes(m){
 }
 const ICO = (n, f) => '<svg class="i' + (f ? ' f' : '') + '" aria-hidden="true"><use href="#i-' + n + '"/></svg>';
 const ICONE = { ok:'✓', atual:ICO('play', 1), trava:ICO('lock') };
+const ICONE_TEC = { html:'icone-html.png', css:'icone-css.png', js:'icone-js.png', git:'icone-git.png', py:'icone-python.png' };
+function tecDe(m){
+  const s = (String(m.id) + ' ' + String(m.nome || '')).toLowerCase();
+  return /html/.test(s) ? 'html' : /css/.test(s) ? 'css' : /java|\bjs\b/.test(s) ? 'js' : /\bgit\b/.test(s) ? 'git' : /python|\bpy\b/.test(s) ? 'py' : null;
+}
+const imgTec = (t, px) => t ? '<img class="tec" src="' + ICONE_TEC[t] + '" alt="" width="' + px + '" height="' + px + '">' : '';
 
 function pintaPainel(){
   const mods = modulos();
@@ -350,7 +457,7 @@ function pintaPainel(){
 
   // módulos e lições
   $('mods').innerHTML = mods.map(m =>
-    `<button class="mp ${m.st==='trava'?'trava':''} ${m.id===moduloSel?'on':''}" role="tab" aria-selected="${m.id===moduloSel}" data-k="${esc(m.id)}"><span>${ICONE[m.st]}</span>${esc(m.nome)}</button>`).join('');
+    `<button class="mp ${m.st==='trava'?'trava':''} ${m.id===moduloSel?'on':''}" role="tab" aria-selected="${m.id===moduloSel}" data-k="${esc(m.id)}"><span>${ICONE[m.st]}</span>${imgTec(tecDe(m), 22)}${esc(m.nome)}</button>`).join('');
   const m = mods.find(x => x.id === moduloSel), st = statusLicoes(m);
   $('lista').innerHTML = m.l.map((l,i) => {
     const s = st[i], fim = s==='ok' ? '<span class="pill ref">' + ICO('refresh') + ' REFAZER</span><span class="ic ok">✓</span>' : s==='atual' ? '<span class="ic go">→</span>' : '<span>' + ICO('lock') + '</span>';
@@ -449,6 +556,7 @@ function abreProjeto(modId){
   let rasc = null; try{ rasc = localStorage.getItem(pjChave(m.id)); }catch(e){}
   $('pjCod').value = rasc != null ? rasc : p.base;
   const tipo = p.tipo || 'web';
+  pjTipoEd = tipo === 'python' ? 'py' : tipo === 'texto' ? '' : 'html';
   $('pjArq').textContent = tipo === 'python' ? 'main.py' : tipo === 'texto' ? 'comandos.txt' : 'index.html';
   $('pjEdit').classList.toggle('sem', tipo === 'texto'); $('pjResBox').hidden = tipo === 'texto';
   $('pjVer').hidden = tipo !== 'web'; $('pjSaida').hidden = tipo !== 'python'; $('pjRodar').hidden = tipo !== 'python';
@@ -509,7 +617,7 @@ $('pjCod').addEventListener('input', () => {
 });
 $('pjCod').addEventListener('keydown', e => {   // Tab escreve 2 espaços em vez de pular o foco
   if (e.key !== 'Tab' || e.shiftKey) return; e.preventDefault();
-  const t = e.target, a = t.selectionStart; t.value = t.value.slice(0, a) + '  ' + t.value.slice(t.selectionEnd); t.selectionStart = t.selectionEnd = a + 2;
+  const un = pjTipoEd === 'py' ? '    ' : '  ', t = e.target, a = t.selectionStart; t.value = t.value.slice(0, a) + un + t.value.slice(t.selectionEnd); t.selectionStart = t.selectionEnd = a + un.length;
   t.dispatchEvent(new Event('input'));
 });
 
@@ -1127,7 +1235,7 @@ $('auConteudo').addEventListener('click', e => {
 $('auConteudo').addEventListener('keydown', e => {
   if (e.target.id !== 'auEd') return;
   if (e.key === 'Escape'){ aulaSoltaTab = true; return; }
-  if (e.key === 'Tab' && !aulaSoltaTab){ e.preventDefault(); const t = e.target; t.setRangeText('  ', t.selectionStart, t.selectionEnd, 'end'); t.dispatchEvent(new Event('input', { bubbles:true })); }
+  if (e.key === 'Tab' && !aulaSoltaTab){ e.preventDefault(); const t = e.target, sa = aulaCod[aulaIdx]; t.setRangeText(sa && sa.aba === 'py' ? '    ' : '  ', t.selectionStart, t.selectionEnd, 'end'); t.dispatchEvent(new Event('input', { bubbles:true })); }
   else if (e.key.length === 1) aulaSoltaTab = false;
 });
 document.addEventListener('keydown', e => {
@@ -1646,6 +1754,11 @@ async function tratar(evento, sessao){
   }
 })();
 
+// Praticar (aba atual), projeto final e lições
+$('ed').addEventListener('beforeinput', e => autoEditor(e, lang));
+$('pjCod').addEventListener('beforeinput', e => autoEditor(e, pjTipoEd));
+$('auConteudo').addEventListener('beforeinput', e => { if (e.target.id !== 'auEd') return; const st = aulaCod[aulaIdx]; autoEditor(e, st && st.aba); });
+
 /* =====================================================================
    10) PÁGINA DE LOGIN: editor de teste, trilha desenhada, painel de exemplo,
        correção de exemplo, profundidade e aparecer ao rolar
@@ -1704,6 +1817,7 @@ async function tratar(evento, sessao){
       $('labNota').setAttribute('aria-label', n + ' de 3 estrelas');
       fim.hidden = n < 3; certos = n;
     }
+    ed.addEventListener('beforeinput', e => autoEditor(e, 'html'));
     ed.addEventListener('input', () => { clearTimeout(tm); tm = setTimeout(atualiza, 160); });
     atualiza();
   })();
