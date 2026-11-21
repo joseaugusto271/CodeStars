@@ -671,28 +671,105 @@ details.senha .campo{margin:14px 0 0}
 .qz-nota{font:700 56px/1 'Chakra Petch',sans-serif;margin:8px 0 6px}
 .qz-fim p{margin:0 0 20px;color:var(--suave);font-weight:700}
 .qz-fim .qz-btns{justify-content:center}
-/* ranking */
-.podio{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin:8px 0 28px}
-.pod{display:flex;flex-direction:column;align-items:center;gap:6px;width:150px;text-align:center}
+/* ranking: o céu (as estrelas do top 3 formam uma constelação) */
+.ceu{--ouro:#ffcc00;--prata:#d9d4ec;--bronze:#e8a672;--tinta:#1e1230;--linha-c:rgba(233,220,255,.75);
+  position:relative;overflow:hidden;border-radius:24px;margin:8px 0 36px;color:#fff;box-shadow:0 8px 0 var(--fundo-linha);
+  background-image:
+    radial-gradient(circle at 6% 12%,#fff 0 1.3px,transparent 2px),
+    radial-gradient(circle at 14% 78%,rgba(255,255,255,.8) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 23% 30%,rgba(255,255,255,.6) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 33% 88%,#fff 0 1.2px,transparent 1.9px),
+    radial-gradient(circle at 38% 14%,rgba(255,255,255,.7) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 62% 8%,#fff 0 1.4px,transparent 2.1px),
+    radial-gradient(circle at 70% 70%,rgba(255,255,255,.6) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 78% 18%,rgba(255,255,255,.8) 0 1.2px,transparent 1.9px),
+    radial-gradient(circle at 90% 38%,#fff 0 1.3px,transparent 2px),
+    radial-gradient(circle at 94% 80%,rgba(255,255,255,.7) 0 1px,transparent 1.7px),
+    radial-gradient(circle at 52% 66%,rgba(242,242,107,.8) 0 1.4px,transparent 2.1px),
+    radial-gradient(circle at 10% 44%,rgba(242,242,107,.7) 0 1.4px,transparent 2.1px),
+    radial-gradient(circle at 88% 7%,rgba(242,242,107,.8) 0 1.6px,transparent 2.3px),
+    linear-gradient(180deg,#150826 0%,#241044 100%)}
+.ceu-cena{position:relative;aspect-ratio:1000/430;container-type:inline-size}
+.ceu-linhas{position:absolute;inset:0;width:100%;height:100%;overflow:visible;animation:rkLinha 1s .55s ease-out both}
+.ceu-linhas polyline{fill:none;stroke:var(--linha-c);stroke-width:2.8;stroke-dasharray:.5 8.5;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.ceu-linhas.lm{display:none}
+@keyframes rkLinha{from{clip-path:inset(-10px 100% -10px 0)}to{clip-path:inset(-10px -10px -10px 0)}}
+.podio{position:absolute;inset:0}
+.pod{--wn:20;--cor:var(--ouro);position:absolute;left:var(--x);top:var(--y);width:calc(var(--wn) * 1%);aspect-ratio:1;transform:translate(-50%,-50%)}
+.pod.p1{--x:50%;--y:36%;--wn:25;--cor:var(--ouro);--d:.55s}
+.pod.p2{--x:19%;--y:58%;--wn:19;--cor:var(--prata);--d:.3s}
+.pod.p3{--x:81%;--y:50%;--wn:16;--cor:var(--bronze);--d:.1s}
+.pod-in{position:relative;width:100%;height:100%;animation:rkSurge .65s var(--d) cubic-bezier(.3,1.4,.5,1) both}
+@keyframes rkSurge{from{scale:.2;rotate:-25deg;opacity:0}60%{scale:1.08;rotate:4deg;opacity:1}to{scale:1;rotate:0deg;opacity:1}}
+.pod-estrela{position:absolute;inset:0}
+.pod-estrela svg{display:block;width:100%;height:100%;overflow:visible}
+.pod-estrela polygon{stroke-width:8;stroke-linejoin:round}
+.pod-estrela .som{fill:#0d0419;stroke:#0d0419}
+.pod-estrela .cor{fill:var(--cor);stroke:var(--cor)}
+.pod .rk-av{position:absolute;left:50%;top:55%;width:40%;height:auto;aspect-ratio:1;transform:translate(-50%,-50%);background:var(--creme);border:3px solid var(--tinta);font-size:18px;font-size:calc(var(--wn) * .16cqw)}
+.pod-txt{position:absolute;top:97%;left:50%;width:150%;min-width:130px;transform:translateX(-50%);text-align:center}
+.pod-nome{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 clamp(15px,1.9vw,20px) 'Chakra Petch',sans-serif;color:#fff}
+.pod-nome b{color:var(--cor);font-weight:700;margin-right:7px}
+.pod-nome .nm{display:inline}
+.pod.eu .pod-nome .nm{background:var(--amarelo);color:var(--tinta);border-radius:6px;padding:0 8px}
+.pod-pts{display:inline-flex;align-items:center;gap:5px;margin-top:2px;font:800 14px Nunito,sans-serif;color:#e9dcff}
+.pod-pts .i{width:14px;height:14px;fill:var(--ouro);stroke:var(--ouro)}
+.pod.vaga .pod-estrela .cor{fill:none;stroke:rgba(233,220,255,.4);stroke-width:2.4;stroke-dasharray:1 6}
+.pod.vaga .pod-estrela::after{content:"?";position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);font:700 calc(var(--wn) * .3cqw) 'Chakra Petch',sans-serif;color:rgba(233,220,255,.55)}
+.pod.vaga .pod-nome,.pod.vaga .pod-nome b{color:rgba(233,220,255,.6)}
+.pod.vaga .pod-pts{color:rgba(233,220,255,.5);font-weight:600}
+/* faixa "sua posição" com a estrela mascote */
+.ceu-voce{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:22px;padding:20px 28px 24px;border-top:2px solid rgba(233,220,255,.14)}
+.masc{width:92px;border:0;background:none;padding:0;cursor:pointer;filter:drop-shadow(4px 5px 0 rgba(0,0,0,.35))}
+.masc svg{display:block;width:100%;overflow:visible;transform-origin:50% 92%}
+.masc.festa svg{animation:rkPula .7s 1.35s ease-in-out 3 both}
+.masc.torcendo svg,.masc.olhando svg{animation:rkTorce 1.2s 1.35s ease-in-out 2 both}
+.masc.reage svg{animation:rkPula .7s ease-in-out 1 both}
+@keyframes rkPula{0%,100%{transform:translateY(0) scale(1.05,.92)}30%{transform:translateY(-22px) rotate(-8deg) scale(.96,1.05)}60%{transform:translateY(-22px) rotate(8deg) scale(.96,1.05)}85%{transform:translateY(0) scale(1.05,.92)}}
+@keyframes rkTorce{0%,100%{transform:rotate(0)}30%{transform:translateY(-8px) rotate(-7deg)}70%{transform:translateY(-8px) rotate(7deg)}}
+.voce-corpo{min-width:0;display:grid;gap:8px}
+.voce-corpo p{margin:0}
+.voce-linha{display:flex;align-items:baseline;gap:14px;font:800 18px Nunito,sans-serif;color:#fff}
+.voce-pos{font:700 clamp(38px,5.4vw,56px)/1 'Chakra Petch',sans-serif;color:var(--amarelo)}
+.voce-falta{font-weight:700;color:#e9dcff}
+.voce-barra{display:block;height:10px;border-radius:6px;background:rgba(233,220,255,.16);overflow:hidden;max-width:520px}
+.voce-barra i{display:block;height:100%;border-radius:6px;background:var(--ouro);transform-origin:left;transform:scaleX(var(--p));animation:rkEnche .9s 1.1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rkEnche{from{transform:scaleX(0)}}
+/* lista do 4º lugar em diante */
+.rk-card{padding:22px 24px 12px;margin-bottom:8px}
+.rk-card h2{font:700 22px 'Chakra Petch',sans-serif;margin:0 0 8px}
+.rk-lista{list-style:none;margin:0;padding:0}
+.rk-item{border-radius:0;display:grid;grid-template-columns:44px 44px minmax(0,1fr) auto;align-items:center;gap:14px;padding:12px 10px;border-top:1px solid var(--campo);font-weight:700}
+.rk-item:first-child{border-top:0}
 .rk-av{width:44px;height:44px;border-radius:50%;background:var(--amarelo);color:var(--texto);border:3px solid var(--esc);display:grid;place-items:center;font:700 18px 'Chakra Petch',sans-serif;overflow:hidden;flex:none}
 .rk-av img{width:100%;height:100%;object-fit:cover}
-.pod .rk-av{width:76px;height:76px;font-size:30px}
-.pod.p1 .rk-av{width:96px;height:96px;font-size:38px;border-color:#ffcc00}
-.pod .nome{font-weight:800;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pod .pts{font-weight:800;color:var(--claro);font-size:14px}
-.pod.eu .nome{background:var(--amarelo);color:var(--texto);border-radius:8px;padding:0 8px}
-.pod .pbase{width:100%;border-radius:12px 12px 0 0;display:grid;place-items:center;font:700 28px 'Chakra Petch',sans-serif;color:var(--texto)}
-.pod.p1 .pbase{height:96px;background:linear-gradient(#ffe27a,#ffcc00)}
-.pod.p2 .pbase{height:72px;background:linear-gradient(#e9e6f5,#bdb7d1)}
-.pod.p3 .pbase{height:56px;background:linear-gradient(#f2c9a0,#cd8f5b)}
-.rk-lista{display:grid;gap:6px}
-.rk-lista li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;font-weight:700}
-.rk-pos{width:38px;font:700 16px 'Chakra Petch',sans-serif;color:var(--suave);text-align:center}
-.rk-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rk-pts{font-weight:800;color:var(--suave)}
-.rk-lista li.eu{background:var(--amarelo)}
-.rk-lista li.eu .rk-pos,.rk-lista li.eu .rk-pts{color:var(--texto)}
-.rk-lista li.rk-sep{justify-content:center;color:var(--suave);padding:0}
+.rk-pos{font:700 18px 'Chakra Petch',sans-serif;color:var(--suave);text-align:center}
+.rk-corpo{min-width:0;display:grid;gap:7px}
+.rk-nome{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-barra{display:block;height:6px;border-radius:3px;background:var(--campo);overflow:hidden}
+.rk-barra i{display:block;height:100%;border-radius:3px;background:#522580;transform-origin:left;transform:scaleX(var(--p));animation:rkEnche .8s 1s cubic-bezier(.2,.7,.2,1) both}
+.rk-pts{display:inline-flex;align-items:center;gap:6px;font:700 18px 'Chakra Petch',sans-serif;color:var(--texto)}
+.rk-pts .i{width:17px;height:17px;fill:#d99a00;stroke:#d99a00}
+.rk-item.eu{background:var(--amarelo);border-radius:12px;border-top-color:transparent}
+.rk-item.eu+.rk-item{border-top-color:transparent}
+.rk-item.eu .rk-pos{color:var(--texto)}
+.rk-item.eu .rk-barra{background:rgba(30,18,48,.18)}
+.rk-item.eu .rk-barra i{background:var(--texto)}
+.rk-sep{display:block;text-align:center;color:var(--suave);line-height:1;padding:2px 0}
+@media (max-width:700px){
+  .ceu-cena{aspect-ratio:1/1.12}
+  .ceu-linhas.ld{display:none}.ceu-linhas.lm{display:block}
+  .pod.p1{--x:50%;--y:25%;--wn:42}
+  .pod.p2{--x:24%;--y:62%;--wn:31}
+  .pod.p3{--x:76%;--y:53%;--wn:28}
+  .pod-nome{font-size:15px}.pod-pts{font-size:13px}
+  .ceu-voce{grid-template-columns:72px minmax(0,1fr);gap:14px;padding:16px}
+  .masc{width:72px}
+  .voce-linha{flex-wrap:wrap;gap:4px 12px;font-size:16px}
+  .rk-card{padding:18px 14px 8px}
+  .rk-item{grid-template-columns:34px 40px minmax(0,1fr) auto;gap:10px}
+  .rk-item .rk-av{width:40px;height:40px;font-size:16px}
+}
 .ver-mais{display:inline-block;margin-top:14px;font-weight:800;color:#8a1f9c;text-decoration:underline}
 /* ajuda */
 .aj-nav{display:flex;gap:8px;flex-wrap:wrap}
@@ -727,7 +804,7 @@ kbd{background:#fff;border:1px solid #cfc9a8;border-bottom-width:3px;border-radi
 .msgs{margin-top:26px;padding-top:20px;border-top:2px solid #e6e0b8}
 .msgs h3{font:700 17px 'Chakra Petch',sans-serif;margin:0 0 12px}
 .msg-item{background:#f3efd0;border-radius:12px;padding:12px 14px;margin:0 0 10px;font-size:14px;line-height:1.55;overflow-wrap:anywhere}
-@media (max-width:900px){.aj-2{grid-template-columns:1fr}.podio{gap:8px}.pod{width:104px}.pod .rk-av{width:60px;height:60px;font-size:24px}.pod.p1 .rk-av{width:76px;height:76px}.qz{padding:18px}}
+@media (max-width:900px){.aj-2{grid-template-columns:1fr}.qz{padding:18px}}
 /* tema claro (só dentro do painel) */
 :root[data-tema=claro]{--ac:#6b2fc0;--roxo:#f3edff;--esc:#e4d8fb;--fundo-linha:#cdb9f2;--claro:#5b4a7a}
 :root[data-tema=claro] body{color:#1e1230}

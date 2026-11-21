@@ -1620,38 +1620,119 @@ $('qzRefaz').addEventListener('click', () => abreQuiz(qzAtual.id));
 
 // ---- Ranking geral (função ranking_geral no banco)
 function avatarEl(r){ const a = document.createElement('span'); a.className = 'rk-av'; a.setAttribute('aria-hidden', 'true'); pinta(a, r); return a; }
+const fmtN = n => Number(n).toLocaleString('pt-BR');
+const POLI = '50,10 61.8,37.8 91.8,40.4 69,60.2 75.9,89.6 50,74 24.1,89.6 31,60.2 8.2,40.4 38.2,37.8';
+
+// Estrela mascote com cara que muda conforme a situação do aluno no ranking
+function mascoteSVG(humor){
+  const T = '#1e1230';
+  const traco = 'fill="none" stroke="' + T + '" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"';
+  const olhaCima = '<circle cx="41" cy="48" r="5" fill="' + T + '"/><circle cx="59" cy="48" r="5" fill="' + T + '"/><circle cx="42.8" cy="45.6" r="1.7" fill="#fff"/><circle cx="60.8" cy="45.6" r="1.7" fill="#fff"/>';
+  const olhos = {
+    festa: '<path d="M35.5 52 Q41 44.5 46.5 52 M53.5 52 Q59 44.5 64.5 52" ' + traco + '/>',
+    torcendo: olhaCima,
+    olhando: olhaCima,
+    sono: '<path d="M35.5 51 Q41 55.5 46.5 51 M53.5 51 Q59 55.5 64.5 51" ' + traco + '/>'
+  };
+  const boca = {
+    festa: '<path d="M42.5 58 Q50 71 57.5 58 Z" fill="' + T + '" stroke="' + T + '" stroke-width="2.4" stroke-linejoin="round"/>',
+    torcendo: '<path d="M44 58.5 Q50 68 56 58.5 Z" fill="' + T + '" stroke="' + T + '" stroke-width="2.4" stroke-linejoin="round"/>',
+    olhando: '<path d="M45 60 Q50 64.5 55 60" ' + traco.replace('3.4', '3.2') + '/>',
+    sono: '<circle cx="50" cy="61.5" r="2.4" fill="none" stroke="' + T + '" stroke-width="2.6"/>'
+  };
+  const extra = {
+    festa: '<path d="M13 12 L15 17.5 L20.5 19.5 L15 21.5 L13 27 L11 21.5 L5.5 19.5 L11 17.5 Z M87 6 L88.6 10.4 L93 12 L88.6 13.6 L87 18 L85.4 13.6 L81 12 L85.4 10.4 Z" fill="#f2f26b"/>',
+    torcendo: '',
+    olhando: '',
+    sono: '<path d="M72 20 h9 l-9 10 h9 M84 8 h6 l-6 7 h6" fill="none" stroke="#e9dcff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>'
+  };
+  return '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+    '<polygon points="' + POLI + '" transform="translate(3 4)" fill="#0d0419" stroke="#0d0419" stroke-width="8" stroke-linejoin="round"/>' +
+    '<polygon points="' + POLI + '" fill="#ffcc00" stroke="#ffcc00" stroke-width="8" stroke-linejoin="round"/>' +
+    olhos[humor] + '<ellipse cx="35.5" cy="60" rx="3.8" ry="2.5" fill="#ff7fa6" opacity=".8"/><ellipse cx="64.5" cy="60" rx="3.8" ry="2.5" fill="#ff7fa6" opacity=".8"/>' +
+    boca[humor] + extra[humor] + '</svg>';
+}
+
+// Uma estrela do pódio (pos = 1, 2 ou 3). Sem aluno naquela posição, vira uma vaga em tracejado.
+function podioEl(pos, r){
+  const d = document.createElement('div');
+  d.className = 'pod p' + pos + (r ? (r.eu ? ' eu' : '') : ' vaga');
+  d.setAttribute('role', 'listitem');
+  const nome = r ? r.nome + (r.eu ? ' (você)' : '') : 'Vaga aberta';
+  d.innerHTML = '<div class="pod-in"><div class="pod-estrela"><svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+    (r ? '<polygon class="som" points="' + POLI + '" transform="translate(3 4)"/>' : '') +
+    '<polygon class="cor" points="' + POLI + '"/></svg></div>' +
+    '<div class="pod-txt"><span class="pod-nome"><b>' + pos + 'º</b><span class="nm">' + esc(nome) + '</span></span>' +
+    '<span class="pod-pts">' + (r ? ICO('star', 1) + ' ' + fmtN(r.estrelas) : 'ninguém ainda') + '</span></div></div>';
+  if (r) d.querySelector('.pod-estrela').appendChild(avatarEl(r));
+  return d;
+}
+
+// Faixa "sua posição": posição, quanto falta para subir e a cara da mascote
+function pintaVoce(rows, alguem){
+  const eu = rows.find(r => r.eu);
+  let humor = 'sono', pos = '—', linha = '', falta = '', p = null;
+  if (!alguem){
+    linha = 'O céu ainda está vazio'; falta = 'Conclua uma lição e ocupe o 1º lugar.';
+  } else if (!eu || eu.estrelas <= 0){
+    humor = 'olhando'; linha = 'Você ainda não está no ranking'; falta = 'Conclua uma lição para ganhar sua primeira estrela.';
+  } else {
+    pos = eu.posicao + 'º';
+    linha = 'Você, com ' + fmtN(eu.estrelas) + (eu.estrelas === 1 ? ' estrela' : ' estrelas');
+    if (eu.posicao === 1){
+      humor = 'festa';
+      const seg = rows.find(r => r.posicao === 2 && r.estrelas > 0);
+      if (!seg) falta = 'Mais ninguém pontuou ainda.';
+      else if (seg.estrelas === eu.estrelas) falta = 'Empate com ' + seg.nome + ' (2º). Você fica na frente pelo desempate.';
+      else falta = 'Sua vantagem sobre ' + seg.nome + ' (2º) é de ' + fmtN(eu.estrelas - seg.estrelas) + (eu.estrelas - seg.estrelas === 1 ? ' estrela.' : ' estrelas.');
+    } else {
+      const acima = rows.filter(r => r.posicao < eu.posicao).sort((a, b) => b.posicao - a.posicao)[0];
+      const x = acima ? acima.estrelas - eu.estrelas + 1 : 0;
+      humor = eu.posicao <= 3 ? 'festa' : (acima && x <= 5 ? 'torcendo' : 'olhando');
+      if (acima){
+        falta = (x === 1 ? 'Falta 1 estrela' : 'Faltam ' + fmtN(x) + ' estrelas') + ' para passar ' + acima.nome + ' (' + acima.posicao + 'º)' +
+          (acima.posicao < eu.posicao - 1 ? ', o mais próximo que aparece na lista.' : '.');
+        p = eu.estrelas / (acima.estrelas + 1);
+      }
+    }
+  }
+  $('rkSua').innerHTML = '<button class="masc ' + humor + '" type="button" aria-label="Fazer a estrela reagir">' + mascoteSVG(humor) + '</button>' +
+    '<div class="voce-corpo"><p class="voce-linha">' + (pos === '—' ? '' : '<b class="voce-pos">' + pos + '</b>') + '<span>' + esc(linha) + '</span></p>' +
+    '<p class="voce-falta">' + esc(falta) + '</p>' +
+    (p != null ? '<span class="voce-barra" aria-hidden="true"><i style="--p:' + Math.min(p, .99).toFixed(3) + '"></i></span>' : '') + '</div>';
+}
+$('rkSua').addEventListener('click', e => {
+  const b = e.target.closest('.masc'); if (!b) return;
+  b.classList.remove('reage'); void b.offsetWidth; b.classList.add('reage');
+});
+
 function pintaRankingGeral(rows){
-  const top = rows.filter(r => Number(r.posicao) <= 3 && Number(r.estrelas) > 0);
-  const ordem = [2, 1, 3].map(p => top.find(r => Number(r.posicao) === p)).filter(Boolean);
-  const medalha = { 1:'', 2:'', 3:'' };
-  $('rkPodio').replaceChildren(...ordem.map(r => {
-    const pos = Number(r.posicao), d = document.createElement('div'); d.className = 'pod p' + pos + (r.eu ? ' eu' : ''); d.setAttribute('role', 'listitem');
-    const nome = document.createElement('div'); nome.className = 'nome'; nome.textContent = r.nome + (r.eu ? ' (você)' : '');
-    const pts = document.createElement('div'); pts.className = 'pts'; pts.textContent = r.estrelas + '';
-    const base = document.createElement('div'); base.className = 'pbase'; base.textContent = medalha[pos];
-    d.append(avatarEl(r), nome, pts, base); return d;
-  }));
-  const resto = rows.filter(r => Number(r.posicao) > 3), itens = []; let ult = 3;
-  resto.forEach(r => {
-    const pos = Number(r.posicao);
-    if (pos > ult + 1){ const s = document.createElement('li'); s.className = 'rk-sep'; s.setAttribute('aria-hidden', 'true'); s.textContent = '⋮'; itens.push(s); }
-    const li = document.createElement('li'); if (r.eu) li.className = 'eu';
-    const p = document.createElement('span'); p.className = 'rk-pos'; p.textContent = pos + 'º';
-    const n = document.createElement('span'); n.className = 'rk-nome'; n.textContent = r.nome + (r.eu ? ' (você)' : '');
-    const e = document.createElement('span'); e.className = 'rk-pts'; e.textContent = r.estrelas + '';
-    li.append(p, avatarEl(r), n, e); itens.push(li); ult = pos;
+  rows = rows.map(r => Object.assign({}, r, { posicao: Number(r.posicao), estrelas: Number(r.estrelas) }));
+  const alguem = rows.some(r => r.estrelas > 0);
+  $('rkCeu').hidden = false;
+  // refaz a entrada: as linhas da constelação desenham de novo junto com as estrelas
+  document.querySelectorAll('.ceu-linhas').forEach(s => { s.style.animation = 'none'; void s.getBoundingClientRect(); s.style.animation = ''; });
+  $('rkPodio').replaceChildren(...[1, 2, 3].map(pos => podioEl(pos, rows.find(r => r.posicao === pos && r.estrelas > 0))));
+  pintaVoce(rows, alguem);
+
+  const topo = Math.max(1, ...rows.map(r => r.estrelas)), itens = []; let ult = 3;
+  rows.filter(r => r.posicao > 3).forEach(r => {
+    if (r.posicao > ult + 1){ const s = document.createElement('li'); s.className = 'rk-sep'; s.setAttribute('aria-hidden', 'true'); s.textContent = '⋮'; itens.push(s); }
+    const li = document.createElement('li'); li.className = 'rk-item' + (r.eu ? ' eu' : '');
+    li.innerHTML = '<span class="rk-pos">' + r.posicao + 'º</span>' +
+      '<span class="rk-corpo"><span class="rk-nome">' + esc(r.nome) + (r.eu ? ' (você)' : '') + '</span><span class="rk-barra" aria-hidden="true"><i style="--p:' + (r.estrelas / topo).toFixed(3) + '"></i></span></span>' +
+      '<span class="rk-pts">' + ICO('star', 1) + ' ' + fmtN(r.estrelas) + '</span>';
+    li.insertBefore(avatarEl(r), li.children[1]);
+    itens.push(li); ult = r.posicao;
   });
   $('rkLista').replaceChildren(...itens);
-  $('rkLista').parentElement.hidden = itens.length === 0;
-  const eu = rows.find(r => r.eu);
-  $('rkSua').textContent = !rows.some(r => Number(r.estrelas) > 0) ? 'Ninguém tem estrelas ainda. Conclua uma lição e seja o primeiro!'
-    : (eu && Number(eu.estrelas) > 0) ? 'Você está em ' + Number(eu.posicao) + 'º lugar, com ' + eu.estrelas + '.' : 'Conclua uma lição para entrar no ranking!';
+  $('rkCard').hidden = itens.length === 0;
 }
 async function carregaRankingGeral(){
   $('rkAviso').hidden = true;
   const { data, error } = await sb.rpc('ranking_geral', { p_limite: 20 });
   if (error){
-    $('rkAviso').hidden = false; $('rkPodio').replaceChildren(); $('rkLista').replaceChildren(); $('rkLista').parentElement.hidden = true; $('rkSua').textContent = '';
+    $('rkAviso').hidden = false; $('rkCeu').hidden = true; $('rkCard').hidden = true; $('rkPodio').replaceChildren(); $('rkLista').replaceChildren(); $('rkSua').replaceChildren();
     $('rkAviso').innerHTML = /function|schema cache|could not find/i.test(error.message || '')
       ? '<strong>O ranking geral ainda não foi instalado no banco.</strong> No Supabase, abra o <strong>SQL Editor</strong>, rode o arquivo <strong>praticar-ranking-ajuda.sql</strong> e recarregue esta página.'
       : 'Não consegui carregar o ranking agora. ' + esc(traduz(error));

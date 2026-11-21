@@ -577,12 +577,21 @@
   </section>
 
   <!-- ranking -->
-  <section class="wrap" id="ranking" hidden>
-    <div class="ptopo"><div><h1>Ranking</h1><p class="fala">Os alunos com mais estrelas de todos os tempos.</p></div></div>
+  <section class="wrap" id="ranking" hidden aria-labelledby="rkTitulo">
+    <div class="ptopo"><div><h1 id="rkTitulo">Ranking</h1><p class="fala">Os alunos com mais estrelas de todos os tempos.</p></div></div>
     <div class="lc-dica" id="rkAviso" hidden></div>
-    <div class="podio" id="rkPodio" role="list" aria-label="Pódio"></div>
-    <div class="card mini"><ol class="rk-lista" id="rkLista" aria-label="Classificação geral"></ol></div>
-    <p class="dica3" id="rkSua" role="status"></p>
+    <div class="ceu" id="rkCeu" hidden>
+      <div class="ceu-cena">
+        <svg class="ceu-linhas ld" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><polyline points="19,58 50,36 81,50"/></svg>
+        <svg class="ceu-linhas lm" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true" focusable="false"><polyline points="24,62 50,25 76,53"/></svg>
+        <div class="podio" id="rkPodio" role="list" aria-label="Pódio"></div>
+      </div>
+      <div class="ceu-voce" id="rkSua" role="status"></div>
+    </div>
+    <div class="card rk-card" id="rkCard" hidden>
+      <h2>Do 4º lugar em diante</h2>
+      <ol class="rk-lista" id="rkLista" aria-label="Classificação geral"></ol>
+    </div>
   </section>
 
   <!-- ajuda -->
