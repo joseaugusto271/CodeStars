@@ -418,6 +418,31 @@ function tecDe(m){
 }
 const imgTec = (t, px) => t ? '<img class="tec" src="' + ICONE_TEC[t] + '" alt="" width="' + px + '" height="' + px + '">' : '';
 
+/* mapa de fases do painel */
+const PM_X = [50, 68, 80, 68, 50, 32, 20, 32];   // posição horizontal de cada ponto, em %
+const PM_TXT = { ok:'concluída, toque para refazer', atual:'a próxima', trava:'bloqueada' };
+function noMapa(i, s, attrs, icone, titulo, sub, mascote){
+  const x = PM_X[i % PM_X.length], lado = x > 50 ? 'esq' : 'dir';
+  return `<li class="pm-fase ${lado} ${s}" style="--x:${x}%"><button type="button" class="pm-no ${s}" data-s="${s}" ${attrs} aria-label="${titulo}, ${PM_TXT[s]}">${icone}</button>`
+    + (mascote ? '<svg class="pm-mas" viewBox="0 0 100 100" aria-hidden="true"><use href="#lg"/></svg>' : '')
+    + `<div class="pm-txt"><b>${titulo}</b><span>${sub}</span></div></li>`;
+}
+function medalha(m){
+  const ok = m.st === 'ok';
+  return `<li class="pm-medalha ${ok ? 'on' : ''}"><span class="pm-med">${ICO('trophy')}</span><div><b>Medalha ${esc(m.nome)}</b><span>${ok ? 'Conquistada!' : 'Conclua o módulo para ganhar'}</span></div></li>`;
+}
+function pmCaminho(){
+  const ul = $('lista'), nos = [...ul.querySelectorAll('.pm-no')], antigo = ul.querySelector('.pm-cam');
+  if (antigo) antigo.remove();
+  if (!ul.offsetParent || nos.length < 2) return;
+  const pts = nos.map(n => [n.parentElement.offsetLeft + n.offsetLeft + n.offsetWidth / 2, n.parentElement.offsetTop + n.offsetTop + n.offsetHeight / 2]);
+  let ate = nos.findIndex(n => n.classList.contains('atual'));
+  if (ate < 0) ate = nos.every(n => n.classList.contains('ok')) ? nos.length - 1 : -1;
+  const d = a => a.map((p, i) => { if (!i) return 'M' + p[0] + ' ' + p[1]; const q = a[i-1], h = (p[1] - q[1]) / 2; return ' C' + q[0] + ' ' + (q[1] + h) + ' ' + p[0] + ' ' + (p[1] - h) + ' ' + p[0] + ' ' + p[1]; }).join('');
+  ul.insertAdjacentHTML('afterbegin', `<svg class="pm-cam" width="${ul.offsetWidth}" height="${ul.offsetHeight}" aria-hidden="true"><path class="pm-base" d="${d(pts)}"/>${ate > 0 ? `<path class="pm-prog" d="${d(pts.slice(0, ate + 1))}"/>` : ''}</svg>`);
+}
+if (window.ResizeObserver) new ResizeObserver(pmCaminho).observe($('lista'));
+
 function pintaPainel(){
   const mods = modulos();
   $('nomeSaudacao').textContent = perfil.nome;
@@ -460,11 +485,11 @@ function pintaPainel(){
     `<button class="mp ${m.st==='trava'?'trava':''} ${m.id===moduloSel?'on':''}" role="tab" aria-selected="${m.id===moduloSel}" data-k="${esc(m.id)}"><span>${ICONE[m.st]}</span>${imgTec(tecDe(m), 22)}${esc(m.nome)}</button>`).join('');
   const m = mods.find(x => x.id === moduloSel), st = statusLicoes(m);
   $('lista').innerHTML = m.l.map((l,i) => {
-    const s = st[i], fim = s==='ok' ? '<span class="pill ref">' + ICO('refresh') + ' REFAZER</span><span class="ic ok">✓</span>' : s==='atual' ? '<span class="ic go">→</span>' : '<span>' + ICO('lock') + '</span>';
-    return `<button class="row ${s}" data-s="${s}" data-id="${esc(l.id)}"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="t">${esc(l.titulo)}</span><span class="pill ${l.tipo}">${l.tipo==='a'?ICO('book')+' APRENDER':ICO('bolt')+' PRATICAR'}</span>${fim}</button>`;
-  }).join('');
-
-  $('lista').insertAdjacentHTML('beforeend', linhaProjeto(m));
+    const s = st[i], ic = s === 'ok' ? ICO('star', 1) : s === 'atual' ? ICO('play', 1) : ICO('lock');
+    const sub = 'Lição ' + (i + 1) + ' · ' + (l.tipo === 'a' ? 'Aprender' : 'Praticar') + (s === 'atual' ? ' · ~' + l.minutos + ' min' : '');
+    return noMapa(i, s, 'data-id="' + esc(l.id) + '"', ic, esc(l.titulo), sub, s === 'atual');
+  }).join('') + linhaProjeto(m, m.l.length) + medalha(m);
+  requestAnimationFrame(pmCaminho);
   pintaMeta(); pintaRank(); pintaChips(); falaPadrao();
 }
 $('mods').addEventListener('click', e => {
@@ -474,7 +499,7 @@ $('mods').addEventListener('click', e => {
   moduloSel = m.id; pintaPainel();
 });
 $('lista').addEventListener('click', e => {
-  const r = e.target.closest('.row'); if (!r) return;
+  const f = e.target.closest('.pm-fase'), r = f && f.querySelector('.pm-no'); if (!r) return;
   if (r.dataset.proj){ if (r.dataset.s === 'trava') aviso('Conclua todas as lições do módulo para liberar o projeto final.'); else abreProjeto(r.dataset.proj); return; }
   if (r.dataset.s === 'trava') aviso('Conclua a lição anterior para liberar esta.');
   else abreLicao(r.dataset.id);
@@ -532,12 +557,11 @@ const pjChave = m => 'cs_proj_' + usuario.id + '_' + m;
 function melhorNota(mod){ const n = envios.filter(e => e.modulo === mod).map(e => Number(e.nota)); return n.length ? Math.max(...n) : null; }
 const fmtNota = n => Number(n).toLocaleString('pt-BR', { maximumFractionDigits:1 });
 
-function linhaProjeto(m){
+function linhaProjeto(m, i){
   if (!m.proj) return '';
   const s = m.projOk ? 'ok' : (m.st === 'trava' || m.feitas < m.total) ? 'trava' : 'atual', melhor = melhorNota(m.id);
-  const fim = s === 'ok' ? '<span class="pill ref">' + ICO('refresh') + ' REFAZER</span><span class="ic ok">✓</span>' : s === 'atual' ? '<span class="ic go">→</span>' : '<span>' + ICO('lock') + '</span>';
-  const nota = melhor != null ? `<span class="pill">Melhor nota: ${fmtNota(melhor)}</span>` : '';
-  return `<button class="row ${s}" data-s="${s}" data-proj="${esc(m.id)}"><span class="n">${ICO('trophy')}</span><span class="t">Projeto final: ${esc(m.proj.titulo)}</span>${nota}<span class="pill p">PROJETO</span>${fim}</button>`;
+  const sub = 'Projeto final' + (melhor != null ? ' · melhor nota ' + fmtNota(melhor) : '');
+  return noMapa(i, s, 'data-proj="' + esc(m.id) + '"', ICO('trophy'), 'Projeto: ' + esc(m.proj.titulo), sub, s === 'atual').replace('class="pm-fase ', 'class="pm-fase pm-boss ');
 }
 
 let pjTmr = null;
