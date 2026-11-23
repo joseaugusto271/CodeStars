@@ -411,10 +411,6 @@
     <a class="logo" id="logoApp" href="#" aria-label="CodeStars"><img src="logo-codestars.svg" alt="" width="161" height="42"></a>
     <nav class="tabs" aria-label="Principal"><a class="on" href="#" data-v="painel" aria-current="page">Painel</a><a href="#" data-v="praticar">Praticar</a><a href="#" data-v="projetos">Projetos</a><a href="#" data-v="ranking">Ranking</a><a href="#" data-v="ajuda">Ajuda</a></nav>
     <div class="dir">
-      <span class="chip" id="chSeq" role="img" aria-label="0 dias seguidos" title="0 dias seguidos"><i><svg class="i f" aria-hidden="true"><use href="#i-flame"/></svg></i><b id="nSeq">0</b></span>
-      <span class="chip" id="chEst" role="img" aria-label="0 estrelas" title="0 estrelas"><i><svg class="i f" aria-hidden="true"><use href="#i-star"/></svg></i><b id="nEst">0</b></span>
-      <span class="chip ex" id="chLic" role="img" aria-label="0 lições feitas" title="0 lições feitas"><i><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></i><b id="nLic">0</b></span>
-      <span class="chip ex" id="chRank" role="img" aria-label="Sem posição no ranking" title="Sem posição no ranking"><i><svg class="i" aria-hidden="true"><use href="#i-trophy"/></svg></i><b id="nRank">—</b></span>
       <button class="avatar" id="avatar" type="button" aria-label="Abrir perfil">?</button>
     </div>
   </header>
@@ -461,52 +457,92 @@
   <section class="wrap" id="perfil" hidden>
     <div class="perfil">
       <button class="voltar" id="voltar" type="button">← Voltar ao painel</button>
-      <div class="card pcard">
+      <div class="cab">
         <h1>Meu perfil</h1>
-        <div class="foto">
-          <div class="grande" id="grande" aria-hidden="true">?</div>
-          <div class="acoes">
-            <button class="sec2" id="escolher" type="button"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg> Escolher foto do computador</button>
-            <button class="rm" id="remover" type="button">Remover foto</button>
-            <input type="file" id="arquivo" accept="image/*" hidden>
+        <p class="fala">Seus dados, sua meta de estudo e a aparência do site.</p>
+      </div>
+
+      <section class="pf-sec" aria-labelledby="pfTitPerfil">
+        <div class="pf-lado"><h2 id="pfTitPerfil">Perfil</h2><p>Como você aparece na saudação e no ranking.</p></div>
+        <div class="pf-painel">
+          <div class="pf-linha foto">
+            <div class="grande" id="grande" aria-hidden="true">?</div>
+            <div class="acoes">
+              <button class="sec2" id="escolher" type="button"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg> Escolher foto</button>
+              <button class="rm" id="remover" type="button">Remover foto</button>
+              <input type="file" id="arquivo" accept="image/*" hidden>
+            </div>
+          </div>
+          <div class="pf-linha">
+            <div class="campo">
+              <label for="nome">Nome</label>
+              <input id="nome" type="text" maxlength="30" autocomplete="name">
+              <p class="dica">Esse nome aparece na saudação e no ranking.</p>
+              <p class="err" id="errnome" role="alert"></p>
+            </div>
           </div>
         </div>
-        <div class="campo">
-          <label for="nome">Nome</label>
-          <input id="nome" type="text" maxlength="30" autocomplete="name">
-          <p class="dica">Esse nome aparece na saudação e no ranking.</p>
-          <p class="err" id="errnome" role="alert"></p>
-        </div>
-        <div class="sc"><h2>Conta</h2>
-          <div class="campo"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" placeholder="voce@email.com"><p class="dica" id="notaGoogle" hidden>Você entrou com o Google, então o e-mail e a senha são gerenciados pela sua conta Google.</p><p class="err" id="erremail" role="alert"></p></div>
+      </section>
+
+      <section class="pf-sec" aria-labelledby="pfTitConta">
+        <div class="pf-lado"><h2 id="pfTitConta">Conta</h2><p>E-mail de acesso e senha.</p></div>
+        <div class="pf-painel">
+          <div class="pf-linha">
+            <div class="campo"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" placeholder="voce@email.com"><p class="dica" id="notaGoogle" hidden>Você entrou com o Google, então o e-mail e a senha são gerenciados pela sua conta Google.</p><p class="err" id="erremail" role="alert"></p></div>
+          </div>
           <details class="senha" id="detSenha"><summary><svg class="i" aria-hidden="true"><use href="#i-key"/></svg> Trocar senha</summary>
-            <div class="campo"><label for="senhaAtual">Senha atual</label><input id="senhaAtual" type="password" autocomplete="current-password"></div>
-            <div class="campo"><label for="senhaNova">Nova senha</label><input id="senhaNova" type="password" autocomplete="new-password"><p class="dica">Pelo menos 8 caracteres.</p></div>
-            <div class="campo"><label for="senhaConf">Confirmar nova senha</label><input id="senhaConf" type="password" autocomplete="new-password"></div>
-            <p class="err" id="errsenha" role="alert"></p>
+            <div class="senha-in">
+              <div class="campo"><label for="senhaAtual">Senha atual</label><input id="senhaAtual" type="password" autocomplete="current-password"></div>
+              <div class="campo"><label for="senhaNova">Nova senha</label><input id="senhaNova" type="password" autocomplete="new-password"><p class="dica">Pelo menos 8 caracteres.</p></div>
+              <div class="campo"><label for="senhaConf">Confirmar nova senha</label><input id="senhaConf" type="password" autocomplete="new-password"></div>
+              <p class="err" id="errsenha" role="alert"></p>
+            </div>
           </details>
         </div>
-        <div class="sc"><h2>Estudos</h2>
-          <fieldset class="opts"><legend>Meta diária de lições</legend>
-            <label class="opt"><input type="radio" name="meta" value="1"><span>1</span></label><label class="opt"><input type="radio" name="meta" value="2"><span>2</span></label><label class="opt"><input type="radio" name="meta" value="3"><span>3</span></label><label class="opt"><input type="radio" name="meta" value="5"><span>5</span></label>
-          </fieldset>
-          <label class="sw"><input type="checkbox" id="lembrete"> Receber lembrete diário</label>
-          <div class="campo" id="horaBox" hidden><label for="hora">Horário do lembrete</label><input id="hora" type="time" value="19:00">
-            <p class="dica">Você recebe um e-mail todo dia nesse horário, se ainda não tiver estudado. O horário vale depois de salvar.</p>
-            <button class="sec2" id="lembreteTeste" type="button" style="margin-top:10px">Enviar e-mail de teste</button></div>
+      </section>
+
+      <section class="pf-sec" aria-labelledby="pfTitEstudos">
+        <div class="pf-lado"><h2 id="pfTitEstudos">Estudos</h2><p>Bater a meta do dia mantém sua sequência acesa.</p></div>
+        <div class="pf-painel">
+          <div class="pf-linha">
+            <fieldset class="opts"><legend>Meta diária de lições</legend>
+              <div class="seg-r"><label class="opt"><input type="radio" name="meta" value="1"><span>1</span></label><label class="opt"><input type="radio" name="meta" value="2"><span>2</span></label><label class="opt"><input type="radio" name="meta" value="3"><span>3</span></label><label class="opt"><input type="radio" name="meta" value="5"><span>5</span></label></div>
+            </fieldset>
+          </div>
+          <div class="pf-linha">
+            <label class="sw"><span class="sw-t">Receber lembrete diário<small>Um e-mail por dia, só se você ainda não tiver estudado.</small></span><input type="checkbox" id="lembrete"></label>
+            <div class="campo" id="horaBox" hidden><label for="hora">Horário do lembrete</label><input id="hora" type="time" value="19:00">
+              <p class="dica">O horário vale depois de salvar.</p>
+              <button class="sec2" id="lembreteTeste" type="button">Enviar e-mail de teste</button></div>
+          </div>
         </div>
-        <div class="sc"><h2>Preferências</h2>
-          <div class="campo"><label for="idioma">Idioma</label><select id="idioma"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option></select></div>
-          <fieldset class="opts"><legend>Tema</legend>
-            <label class="opt"><input type="radio" name="tema" value="escuro"><span><svg class="i" aria-hidden="true"><use href="#i-moon"/></svg> Escuro</span></label><label class="opt"><input type="radio" name="tema" value="claro"><span><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg> Claro</span></label><label class="opt"><input type="radio" name="tema" value="auto"><span>Automático</span></label>
-          </fieldset>
+      </section>
+
+      <section class="pf-sec" aria-labelledby="pfTitPref">
+        <div class="pf-lado"><h2 id="pfTitPref">Preferências</h2><p>Idioma e tema de cores.</p></div>
+        <div class="pf-painel">
+          <div class="pf-linha">
+            <div class="campo"><label for="idioma">Idioma</label><select id="idioma"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option></select></div>
+          </div>
+          <div class="pf-linha">
+            <fieldset class="opts"><legend>Tema</legend>
+              <div class="seg-r"><label class="opt"><input type="radio" name="tema" value="escuro"><span><svg class="i" aria-hidden="true"><use href="#i-moon"/></svg> Escuro</span></label><label class="opt"><input type="radio" name="tema" value="claro"><span><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg> Claro</span></label><label class="opt"><input type="radio" name="tema" value="auto"><span>Automático</span></label></div>
+            </fieldset>
+          </div>
         </div>
-        <div class="rod2"><button class="btn" id="salvar" type="button">Salvar alterações</button><button class="sec2" id="cancelar" type="button">Cancelar</button></div>
-        <div class="sc">
-          <button class="sair" id="sair" type="button">Sair da conta</button>
-          <div class="conf" id="sairConf" hidden><span>Tem certeza que quer sair?</span><button class="btn" id="sairSim" type="button" style="font-size:15px;padding:9px 18px">Sair</button><button class="sec2" id="sairNao" type="button">Ficar</button></div>
+      </section>
+
+      <section class="pf-sec" aria-labelledby="pfTitSessao">
+        <div class="pf-lado"><h2 id="pfTitSessao">Sessão</h2><p>Encerra o acesso neste dispositivo.</p></div>
+        <div class="pf-painel">
+          <div class="pf-linha">
+            <button class="sair" id="sair" type="button">Sair da conta</button>
+            <div class="conf" id="sairConf" hidden><span>Tem certeza que quer sair?</span><button class="btn" id="sairSim" type="button">Sair</button><button class="sec2" id="sairNao" type="button">Ficar</button></div>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <div class="pf-barra"><button class="sec2" id="cancelar" type="button">Cancelar</button><button class="btn" id="salvar" type="button">Salvar alterações</button></div>
     </div>
   </section>
 
@@ -548,28 +584,38 @@
 
   <!-- praticar -->
   <section class="wrap" id="praticar" hidden>
-    <div class="ptopo"><div><h1>Praticar</h1><p class="fala">Treine o que você aprendeu. Aqui não vale estrela, então pode errar e repetir à vontade.</p></div></div>
-    <div class="seg" role="tablist" aria-label="Tipo de prática">
-      <button class="seg-b on" role="tab" aria-selected="true" data-p="desafios" type="button"><svg class="i" aria-hidden="true"><use href="#i-code"/></svg> Desafios de código</button>
-      <button class="seg-b" role="tab" aria-selected="false" data-p="quizzes" type="button"><svg class="i" aria-hidden="true"><use href="#i-help"/></svg> Quizzes</button>
-    </div>
-    <div class="lc-dica" id="prAviso" hidden><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg> <strong>Os desafios e quizzes ainda não foram instalados no banco.</strong> No Supabase, abra o <strong>SQL Editor</strong>, rode o arquivo <strong>praticar-ranking-ajuda.sql</strong> e recarregue esta página (Ctrl + Shift + R).</div>
-    <div id="prDesafios"><div class="pr-grid" id="prLista"></div></div>
-    <div id="prQuizzes" hidden>
-      <div class="pr-grid" id="qzLista"></div>
-      <div class="card qz" id="qzRun" hidden>
-        <div class="qz-top"><button class="voltar" id="qzSair" type="button">← Voltar aos quizzes</button><span class="qz-prog" id="qzProg"></span></div>
-        <div class="barra" aria-hidden="true"><i id="qzBarra"></i></div>
-        <h2 id="qzPerg" tabindex="-1"></h2>
-        <div class="qz-ops" id="qzOps" role="radiogroup" aria-labelledby="qzPerg"></div>
-        <p class="qz-exp" id="qzExp" role="status" hidden></p>
-        <div class="qz-btns"><button class="btn" id="qzVerifica" type="button">Verificar</button><button class="btn" id="qzProx" type="button" hidden>Próxima →</button></div>
+    <div class="pr-layout">
+      <header class="pr-cab">
+        <h1>Praticar</h1>
+        <p class="fala">Treine o que você aprendeu. Aqui não vale estrela, então pode errar e repetir à vontade.</p>
+      </header>
+      <div class="pr-abas">
+        <div class="seg" role="tablist" aria-label="Tipo de prática">
+          <button class="seg-b on" role="tab" aria-selected="true" data-p="desafios" type="button"><svg class="i" aria-hidden="true"><use href="#i-code"/></svg> Desafios de código <span class="seg-n" id="segNd"></span></button>
+          <button class="seg-b" role="tab" aria-selected="false" data-p="quizzes" type="button"><svg class="i" aria-hidden="true"><use href="#i-help"/></svg> Quizzes <span class="seg-n" id="segNq"></span></button>
+        </div>
       </div>
-      <div class="card qz qz-fim" id="qzFim" hidden>
-        <h2 id="qzFimTit">Quiz concluído!</h2>
-        <div class="qz-nota" id="qzNota">0/0</div>
-        <p id="qzMsg"></p>
-        <div class="qz-btns"><button class="btn" id="qzRefaz" type="button"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg> Fazer de novo</button><button class="sec2" id="qzVolta" type="button">Voltar aos quizzes</button></div>
+      <aside class="pr-resumo" id="prResumo" aria-label="Seu progresso" hidden></aside>
+      <div class="pr-corpo">
+        <div class="lc-dica" id="prAviso" hidden><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg> <strong>Os desafios e quizzes ainda não foram instalados no banco.</strong> No Supabase, abra o <strong>SQL Editor</strong>, rode o arquivo <strong>praticar-ranking-ajuda.sql</strong> e recarregue esta página (Ctrl + Shift + R).</div>
+        <div id="prDesafios"><div class="pr-grid" id="prLista"></div></div>
+        <div id="prQuizzes" hidden>
+          <div class="pr-grid" id="qzLista"></div>
+          <div class="card qz" id="qzRun" hidden>
+            <div class="qz-top"><button class="voltar" id="qzSair" type="button">← Voltar aos quizzes</button><span class="qz-prog" id="qzProg"></span></div>
+            <div class="barra" aria-hidden="true"><i id="qzBarra"></i></div>
+            <h2 id="qzPerg" tabindex="-1"></h2>
+            <div class="qz-ops" id="qzOps" role="radiogroup" aria-labelledby="qzPerg"></div>
+            <p class="qz-exp" id="qzExp" role="status" hidden></p>
+            <div class="qz-btns"><button class="btn" id="qzVerifica" type="button">Verificar</button><button class="btn" id="qzProx" type="button" hidden>Próxima →</button></div>
+          </div>
+          <div class="card qz qz-fim" id="qzFim" hidden>
+            <h2 id="qzFimTit">Quiz concluído!</h2>
+            <div class="qz-nota" id="qzNota">0/0</div>
+            <p id="qzMsg"></p>
+            <div class="qz-btns"><button class="btn" id="qzRefaz" type="button"><svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg> Fazer de novo</button><button class="sec2" id="qzVolta" type="button">Voltar aos quizzes</button></div>
+          </div>
+        </div>
       </div>
     </div>
   </section>

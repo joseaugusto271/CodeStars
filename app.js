@@ -490,7 +490,7 @@ function pintaPainel(){
     return noMapa(i, s, 'data-id="' + esc(l.id) + '"', ic, esc(l.titulo), sub, s === 'atual');
   }).join('') + linhaProjeto(m, m.l.length) + medalha(m);
   requestAnimationFrame(pmCaminho);
-  pintaMeta(); pintaRank(); pintaChips(); falaPadrao();
+  pintaMeta(); pintaRank(); falaPadrao();
 }
 $('mods').addEventListener('click', e => {
   const b = e.target.closest('.mp'); if (!b) return;
@@ -522,16 +522,6 @@ function pintaRank(){
     const pos = Number(r.posicao), med = pos + 'º';
     return `<li class="${r.eu?'eu':''}">${med} ${esc(r.nome)}${r.eu?' (você)':''} <em>${r.estrelas} ${ICO('star',1)}</em></li>`;
   }).join('') || '<li>Complete uma lição para entrar no ranking!</li>';
-}
-function pintaChips(){
-  contar($('nSeq'), resumo.sequencia); contar($('nEst'), resumo.estrelas); contar($('nLic'), resumo.licoes_feitas);
-  const eu = ranking.find(r => r.eu), temPos = eu && eu.estrelas > 0;
-  $('nRank').textContent = temPos ? Number(eu.posicao) + 'º' : '—';
-  const set = (id, txt) => { $(id).setAttribute('aria-label', txt); $(id).title = txt; };
-  set('chSeq', resumo.sequencia + ' ' + plural(resumo.sequencia,'dia seguido','dias seguidos'));
-  set('chEst', resumo.estrelas + ' ' + plural(resumo.estrelas,'estrela','estrelas'));
-  set('chLic', resumo.licoes_feitas + ' ' + plural(resumo.licoes_feitas,'lição feita','lições feitas'));
-  set('chRank', temPos ? eu.posicao + 'º no ranking da semana' : 'Sem posição no ranking ainda');
 }
 
 /* mascote do painel */
@@ -1567,23 +1557,50 @@ function carregaPraticaLocal(){
 function salvaPraticaLocal(){ try{ localStorage.setItem(chavePratica(), JSON.stringify({ desafios:[...praticaFeita], quiz:quizMelhor })); }catch(e){} }
 
 // ---- Praticar
+const NIVEIS = { facil:['Fácil', 1], medio:['Médio', 2], dificil:['Difícil', 3] };
 function mostraAbaPratica(a){
   praticaAba = a;
   document.querySelectorAll('.seg-b').forEach(b => { const on = b.dataset.p === a; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
   $('prDesafios').hidden = a !== 'desafios'; $('prQuizzes').hidden = a !== 'quizzes';
+  pintaResumo();
+}
+function pintaResumo(){
+  const box = $('prResumo'), nd = desafios.length, nq = quizzes.length;
+  $('segNd').textContent = nd || ''; $('segNq').textContent = nq || '';
+  const quiz = praticaAba === 'quizzes', total = quiz ? nq : nd;
+  box.hidden = total === 0; if (!total) return;
+  const topo = (n, de, rot) => `<h2>Seu progresso</h2><div class="pr-res-num">${n}<small>de ${de} ${rot}</small></div><div class="pr-res-barra" style="--p:${Math.round(n / de * 100)}%"><i></i></div>`;
+  if (!quiz){
+    const nivelDe = d => NIVEIS[d.nivel] ? d.nivel : 'medio';
+    const feitos = desafios.filter(d => praticaFeita.has(d.id)).length;
+    const linhas = Object.keys(NIVEIS).map(k => { const l = desafios.filter(d => nivelDe(d) === k); return l.length ? `<div><dt>${NIVEIS[k][0]}</dt><dd>${l.filter(d => praticaFeita.has(d.id)).length}/${l.length}</dd></div>` : ''; }).join('');
+    box.innerHTML = topo(feitos, nd, plural(nd, 'desafio', 'desafios')) + `<dl class="pr-res-lista">${linhas}</dl>`;
+  } else {
+    const feitos = quizzes.filter(q => quizMelhor[q.id] != null);
+    const acertos = feitos.reduce((s, q) => s + quizMelhor[q.id], 0), perguntas = feitos.reduce((s, q) => s + q.perguntas.length, 0);
+    const gabaritados = feitos.filter(q => quizMelhor[q.id] === q.perguntas.length).length;
+    box.innerHTML = topo(feitos.length, nq, plural(nq, 'quiz', 'quizzes')) + `<dl class="pr-res-lista"><div><dt>Acertos nas melhores notas</dt><dd>${acertos}/${perguntas}</dd></div><div><dt>Quizzes gabaritados</dt><dd>${gabaritados}</dd></div></dl>`;
+  }
 }
 function pintaPratica(){
   $('prAviso').hidden = praticaOk && (desafios.length > 0 || quizzes.length > 0);
-  const rot = { html:'HTML', css:'CSS', js:'JavaScript' };
-  const ordem = ['html', 'css', 'js'];
+  const rot = { html:'HTML', css:'CSS', js:'JavaScript', git:'Git', py:'Python' };
+  const ordem = ['html', 'css', 'js', 'git', 'py'];
   const agrupa = (lista, chave) => { const g = {}; lista.forEach(x => { const k = chave(x) || 'outros'; (g[k] = g[k] || []).push(x); }); return Object.keys(g).sort((a, b) => (ordem.indexOf(a) + 1 || 9) - (ordem.indexOf(b) + 1 || 9)).map(k => [k, g[k]]); };
-  const bloco = (g, linha) => g.map(([k, l]) => (k === 'outros' ? '' : '<h3 class="pr-grupo">' + esc(rot[k] || k) + '</h3>') + '<div class="pr-rows">' + l.map(linha).join('') + '</div>').join('');
-  $('prLista').innerHTML = bloco(agrupa(desafios, d => (d.tags || [])[0]), d =>
-    `<button class="pr-row" data-id="${esc(d.id)}" type="button"><span class="pr-info"><b>${esc(d.titulo)}</b><span>${esc(d.descricao)}</span></span><span class="pr-meta">${d.nivel === 'facil' ? 'Fácil' : 'Médio'}</span><span class="pr-fim">${praticaFeita.has(d.id) ? ICO('check') : '→'}</span></button>`);
+  const bloco = (g, linha, contagem) => g.map(([k, l]) => {
+    const tec = ICONE_TEC[k];
+    const cab = k === 'outros' ? '' : `<div class="pr-sec-cab">${tec ? `<img class="tec" src="${tec}" alt="" width="26" height="26">` : ''}<h2 class="pr-grupo">${esc(rot[k] || k)}</h2><span class="pr-cont">${contagem(l)}</span></div>`;
+    return `<section class="pr-sec">${cab}<div class="pr-rows">${l.map(linha).join('')}</div></section>`;
+  }).join('');
+  const nivel = n => { const [t, k] = NIVEIS[n] || NIVEIS.medio; return `<span class="pr-nivel"><span class="pr-barras" aria-hidden="true">${[1, 2, 3].map(i => `<i${i <= k ? ' class="on"' : ''}></i>`).join('')}</span>${t}</span>`; };
+  $('prLista').innerHTML = bloco(agrupa(desafios, d => (d.tags || [])[0]), d => {
+    const ok = praticaFeita.has(d.id);
+    return `<button class="pr-row" data-id="${esc(d.id)}" type="button"><span class="pr-st${ok ? ' ok' : ''}">${ok ? ICO('check') + '<span class="sr">Concluído</span>' : ''}</span><span class="pr-info"><b>${esc(d.titulo)}</b><span>${esc(d.descricao)}</span></span>${nivel(d.nivel)}<span class="pr-fim" aria-hidden="true">→</span></button>`;
+  }, l => l.filter(d => praticaFeita.has(d.id)).length + ' de ' + l.length);
   $('qzLista').innerHTML = bloco(agrupa(quizzes, q => q.modulo), q => {
-    const n = q.perguntas.length, m = quizMelhor[q.id];
-    return `<button class="pr-row" data-id="${esc(q.id)}" type="button"><span class="pr-info"><b>${esc(q.titulo)}</b><span>${esc(q.descricao)}</span></span><span class="pr-meta">${n} perguntas${m != null ? ' · melhor ' + m + '/' + n : ''}</span><span class="pr-fim">→</span></button>`;
-  });
+    const n = q.perguntas.length, m = quizMelhor[q.id], fez = m != null, perfeito = fez && m === n;
+    return `<button class="pr-row" data-id="${esc(q.id)}" type="button"><span class="pr-st${perfeito ? ' ok' : fez ? ' meio' : ''}">${perfeito ? ICO('check') + '<span class="sr">Gabaritado</span>' : fez ? '<span class="sr">Já feito</span>' : ''}</span><span class="pr-info"><b>${esc(q.titulo)}</b><span>${esc(q.descricao)}</span></span><span class="pr-meta"><span>${n} ${plural(n, 'pergunta', 'perguntas')}</span>${fez ? `<b>Melhor: ${m}/${n}</b>` : ''}</span><span class="pr-fim" aria-hidden="true">→</span></button>`;
+  }, l => l.length + ' ' + plural(l.length, 'quiz', 'quizzes'));
   mostraAbaPratica(praticaAba);
 }
 document.querySelectorAll('.seg-b').forEach(b => b.addEventListener('click', () => mostraAbaPratica(b.dataset.p)));
