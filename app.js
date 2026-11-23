@@ -243,8 +243,10 @@ function modo(m){
   limpaErros();
 }
 document.querySelectorAll('[data-ir]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); modo(a.dataset.ir); }));
-$('hdrEntrar').addEventListener('click', () => { modo('entrar'); $('lgEmail').focus(); });
-$('hdrCriar').addEventListener('click',  () => { modo('criar');  $('lgNome').focus(); });
+// sobe até o card (de qualquer ponto da página) e só então põe o cursor no campo
+function sobeEFoca(campo){ scrollTo({ top: 0, behavior: rmov ? 'auto' : 'smooth' }); setTimeout(() => campo.focus({ preventScroll: true }), rmov ? 0 : 600); }
+$('hdrEntrar').addEventListener('click', () => { modo('entrar'); sobeEFoca($('lgEmail')); });
+$('hdrCriar').addEventListener('click',  () => { modo('criar');  sobeEFoca($('lgNome')); });
 
 $('lgOlho').addEventListener('click', () => {
   const ver = $('lgSenha').type === 'password';
@@ -331,7 +333,7 @@ $('lgForm').addEventListener('submit', async e => {
   (function t(){ if(i<=alvo.length){ el.textContent=alvo.slice(0,i++); setTimeout(t,90); } })();
   if (!rmov){
     const mira=[[-3,-2],[3,-2],[-3,2],[3,1],[0,-3],[0,0]];
-    setInterval(()=>{ const [x,y]=mira[Math.floor(Math.random()*mira.length)]; olhos.style.transform=`translate(${x}px,${y}px)`; },1800);
+    setInterval(()=>{ if (window.__olharPara && window.__olharPara()) return; const [x,y]=mira[Math.floor(Math.random()*mira.length)]; olhos.style.translate=`${x}px ${y}px`; },1800);
     (function sozinha(){ setTimeout(()=>{ if(!document.hidden && !$('telaLogin').hidden && !estrela.matches(':hover')) anima(Math.random()<.5?'pula':'gira'); sozinha(); },4000+Math.random()*4000); })();
   }
 })();
@@ -1911,7 +1913,7 @@ $('auConteudo').addEventListener('beforeinput', e => { if (e.target.id !== 'auEd
   $('lpCriar').addEventListener('click', criarConta);
   $('labCriar').addEventListener('click', criarConta);
   const desce = raiz.querySelector('.desce');
-  if (desce) desce.addEventListener('click', e => { e.preventDefault(); $('como').scrollIntoView({ behavior: rmov ? 'auto' : 'smooth', block: 'start' }); });
+  if (desce) desce.addEventListener('click', e => { e.preventDefault(); $('manifesto').scrollIntoView({ behavior: rmov ? 'auto' : 'smooth', block: 'start' }); });
 
   /* ---------- 1. editor de teste ---------- */
   (function(){
@@ -2068,4 +2070,209 @@ $('auConteudo').addEventListener('beforeinput', e => { if (e.target.id !== 'auEd
     rvs.forEach(e => io.observe(e));
   }
   })();
+})();
+
+/* =====================================================================
+   11) LOGIN CINÉTICO: curvas de nível, menu em tela cheia, manifesto preso na
+       tela, lema palavra por palavra, colagem em profundidade, cursor, ímã e
+       inclinação. Tudo para quando a tela de login não está aberta.
+   ===================================================================== */
+(function(){
+  const raiz = $('telaLogin'), probe = $('vpFim'), cab = $('hdrLogin');
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const fino = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const zoom = () => parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+  const altJ = () => probe.getBoundingClientRect().bottom || innerHeight;
+  if (rmov) raiz.classList.add('sem-mov');
+
+  /* ---------- curvas de nível (como num mapa de relevo) ---------- */
+  function relevo(seed){
+    let s = seed; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647;
+    const centros = [[170,150],[820,130],[500,400],[130,560],[870,570]];
+    let d = '';
+    centros.forEach(([cx0, cy0]) => {
+      const cx = cx0 + (rnd() - .5) * 90, cy = cy0 + (rnd() - .5) * 70, r0 = 28 + rnd() * 40;
+      const h = [0, 1, 2].map(() => ({ a: .04 + rnd() * .09, f: 2 + Math.floor(rnd() * 3), p: rnd() * 6.28 }));
+      const aneis = 7 + Math.floor(rnd() * 3), passo = 24 + rnd() * 10;
+      for (let k = 1; k <= aneis; k++){
+        const R = r0 + k * passo, N = 36, p = [];
+        for (let i = 0; i < N; i++){
+          const t = i / N * 6.2832; let m = 1;
+          h.forEach((q, j) => { m += q.a * Math.sin(q.f * t + q.p + k * .13 * (j + 1)); });
+          p.push([cx + Math.cos(t) * R * m * 1.3, cy + Math.sin(t) * R * m * .82]);
+        }
+        const meio = (a, b) => ((a[0] + b[0]) / 2).toFixed(0) + ' ' + ((a[1] + b[1]) / 2).toFixed(0);
+        d += 'M' + meio(p[N - 1], p[0]);
+        for (let i = 0; i < N; i++) d += 'Q' + p[i][0].toFixed(0) + ' ' + p[i][1].toFixed(0) + ' ' + meio(p[i], p[(i + 1) % N]);
+        d += 'Z';
+      }
+    });
+    return '<svg viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="' + d + '"/></svg>';
+  }
+  // cada seção das páginas ganha o seu relevo (as criadas à mão no HTML já têm a div)
+  raiz.querySelectorAll('.lp').forEach(sec => {
+    const d = document.createElement('div');
+    d.className = 'relevo-bg'; d.dataset.cor = sec.classList.contains('lp-creme') ? 'escuro' : 'claro'; d.setAttribute('aria-hidden', 'true');
+    sec.insertBefore(d, sec.firstChild);
+  });
+  const SVG_A = relevo(7), SVG_B = relevo(41);
+  raiz.querySelectorAll('.relevo-bg').forEach((el, i) => { el.innerHTML = i % 2 ? SVG_B : SVG_A; });
+
+  /* ---------- louro (emblema) ---------- */
+  function louro(){
+    let g = '';
+    for (let i = 0; i < 9; i++){      // um galho em arco do lado esquerdo; o direito é o espelho
+      const grau = 108 + i / 8 * 124, a = grau * Math.PI / 180, R = 27 + (i % 2 ? 3.2 : -1.2);
+      const x = 60 + Math.cos(a) * R, y = 37 + Math.sin(a) * R * .92;
+      g += '<ellipse cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" rx="3.3" ry="7.4" transform="rotate(' + grau.toFixed(0) + ' ' + x.toFixed(1) + ' ' + y.toFixed(1) + ')"/>';
+    }
+    return '<g>' + g + '</g><g transform="matrix(-1 0 0 1 120 0)">' + g + '</g>'
+      + '<path d="M60 23l3.9 8.7 9.4.9-7.1 6.2 2.2 9.2L60 43l-8.4 5.1 2.2-9.2-7.1-6.2 9.4-.9z" style="fill:var(--amarelo)"/>';
+  }
+  raiz.querySelectorAll('.louro').forEach(s => { s.innerHTML = louro(); });
+
+  /* ---------- mira da estrela, estouro de estrelinhas ao clicar ---------- */
+  const est = $('estrela'), olhos = $('olhos');
+  let miraAt = 0, cliques = 0;
+  window.__olharPara = () => performance.now() - miraAt < 2500;
+  est.addEventListener('click', () => {
+    cliques++;
+    if (!rmov){
+      for (let i = 0; i < 12; i++){
+        const b = document.createElement('i'), ang = Math.random() * 6.28, dist = 90 + Math.random() * 90;
+        b.className = 'bolha'; b.textContent = '★';
+        b.style.cssText = '--dx:' + (Math.cos(ang) * dist).toFixed(0) + 'px;--dy:' + (Math.sin(ang) * dist).toFixed(0) + 'px;--rot:' + (Math.random() * 360 - 180).toFixed(0) + 'deg;--s:' + Math.random().toFixed(2);
+        est.appendChild(b); setTimeout(() => b.remove(), 1000);
+      }
+    }
+    if (cliques % 5 === 0 && typeof anima === 'function') setTimeout(() => anima('gira'), 120);
+  });
+
+  /* ---------- menu em tela cheia ---------- */
+  const mt = $('menuTela'), bt = $('menuBt');
+  const rolaPara = (el) => el.scrollIntoView({ behavior: rmov ? 'auto' : 'smooth', block: 'start' });
+  function abre(){ mt.classList.add('aberto'); mt.inert = false; bt.setAttribute('aria-expanded', 'true'); bt.setAttribute('aria-label', 'Fechar menu'); raiz.classList.add('menu-on'); document.documentElement.style.overflow = 'hidden'; setTimeout(() => { const a = mt.querySelector('a'); if (a) a.focus({ preventScroll: true }); }, rmov ? 0 : 500); }
+  function fecha(volta){ mt.classList.remove('aberto'); mt.inert = true; bt.setAttribute('aria-expanded', 'false'); bt.setAttribute('aria-label', 'Abrir menu'); raiz.classList.remove('menu-on'); document.documentElement.style.overflow = ''; if (volta) bt.focus({ preventScroll: true }); }
+  bt.addEventListener('click', () => mt.classList.contains('aberto') ? fecha(true) : abre());
+  addEventListener('keydown', e => { if (e.key === 'Escape' && mt.classList.contains('aberto')) fecha(true); });
+  mt.querySelectorAll('.menu-links a').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault(); const alvo = $(a.getAttribute('href').slice(1)); fecha(false);
+    setTimeout(() => alvo && rolaPara(alvo), rmov ? 0 : 380);
+  }));
+  const aoTopo = (campo) => { scrollTo({ top: 0, behavior: rmov ? 'auto' : 'smooth' }); setTimeout(() => campo.focus({ preventScroll: true }), rmov ? 0 : 600); };
+  $('menuCriar').addEventListener('click', () => { fecha(false); modo('criar'); aoTopo($('lgNome')); });
+  $('menuEntrar').addEventListener('click', () => { fecha(false); modo('entrar'); aoTopo($('lgEmail')); });
+
+  /* ---------- lema: separa as palavras ---------- */
+  const lemaT = $('lemaT'), palavras = [];
+  (function(){
+    const nos = [...lemaT.childNodes]; lemaT.textContent = '';
+    nos.forEach(n => {
+      const serifa = n.nodeType === 1, txt = n.textContent;
+      txt.split(/\s+/).filter(Boolean).forEach((w, i) => {
+        // vírgula ou ponto logo depois de uma palavra fica grudado nela
+        if (i === 0 && !/^\s/.test(txt) && palavras.length && /^[,.;:!?]/.test(w)){ const ult = palavras[palavras.length - 1]; ult.textContent += w.slice(0, 1); w = w.slice(1); if (!w) return; }
+        const s = document.createElement('span'); s.className = 'w' + (serifa ? ' s' : ''); s.textContent = w; lemaT.appendChild(s); lemaT.appendChild(document.createTextNode(' ')); palavras.push(s);
+      });
+    });
+  })();
+
+  /* ---------- rodapé: letras que sobem perto do mouse ---------- */
+  const fnome = $('fnome'), letras = [];
+  fnome.textContent.split('').forEach(c => { const s = document.createElement('span'); s.textContent = c; letras.push(s); });
+  fnome.textContent = ''; letras.forEach(s => fnome.appendChild(s));
+
+  /* ---------- ponteiro (cursor, ímã, inclinação, mira) ---------- */
+  const cur = $('cursor'); let px = -100, py = -100, cx = -100, cy = -100;
+  const vitr = raiz.querySelector('.vitrine');
+  addEventListener('pointermove', e => {
+    if (raiz.hidden) return;
+    px = e.clientX; py = e.clientY;
+    if (fino && !rmov){
+      cur.classList.add('on');
+      cur.classList.toggle('maior', !!e.target.closest('a,button,summary,textarea,input,label,[data-tilt],.tile'));
+    }
+    raiz.style.setProperty('--mx', (clamp(px / innerWidth * 2 - 1, -1, 1)).toFixed(3));
+    raiz.style.setProperty('--my', (clamp(py / innerHeight * 2 - 1, -1, 1)).toFixed(3));
+    // a estrela olha para onde o mouse está
+    if (olhos && !rmov){
+      const r = est.getBoundingClientRect(), dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height / 2), d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 380);
+      olhos.style.translate = (dx / d * 3.4 * k).toFixed(2) + 'px ' + (dy / d * 3 * k).toFixed(2) + 'px'; miraAt = performance.now();
+    }
+    // letras do rodapé
+    if (letras.length){
+      const f = fnome.getBoundingClientRect();
+      if (py > f.top - 80 && py < f.bottom + 80) letras.forEach(s => { const r = s.getBoundingClientRect(); s.style.setProperty('--k', clamp(1 - Math.abs(px - (r.left + r.width / 2)) / (r.width * 2.4), 0, 1).toFixed(2)); });
+    }
+  }, { passive: true });
+  document.addEventListener('pointerleave', () => cur.classList.remove('on'));
+  if (fino && !rmov){
+    // ímã: o botão acompanha um pouco o mouse
+    raiz.querySelectorAll('[data-mag]').forEach(el => {
+      el.addEventListener('pointermove', e => {
+        const r = el.getBoundingClientRect(), z = zoom();
+        el.classList.remove('solta');
+        el.style.setProperty('--tx', (clamp((e.clientX - (r.left + r.width / 2)) * .28, -12, 12) / z).toFixed(1) + 'px');
+        el.style.setProperty('--ty', (clamp((e.clientY - (r.top + r.height / 2)) * .28, -10, 10) / z).toFixed(1) + 'px');
+      });
+      el.addEventListener('pointerleave', () => { el.classList.add('solta'); el.style.setProperty('--tx', '0px'); el.style.setProperty('--ty', '0px'); });
+    });
+    // inclinação em 3D nos painéis
+    raiz.querySelectorAll('[data-tilt]').forEach(el => {
+      el.addEventListener('pointermove', e => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--ry', (((e.clientX - r.left) / r.width - .5) * 9).toFixed(2) + 'deg');
+        el.style.setProperty('--rx', (-((e.clientY - r.top) / r.height - .5) * 9).toFixed(2) + 'deg');
+      });
+      el.addEventListener('pointerleave', () => { el.style.setProperty('--rx', '0deg'); el.style.setProperty('--ry', '0deg'); });
+    });
+  }
+
+  /* ---------- a rolagem comanda as peças ---------- */
+  const mani = $('manifesto'), pin = $('maniPin'), faixa1 = $('faixa1'), faixa2 = $('faixa2'), jan = $('maniJan'), rab = $('rabisco');
+  const lns = [...mani.querySelectorAll('[data-t]')], pal = $('colaPal'), movel = [...pal.querySelectorAll('[data-v]')];
+  const mqCel = matchMedia('(max-width:900px)');
+  let pCur = 0, ultSy = 0, vel = 0, rid = 0;
+  const ult = { d: -1, sc: -1, x: -1, sk: 99, sp: -1, rolou: null };
+  function quadro(){
+    rid = 0; if (raiz.hidden || document.hidden) return;
+    const vh = altJ(), rr = raiz.getBoundingClientRect(), sy = -rr.top, fim = Math.max(1, rr.height - vh);
+    raiz.style.setProperty('--sy', sy.toFixed(0));
+    const sp = clamp(sy / fim, 0, 1); if (Math.abs(sp - ult.sp) > .0005){ cab.style.setProperty('--sp', sp.toFixed(4)); ult.sp = sp; }
+    const rolou = sy > 40; if (rolou !== ult.rolou){ cab.classList.toggle('rolou', rolou); ult.rolou = rolou; }
+    vel += ((sy - ultSy) - vel) * .2; ultSy = sy;
+
+    // cursor segue o mouse com atraso
+    if (fino && !rmov){ cx += (px - cx) * .22; cy += (py - cy) * .22; const z = zoom(); cur.style.transform = 'translate3d(' + (cx / z).toFixed(1) + 'px,' + (cy / z).toFixed(1) + 'px,0)'; }
+
+    // manifesto
+    const r = mani.getBoundingClientRect(), topo = cab.getBoundingClientRect().bottom, total = Math.max(1, r.height - pin.getBoundingClientRect().height);
+    const alvo = rmov ? 1 : clamp((topo - r.top) / total, 0, 1);
+    pCur += (alvo - pCur) * (rmov ? 1 : .14); if (Math.abs(alvo - pCur) < .0008) pCur = alvo;
+    const p = pCur;
+    faixa1.style.setProperty('--x', (-25 * p).toFixed(2) + '%');
+    faixa2.style.setProperty('--x', (-25 * (1 - p)).toFixed(2) + '%');
+    const sk = clamp(vel * -.05, -7, 7); if (Math.abs(sk - ult.sk) > .05){ faixa1.style.setProperty('--sk', sk.toFixed(2) + 'deg'); faixa2.style.setProperty('--sk', sk.toFixed(2) + 'deg'); ult.sk = sk; }
+    jan.style.setProperty('--sc', (.82 + .18 * clamp(p / .22, 0, 1)).toFixed(3));
+    rab.style.setProperty('--d', clamp((p - .2) / .6, 0, 1).toFixed(3));
+    lns.forEach(el => el.classList.toggle('on', p >= parseFloat(el.dataset.t)));
+
+    // lema: cada palavra acende no seu tempo
+    const h = lemaT.getBoundingClientRect(), n = palavras.length;
+    const pl = rmov ? 1 : clamp((vh * .86 - h.top) / (h.height + vh * .32), 0, 1);
+    palavras.forEach((w, i) => w.style.setProperty('--a', clamp(pl * (n + 2) - i, 0, 1).toFixed(2)));
+
+    // colagem: cada peça anda numa velocidade
+    if (!mqCel.matches && !rmov){
+      const pr = pal.getBoundingClientRect(), d = (pr.top + pr.height / 2) - vh / 2, z = zoom();
+      movel.forEach(el => el.style.setProperty('--py', clamp(d * parseFloat(el.dataset.v) * .32, -180, 180) / z + 'px'));
+    } else movel.forEach(el => el.style.removeProperty('--py'));
+
+    if (Math.abs(alvo - pCur) > 0 || Math.abs(vel) > .2 || (fino && (Math.abs(px - cx) > .4 || Math.abs(py - cy) > .4))) pede();
+  }
+  const pede = () => { if (!rid) rid = requestAnimationFrame(quadro); };
+  addEventListener('scroll', pede, { passive: true }); addEventListener('resize', pede); addEventListener('pointermove', pede, { passive: true });
+  new MutationObserver(pede).observe(raiz, { attributes: true, attributeFilter: ['hidden'] });
+  document.addEventListener('visibilitychange', pede);
+  pede();
 })();
