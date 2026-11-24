@@ -425,7 +425,7 @@ const PM_X = [50, 68, 80, 68, 50, 32, 20, 32];   // posição horizontal de cada
 const PM_TXT = { ok:'concluída, toque para refazer', atual:'a próxima', trava:'bloqueada' };
 function noMapa(i, s, attrs, icone, titulo, sub, mascote){
   const x = PM_X[i % PM_X.length], lado = x > 50 ? 'esq' : 'dir';
-  return `<li class="pm-fase ${lado} ${s}" style="--x:${x}%"><button type="button" class="pm-no ${s}" data-s="${s}" ${attrs} aria-label="${titulo}, ${PM_TXT[s]}">${icone}</button>`
+  return `<li class="pm-fase ${lado} ${s}" style="--x:${x}%;--k:${i}"><button type="button" class="pm-no ${s}" data-s="${s}" ${attrs} aria-label="${titulo}, ${PM_TXT[s]}">${icone}</button>`
     + (mascote ? '<svg class="pm-mas" viewBox="0 0 100 100" aria-hidden="true"><use href="#lg"/></svg>' : '')
     + `<div class="pm-txt"><b>${titulo}</b><span>${sub}</span></div></li>`;
 }
@@ -441,7 +441,7 @@ function pmCaminho(){
   let ate = nos.findIndex(n => n.classList.contains('atual'));
   if (ate < 0) ate = nos.every(n => n.classList.contains('ok')) ? nos.length - 1 : -1;
   const d = a => a.map((p, i) => { if (!i) return 'M' + p[0] + ' ' + p[1]; const q = a[i-1], h = (p[1] - q[1]) / 2; return ' C' + q[0] + ' ' + (q[1] + h) + ' ' + p[0] + ' ' + (p[1] - h) + ' ' + p[0] + ' ' + p[1]; }).join('');
-  ul.insertAdjacentHTML('afterbegin', `<svg class="pm-cam" width="${ul.offsetWidth}" height="${ul.offsetHeight}" aria-hidden="true"><path class="pm-base" d="${d(pts)}"/>${ate > 0 ? `<path class="pm-prog" d="${d(pts.slice(0, ate + 1))}"/>` : ''}</svg>`);
+  ul.insertAdjacentHTML('afterbegin', `<svg class="pm-cam" width="${ul.offsetWidth}" height="${ul.offsetHeight}" aria-hidden="true"><path class="pm-base" d="${d(pts)}"/>${ate > 0 ? `<path class="pm-prog" pathLength="1" d="${d(pts.slice(0, ate + 1))}"/>` : ''}</svg>`);
 }
 if (window.ResizeObserver) new ResizeObserver(pmCaminho).observe($('lista'));
 
@@ -509,7 +509,7 @@ $('lista').addEventListener('click', e => {
 
 function pintaMeta(){
   const m = perfil.meta_diaria, f = resumo.hoje, p = Math.min(f / m, 1) * 100;
-  $('ringNum').textContent = f + '/' + m; $('ring').style.setProperty('--p', p + '%');
+  $('ringNum').textContent = f + '/' + m; $('ring').style.setProperty('--p', p + '%'); $('ring').dataset.pr = p + '%'; $('ring').style.setProperty('--pr', p + '%');
   $('metaTxt').textContent = f >= m ? 'Meta batida! A chama de hoje está acesa'
     : (m - f === 1 ? 'Mais uma lição e a chama de hoje fica acesa.' : 'Faltam ' + (m - f) + ' lições para bater a meta de hoje.');
   const L = ['S','T','Q','Q','S','S','D'], set = new Set(resumo.dias_semana || []);
@@ -518,11 +518,14 @@ function pintaMeta(){
     let on = false; if (ini) on = set.has(new Date(ini.getTime() + i*864e5).toISOString().slice(0,10));
     return `<span class="${on?'x':''}"><b>${on?ICO('flame',1):''}</b>${l}</span>`;
   }).join('');
+  const st = (c, ic, n, rot) => `<div class="st-i ${c}">${ICO(ic, 1)}<b data-n="${n}">${n}</b><span>${rot}</span></div>`, sq = resumo.sequencia || 0, li = resumo.licoes_feitas || 0;
+  $('pnStats').innerHTML = st('f', 'flame', sq, plural(sq, 'dia seguido', 'dias seguidos')) + st('e', 'star', resumo.estrelas || 0, 'estrelas') + st('l', 'check', li, plural(li, 'lição', 'lições'));
 }
 function pintaRank(){
+  const topo = Math.max(1, ...ranking.map(x => Number(x.estrelas)));
   $('rankList').innerHTML = ranking.map(r => {
     const pos = Number(r.posicao), med = pos + 'º';
-    return `<li class="${r.eu?'eu':''}">${med} ${esc(r.nome)}${r.eu?' (você)':''} <em>${r.estrelas} ${ICO('star',1)}</em></li>`;
+    return `<li class="${r.eu?'eu':''}"><span class="rp">${med}</span><span class="rn">${esc(r.nome)}${r.eu?' (você)':''}</span><em><span data-n="${r.estrelas}">${r.estrelas}</span> ${ICO('star',1)}</em><i class="rb" style="--p:${(r.estrelas / topo).toFixed(3)}"></i></li>`;
   }).join('') || '<li>Complete uma lição para entrar no ranking!</li>';
 }
 
@@ -1571,7 +1574,7 @@ function pintaResumo(){
   $('segNd').textContent = nd || ''; $('segNq').textContent = nq || '';
   const quiz = praticaAba === 'quizzes', total = quiz ? nq : nd;
   box.hidden = total === 0; if (!total) return;
-  const topo = (n, de, rot) => `<h2>Seu progresso</h2><div class="pr-res-num">${n}<small>de ${de} ${rot}</small></div><div class="pr-res-barra" style="--p:${Math.round(n / de * 100)}%"><i></i></div>`;
+  const topo = (n, de, rot) => `<h2>Seu progresso</h2><div class="pr-res-num"><span data-n="${n}">${n}</span><small>de ${de} ${rot}</small></div><div class="pr-res-barra" style="--p:${Math.round(n / de * 100)}%"><i></i></div>`;
   if (!quiz){
     const nivelDe = d => NIVEIS[d.nivel] ? d.nivel : 'medio';
     const feitos = desafios.filter(d => praticaFeita.has(d.id)).length;
@@ -1706,7 +1709,7 @@ function podioEl(pos, r){
     (r ? '<polygon class="som" points="' + POLI + '" transform="translate(3 4)"/>' : '') +
     '<polygon class="cor" points="' + POLI + '"/></svg></div>' +
     '<div class="pod-txt"><span class="pod-nome"><b>' + pos + 'º</b><span class="nm">' + esc(nome) + '</span></span>' +
-    '<span class="pod-pts">' + (r ? ICO('star', 1) + ' ' + fmtN(r.estrelas) : 'ninguém ainda') + '</span></div></div>';
+    '<span class="pod-pts">' + (r ? ICO('star', 1) + ' <span data-n="' + r.estrelas + '">' + fmtN(r.estrelas) + '</span>' : 'ninguém ainda') + '</span></div></div>';
   if (r) d.querySelector('.pod-estrela').appendChild(avatarEl(r));
   return d;
 }
@@ -1764,7 +1767,7 @@ function pintaRankingGeral(rows){
     const li = document.createElement('li'); li.className = 'rk-item' + (r.eu ? ' eu' : '');
     li.innerHTML = '<span class="rk-pos">' + r.posicao + 'º</span>' +
       '<span class="rk-corpo"><span class="rk-nome">' + esc(r.nome) + (r.eu ? ' (você)' : '') + '</span><span class="rk-barra" aria-hidden="true"><i style="--p:' + (r.estrelas / topo).toFixed(3) + '"></i></span></span>' +
-      '<span class="rk-pts">' + ICO('star', 1) + ' ' + fmtN(r.estrelas) + '</span>';
+      '<span class="rk-pts">' + ICO('star', 1) + ' <span data-n="' + r.estrelas + '">' + fmtN(r.estrelas) + '</span></span>';
     li.insertBefore(avatarEl(r), li.children[1]);
     itens.push(li); ult = r.posicao;
   });
@@ -2130,6 +2133,7 @@ $('auConteudo').addEventListener('beforeinput', e => { if (e.target.id !== 'auEd
       + '<path d="M60 23l3.9 8.7 9.4.9-7.1 6.2 2.2 9.2L60 43l-8.4 5.1 2.2-9.2-7.1-6.2 9.4-.9z" style="fill:var(--amarelo)"/>';
   }
   raiz.querySelectorAll('.louro').forEach(s => { s.innerHTML = louro(); });
+  window.CSX = { relevo, louro };
 
   /* ---------- mira da estrela, estouro de estrelinhas ao clicar ---------- */
   const est = $('estrela'), olhos = $('olhos');
@@ -2275,4 +2279,156 @@ $('auConteudo').addEventListener('beforeinput', e => { if (e.target.id !== 'auEd
   new MutationObserver(pede).observe(raiz, { attributes: true, attributeFilter: ['hidden'] });
   document.addEventListener('visibilitychange', pede);
   pede();
+})();
+
+/* =====================================================================
+   12) APP CINÉTICO: abas animadas, entrada das páginas, cursor e holofote,
+       mascote que olha, ímã, inclinação, revelação ao rolar, contagem,
+       busca na ajuda, divisor do editor. Para tudo quando o app não está aberto.
+   ===================================================================== */
+(function(){
+  const app = $('telaApp'), cab = $('hdrApp'), sonda = $('vpFimApp'), cur = $('cursorApp'), prog = $('appProg');
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const fino = matchMedia('(hover:hover) and (pointer:fine)').matches;
+  const zoom = () => parseFloat(getComputedStyle(document.documentElement).zoom) || 1;
+  const altJ = () => sonda.getBoundingClientRect().bottom || innerHeight;
+  const emAula = () => document.documentElement.classList.contains('au-aberta') || !$('proj').hidden;   // a tela de lição não leva cursor nem holofote
+  const aberto = () => !app.hidden && !emAula();
+  const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  /* relevo ao fundo e faixas decorativas */
+  const amb = app.querySelector('.amb'); if (amb && window.CSX) amb.innerHTML = CSX.relevo(23);
+  app.querySelectorAll('.faixa-pg').forEach(f => {
+    const g = f.dataset.txt.split('★').map(s => s.trim()).filter(Boolean).map((w, i) => '<span class="' + (i % 2 ? 's' : 'o') + '">' + esc(w) + '</span><i>★</i>').join('');
+    f.innerHTML = '<div class="tr">' + g + g + g + g + g + g + '</div>';
+  });
+
+  /* abas: texto que rola no hover e traço amarelo que desliza até a aba ativa */
+  const tabs = cab.querySelector('.tabs'), ind = document.createElement('i');
+  ind.className = 'tabs-ind'; ind.setAttribute('aria-hidden', 'true'); tabs.appendChild(ind);
+  tabs.querySelectorAll('a').forEach(a => { const t = a.textContent.trim(); a.innerHTML = '<span class="r"><span>' + t + '</span><span aria-hidden="true">' + t + '</span></span>'; });
+  function posiciona(){
+    const on = tabs.querySelector('a.on'); if (!on){ ind.style.opacity = 0; return; }
+    const t = tabs.getBoundingClientRect(), r = on.getBoundingClientRect(), z = zoom();
+    ind.style.opacity = 1; ind.style.setProperty('--x', ((r.left - t.left) / z + tabs.scrollLeft).toFixed(1) + 'px'); ind.style.setProperty('--w', (r.width / z).toFixed(1) + 'px');
+  }
+  addEventListener('resize', posiciona);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(posiciona);
+
+  /* entrada das páginas: cada bloco "vem" sobe em sequência; barras e anel enchem de novo */
+  function reanima(pg){
+    pg.querySelectorAll('.barra i').forEach(i => { const w = i.style.width; if (!w) return; i.style.transition = 'none'; i.style.width = '0'; void i.offsetWidth; i.style.transition = ''; requestAnimationFrame(() => { i.style.width = w; }); });
+    const r = $('ring');
+    if (pg.id === 'painel' && r){ r.style.transition = 'none'; r.style.setProperty('--pr', '0%'); void r.offsetWidth; r.style.transition = ''; requestAnimationFrame(() => r.style.setProperty('--pr', r.dataset.pr || '0%')); }
+  }
+  function entrada(v){
+    const pg = $(v); if (!pg || rmov) return;
+    pg.classList.remove('entra'); let i = 0;
+    pg.querySelectorAll('.vem').forEach(el => { if (el.offsetParent !== null) el.style.setProperty('--i', i++); });
+    void pg.offsetWidth; pg.classList.add('entra'); reanima(pg);
+    clearTimeout(pg._t); pg._t = setTimeout(() => pg.classList.remove('entra'), 2600);
+  }
+  const vai0 = vai; vai = function(v){ vai0(v); posiciona(); entrada(v); pede(); };
+
+  /* mascote do painel: olha para o mouse; ao clicar, estrelinhas */
+  const mas = $('mascote');
+  mas.addEventListener('click', () => {
+    if (rmov) return;
+    for (let i = 0; i < 10; i++){
+      const b = document.createElement('i'), ang = Math.random() * 6.28, d = 70 + Math.random() * 80;
+      b.className = 'bolha'; b.textContent = '★';
+      b.style.cssText = '--dx:' + (Math.cos(ang) * d).toFixed(0) + 'px;--dy:' + (Math.sin(ang) * d).toFixed(0) + 'px;--rot:' + (Math.random() * 360 - 180).toFixed(0) + 'deg;--s:' + Math.random().toFixed(2);
+      mas.appendChild(b); setTimeout(() => b.remove(), 1000);
+    }
+  });
+
+  /* ponteiro: cursor, holofote, olhos, ímã e inclinação (por delegação, vale para o que for criado depois) */
+  let px = -100, py = -100, cx = -100, cy = -100, gx = innerWidth / 2, gy = innerHeight / 3, tiltEl = null, magEl = null, rid = 0;
+  const ult = { sp: -1, rolou: null };
+  addEventListener('pointermove', e => {
+    if (!aberto()) return;
+    px = e.clientX; py = e.clientY;
+    if (fino && !rmov){
+      cur.classList.add('on');
+      cur.classList.toggle('maior', !!e.target.closest('a,button,summary,textarea,input,select,label,.pm-no'));
+      if (mas.offsetParent){
+        const r = mas.getBoundingClientRect(), dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height / 2), d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 420);
+        mas.style.setProperty('--ox', (dx / d * 3.6 * k).toFixed(2) + 'px'); mas.style.setProperty('--oy', (dy / d * 3.2 * k).toFixed(2) + 'px');
+      }
+      const t = e.target.closest('[data-tilt]');
+      if (t !== tiltEl){ if (tiltEl){ tiltEl.style.setProperty('--rx', '0deg'); tiltEl.style.setProperty('--ry', '0deg'); } tiltEl = t; }
+      if (t){ const r = t.getBoundingClientRect(); t.style.setProperty('--ry', (((e.clientX - r.left) / r.width - .5) * 7).toFixed(2) + 'deg'); t.style.setProperty('--rx', (-((e.clientY - r.top) / r.height - .5) * 7).toFixed(2) + 'deg'); }
+      const m = e.target.closest('[data-mag],.pm-no:not(.trava),.avatar');
+      if (m !== magEl){ if (magEl){ magEl.classList.add('solta'); magEl.style.setProperty('--tx', '0px'); magEl.style.setProperty('--ty', '0px'); } magEl = m; if (m) m.classList.remove('solta'); }
+      if (m){ const r = m.getBoundingClientRect(), z = zoom(); m.style.setProperty('--tx', (clamp((e.clientX - (r.left + r.width / 2)) * .28, -10, 10) / z).toFixed(1) + 'px'); m.style.setProperty('--ty', (clamp((e.clientY - (r.top + r.height / 2)) * .28, -8, 8) / z).toFixed(1) + 'px'); }
+    }
+    pede();
+  }, { passive: true });
+  document.addEventListener('pointerleave', () => cur.classList.remove('on'));
+
+  /* rolagem e quadro de animação */
+  function quadro(){
+    rid = 0; if (!aberto() || document.hidden) return;
+    const rr = app.getBoundingClientRect(), vh = altJ(), sy = -rr.top, fim = Math.max(1, rr.height - vh);
+    app.style.setProperty('--sy', sy.toFixed(0));
+    const sp = clamp(sy / fim, 0, 1); if (Math.abs(sp - ult.sp) > .0005){ prog.style.setProperty('--sp', sp.toFixed(4)); ult.sp = sp; }
+    const rolou = sy > 40; if (rolou !== ult.rolou){ cab.classList.toggle('rolou', rolou); ult.rolou = rolou; }
+    if (fino && !rmov){
+      const z = zoom(); cx += (px - cx) * .22; cy += (py - cy) * .22; gx += (px - gx) * .08; gy += (py - gy) * .08;
+      cur.style.transform = 'translate3d(' + (cx / z).toFixed(1) + 'px,' + (cy / z).toFixed(1) + 'px,0)';
+      app.style.setProperty('--gx', (gx / z).toFixed(0) + 'px'); app.style.setProperty('--gy', (gy / z).toFixed(0) + 'px');
+      if (Math.abs(px - cx) > .4 || Math.abs(py - cy) > .4 || Math.abs(px - gx) > .6 || Math.abs(py - gy) > .6) pede();
+    }
+  }
+  function pede(){ if (!rid) rid = requestAnimationFrame(quadro); }
+  addEventListener('scroll', pede, { passive: true }); addEventListener('resize', pede); document.addEventListener('visibilitychange', pede);
+  new MutationObserver(() => { pede(); posiciona(); }).observe(app, { attributes: true, attributeFilter: ['hidden'] });
+
+  /* revelação ao rolar e contagem de números (também para o que é criado depois) */
+  const SEL_RV = '.guia-c,details.faq,.aj-2>.card,.contato,.rk-item,.pr-sec,.pf-sec';
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting) return; const el = e.target; el.classList.add('vis'); io.unobserve(el);
+    setTimeout(() => el.classList.remove('rv2', 'vis'), 1500 + (Number(el.style.getPropertyValue('--k')) || 0) * 70);
+  }), { threshold: .1, rootMargin: '0px 0px -5% 0px' });
+  const marca = el => {
+    if (el.dataset.rv || rmov) return; el.dataset.rv = 1; el.classList.add('rv2');
+    el.style.setProperty('--k', [...el.parentElement.children].filter(x => x.dataset.rv).indexOf(el) % 6); io.observe(el);
+  };
+  const conta = el => {
+    const alvo = Number(el.dataset.n); if (!isFinite(alvo)) return;
+    const t0 = performance.now(), dur = 1000 + Math.min(alvo, 400) * 2;
+    (function f(t){ const k = clamp((t - t0) / dur, 0, 1); el.textContent = Number(Math.round(alvo * (1 - Math.pow(1 - k, 3)))).toLocaleString('pt-BR'); if (k < 1) requestAnimationFrame(f); })(t0);
+  };
+  const ioN = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ conta(e.target); ioN.unobserve(e.target); } }), { threshold: .4 });
+  const obsN = el => { if (el.dataset.nv || rmov) return; el.dataset.nv = 1; el.textContent = '0'; ioN.observe(el); };
+  const varre = n => {
+    if (n.matches(SEL_RV)) marca(n); n.querySelectorAll(SEL_RV).forEach(marca);
+    if (n.matches('[data-n]')) obsN(n); n.querySelectorAll('[data-n]').forEach(obsN);
+  };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) varre(n); }))).observe(app, { childList: true, subtree: true });
+  varre(app);
+
+  /* ajuda: busca nas perguntas e destaque da seção que está na tela */
+  const faqs = [...document.querySelectorAll('#faqLista details.faq')], tot = faqs.length, bq = $('ajBusca');
+  bq.addEventListener('input', () => {
+    const q = norm(bq.value.trim()); let n = 0;
+    faqs.forEach(d => { const ok = !q || norm(d.textContent).includes(q); d.classList.toggle('some', !ok); if (ok) n++; if (!q) d.open = false; });
+    $('ajVazio').hidden = !q || n > 0; $('ajBuscaN').textContent = q ? n + ' de ' + tot : '';
+  });
+  const botoes = [...document.querySelectorAll('.aj-nav [data-aj]')];
+  const ioS = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) botoes.forEach(b => b.classList.toggle('on', b.dataset.aj === e.target.id)); }), { rootMargin: '-35% 0px -60% 0px' });
+  document.querySelectorAll('.aj-sec').forEach(s => ioS.observe(s));
+
+  /* projetos: divisor arrastável entre o editor e o resultado, e varredura quando o resultado atualiza */
+  const pg = document.querySelector('#projetos .pg'), dv = $('pgDiv'); let razao = .5;
+  const aplica = () => { pg.style.setProperty('--c1', (razao * 2).toFixed(3) + 'fr'); pg.style.setProperty('--c2', ((1 - razao) * 2).toFixed(3) + 'fr'); dv.setAttribute('aria-valuenow', Math.round(razao * 100)); };
+  dv.setAttribute('aria-valuemin', 22); dv.setAttribute('aria-valuemax', 78); aplica();
+  dv.addEventListener('pointerdown', e => { dv.setPointerCapture(e.pointerId); dv.classList.add('arrasta'); });
+  dv.addEventListener('pointermove', e => { if (!dv.classList.contains('arrasta')) return; const r = pg.getBoundingClientRect(); razao = clamp((e.clientX - r.left) / r.width, .22, .78); aplica(); });
+  dv.addEventListener('pointerup', () => dv.classList.remove('arrasta'));
+  dv.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') razao = clamp(razao - .03, .22, .78); else if (e.key === 'ArrowRight') razao = clamp(razao + .03, .22, .78); else return; e.preventDefault(); aplica(); });
+  const res = $('res');
+  new MutationObserver(() => { const c = res.closest('.card'); c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); }).observe(res, { attributes: true, attributeFilter: ['srcdoc'] });
+
+  posiciona(); pede();
 })();
