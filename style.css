@@ -485,7 +485,7 @@ html.au-aberta{overflow:hidden}
 .chk{display:flex;gap:10px;align-items:flex-start;font-weight:700;font-size:var(--t-md);color:var(--claro);line-height:1.4}
 .chk .ci{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:var(--t-sm);flex:none;background:rgba(255,255,255,.14);color:#fff}
 .chk.ok{color:var(--menta)}.chk.ok .ci{background:var(--menta);color:#0b3b2a}
-.chk.no{color:#ffb3bf}.chk.no .ci{background:#ffd5db;color:#c2253a}
+.chk.falta{color:#ffb3bf}.chk.falta .ci{background:#ffd5db;color:#c2253a}
 .sr{position:absolute;left:-9999px}
 .au-fim-emoji{font-size:92px;line-height:1}
 .au-estrelas{font:700 58px/1 'Chakra Petch',sans-serif;color:var(--amarelo)}

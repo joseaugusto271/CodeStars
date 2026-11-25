@@ -1130,8 +1130,8 @@ function mostraAba(){
 function pintaChecks(){
   const t = aula.telas[aulaIdx], st = aulaCod[aulaIdx], ul = $('auChecks'); if (!ul) return;
   ul.innerHTML = st.res ? t.testes.map((x, k) => { const r = st.res[k];
-    return `<li class="chk ${r ? 'ok' : 'no'}"><span class="ci" aria-hidden="true">${r ? '✓' : '✗'}</span><span>${esc(x.msg)}</span><span class="sr">${r ? ' (feito)' : ' (ainda falta)'}</span></li>`; }).join('')
-    + (st.prob ? `<li class="chk no"><span class="ci" aria-hidden="true">✗</span><span>${esc(st.prob)}</span><span class="sr"> (ainda falta)</span></li>` : '') : '';
+    return `<li class="chk ${r ? 'ok' : 'falta'}"><span class="ci" aria-hidden="true">${r ? '✓' : '✗'}</span><span>${esc(x.msg)}</span><span class="sr">${r ? ' (feito)' : ' (ainda falta)'}</span></li>`; }).join('')
+    + (st.prob ? `<li class="chk falta"><span class="ci" aria-hidden="true">✗</span><span>${esc(st.prob)}</span><span class="sr"> (ainda falta)</span></li>` : '') : '';
 }
 function rodaPreview(){
   const t = aula && aula.telas[aulaIdx], f = $('auRes'); if (!t || t.t !== 'codigo' || !f) return;
