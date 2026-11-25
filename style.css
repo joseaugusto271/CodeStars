@@ -1466,3 +1466,10 @@ kbd{display:inline-block;min-width:34px;padding:5px 10px;border-radius:8px;borde
 :root[data-tema=claro] .st-i.e .i,:root[data-tema=claro] .rk-mini em .i{color:#d99a00}
 :root[data-tema=claro] .st-i.l .i{color:#1c9a6a}
 :root[data-tema=claro] .card.rk-mini ol li.eu em .i{color:var(--texto)}
+
+/* abertura: fundo vivo atrás do logotipo (o logotipo em si não foi alterado) */
+#intro .in-relevo,#intro .in-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#intro .in-logo{z-index:2}
+.in-relevo svg{position:absolute;left:-4%;top:-4%;width:108%;height:108%;translate:calc(var(--mx,0) * -16px) calc(var(--my,0) * -12px);transition:translate .5s ease-out}
+.in-relevo path{fill:none;stroke:rgba(255,255,255,.065);stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation:inDesenha 1.6s cubic-bezier(.4,0,.2,1) forwards;animation-delay:calc(.05s + var(--i) * .03s)}
+@keyframes inDesenha{to{stroke-dashoffset:0}}
