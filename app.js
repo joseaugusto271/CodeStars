@@ -2346,7 +2346,7 @@ $('auConteudo').addEventListener('beforeinput', e => { if (e.target.id !== 'auEd
   let px = -100, py = -100, cx = -100, cy = -100, gx = innerWidth / 2, gy = innerHeight / 3, tiltEl = null, magEl = null, rid = 0;
   const ult = { sp: -1, rolou: null };
   addEventListener('pointermove', e => {
-    if (!aberto()) return;
+    if (!aberto()){ cur.classList.remove('on'); return; }
     px = e.clientX; py = e.clientY;
     if (fino && !rmov){
       cur.classList.add('on');

@@ -1473,3 +1473,9 @@ kbd{display:inline-block;min-width:34px;padding:5px 10px;border-radius:8px;borde
 .in-relevo svg{position:absolute;left:-4%;top:-4%;width:108%;height:108%;translate:calc(var(--mx,0) * -16px) calc(var(--my,0) * -12px);transition:translate .5s ease-out}
 .in-relevo path{fill:none;stroke:rgba(255,255,255,.065);stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;animation:inDesenha 1.6s cubic-bezier(.4,0,.2,1) forwards;animation-delay:calc(.05s + var(--i) * .03s)}
 @keyframes inDesenha{to{stroke-dashoffset:0}}
+
+/* lição e projeto final ficam acima do cabeçalho do app (antes o cabeçalho cobria o X e o voltar) */
+#aula{z-index:60}
+#proj{z-index:61}
+#aviso{z-index:70}
+html.au-aberta #telaApp>#hdrApp,html.au-aberta .seguidor{visibility:hidden}
