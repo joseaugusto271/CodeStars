@@ -174,6 +174,79 @@ function realcaPy(c){
     (m, com, str, kw) => com ? '<span class="p">' + com + '</span>' : str ? '<span class="s">' + str + '</span>' : '<span class="k">' + kw + '</span>');
 }
 
+// ---- prévia de código do card "Continuando": mostra um trecho real da própria lição
+const PREVIA_ARQ = { py:'main.py', html:'index.html', css:'style.css', js:'script.js', git:'terminal' };
+const PREVIA_TEMAS = {
+  py: [
+    [/conta|operador|matem|texto|string/, 'preco = 12.5\nqtd = 3\ntotal = preco * qtd\nnome = "Ana"\nprint("Total:", total)\nprint(nome + " comprou " + str(qtd))'],
+    [/entrada|input|vari[aá]vel|dado/, 'nome = input("Seu nome? ")\nidade = 15\nprint("Oi, " + nome)\nprint("Ano que vem:", idade + 1)'],
+    [/condi|decis|\bif\b/, 'idade = 16\nif idade >= 18:\n    print("Maior de idade")\nelse:\n    print("Menor de idade")'],
+    [/repet|la[cç]o|loop|\bfor\b|while/, 'for i in range(1, 4):\n    print("Rodada", i)\n\nprint("Fim!")'],
+    [/lista/, 'frutas = ["maçã", "uva"]\nfrutas.append("pera")\nprint(len(frutas))\nprint(frutas[0])'],
+    [/fun[cç]/, 'def dobro(n):\n    return n * 2\n\nprint(dobro(4))'],
+    [/./, 'print("Olá, mundo!")\nnome = "Ana"\nprint("Oi,", nome)']
+  ],
+  html: [
+    [/estrutura|p[aá]gina|t[ií]tulo|tag/, '<!DOCTYPE html>\n<html>\n  <body>\n    <h1>Meu Site</h1>\n    <p>Bem-vindo!</p>\n  </body>\n</html>'],
+    [/lista/, '<ul>\n  <li>HTML</li>\n  <li>CSS</li>\n  <li>JavaScript</li>\n</ul>'],
+    [/imagem|img|foto/, '<img src="gato.png" alt="Um gato">\n<p>Meu gato</p>'],
+    [/link|\ba\b|[aâ]ncora/, '<a href="https://codestars.app">\n  Visitar o site\n</a>'],
+    [/form|campo|input/, '<form>\n  <label>Nome</label>\n  <input type="text">\n  <button>Enviar</button>\n</form>'],
+    [/./, '<h1>Meu Site</h1>\n<p>Primeiro parágrafo.</p>']
+  ],
+  css: [
+    [/cor|color|fundo/, 'h1 {\n  color: purple;\n  background: gold;\n}'],
+    [/flex/, '.menu {\n  display: flex;\n  gap: 12px;\n  justify-content: center;\n}'],
+    [/grid/, '.galeria {\n  display: grid;\n  grid-template-columns: 1fr 1fr 1fr;\n  gap: 8px;\n}'],
+    [/box|margem|espa[cç]|padding|borda/, '.card {\n  padding: 16px;\n  margin: 8px;\n  border-radius: 12px;\n}'],
+    [/./, 'p {\n  color: purple;\n  font-size: 18px;\n}']
+  ],
+  js: [
+    [/vari[aá]vel|let|const|tipo/, 'let nome = "Ana";\nconst idade = 15;\nconsole.log(nome, idade);'],
+    [/fun[cç]/, 'function dobro(n) {\n  return n * 2;\n}\nconsole.log(dobro(4));'],
+    [/evento|clique|bot[aã]o/, 'botao.addEventListener("click", () => {\n  alert("Você clicou!");\n});'],
+    [/array|lista/, 'const frutas = ["maçã", "uva"];\nfrutas.push("pera");\nconsole.log(frutas.length);'],
+    [/condi|decis|\bif\b/, 'if (idade >= 18) {\n  console.log("Maior de idade");\n} else {\n  console.log("Menor de idade");\n}'],
+    [/repet|la[cç]o|loop|\bfor\b|while/, 'for (let i = 1; i <= 3; i++) {\n  console.log("Rodada", i);\n}'],
+    [/dom|elemento|seletor/, 'const titulo = document.querySelector("h1");\ntitulo.textContent = "Olá!";'],
+    [/./, 'console.log("Olá, mundo!");']
+  ],
+  git: [
+    [/commit/, 'git add .\ngit commit -m "primeira versão"'],
+    [/branch|ramo/, 'git branch nova-ideia\ngit switch nova-ideia'],
+    [/push|remot|github|nuvem/, 'git remote add origin <url>\ngit push -u origin main'],
+    [/./, 'git init\ngit status\ngit add .\ngit commit -m "início"']
+  ]
+};
+function previaDaLicao(l, m){
+  let tec = tecDe(m);
+  const titulo = String(l.titulo || '').toLowerCase();
+  const pareceCodigo = c => /[<>{}=();]|\n/.test(c || '');
+  let cod = '', lang = tec;
+  // 1) código real: a solução do último exercício da lição
+  try{
+    const telas = telasDe(l.conteudo) || [];
+    for (let k = telas.length - 1; k >= 0 && !cod; k--){
+      const sol = telas[k] && telas[k].solucao; if (!sol) continue;
+      const ordem = tec && sol[tec] ? [tec] : ['py', 'html', 'css', 'js'];
+      const ch = ordem.find(x => typeof sol[x] === 'string' && sol[x].trim());
+      if (ch){ cod = sol[ch]; lang = ch; }
+    }
+  }catch(e){}
+  // 2) o texto de "preview" do banco, se for mesmo código
+  if (!cod && pareceCodigo(l.preview)) cod = l.preview;
+  // 3) trecho pronto do assunto da lição
+  if (!cod){
+    if (!tec) tec = /python/.test(titulo) ? 'py' : 'html';
+    lang = tec;
+    const alvo = titulo + ' ' + (pareceCodigo(l.preview) ? '' : String(l.preview || '').toLowerCase());
+    cod = (PREVIA_TEMAS[tec].find(x => x[0].test(alvo)) || PREVIA_TEMAS[tec].slice(-1)[0])[1];
+  }
+  const linhas = cod.replace(/\r/g, '').replace(/\s+$/, '').split('\n');
+  while (linhas.length && !linhas[0].trim()) linhas.shift();
+  return { cod: linhas.slice(0, 8).join('\n'), lang: lang || 'html' };
+}
+
 // traduz os erros do Supabase para português
 function traduz(err){
   const m = String((err && err.message) || err || '').toLowerCase();
@@ -473,7 +546,7 @@ function pintaPainel(){
     $('cBarra').style.width = pct + '%'; $('cProg').setAttribute('aria-valuenow', pct);
     $('cMeta1').textContent = m.feitas + ' de ' + m.total + ' ' + plural(m.total,'lição','lições');
     $('cMeta2').textContent = '~' + prox.minutos + ' min · +' + prox.estrelas + '';
-    $('cCod').innerHTML = realca(prox.preview || ''); $('cPre').hidden = false;
+    const pv = previaDaLicao(prox, m); $('cCod').innerHTML = pv.lang === 'py' ? realcaPy(pv.cod) : realca(pv.cod); $('cPre').dataset.arq = PREVIA_ARQ[pv.lang] || ''; $('cPre').hidden = false;
     $('cBtn').hidden = false; $('cBtn').onclick = () => abreLicao(prox.id);
   } else {
     $('cTag').textContent = 'TRILHA COMPLETA'; $('cTit').textContent = 'Você concluiu todas as lições!';

@@ -1479,3 +1479,9 @@ kbd{display:inline-block;min-width:34px;padding:5px 10px;border-radius:8px;borde
 #proj{z-index:61}
 #aviso{z-index:70}
 html.au-aberta #telaApp>#hdrApp,html.au-aberta .seguidor{visibility:hidden}
+
+/* card "Continuando": prévia de código sem rolagem lateral */
+#cPre{position:relative;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2;align-items:center;padding:52px 22px 22px;font-size:var(--t-md);line-height:1.7}
+#cPre::before{content:attr(data-arq);position:absolute;top:0;left:0;right:0;padding:11px 22px;font:700 var(--t-sm) 'Chakra Petch',monospace;letter-spacing:.3px;color:var(--claro);background:rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.1)}
+#cPre[data-arq=""]::before{display:none}
+#cPre[data-arq=""]{padding-top:22px}
