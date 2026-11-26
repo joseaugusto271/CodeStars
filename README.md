@@ -1,12 +1,27 @@
-# CodeStars
+<div align="center">
 
-[![Plataforma no ar](https://img.shields.io/badge/plataforma-no_ar-7FF0C0.svg)](https://joseaugusto271.github.io/CodeStars/)
-[![Projeto](https://img.shields.io/badge/projeto-TCC-2C1450.svg)](https://github.com/joseaugusto271/CodeStars)
-[![Supabase](https://img.shields.io/badge/back--end-Supabase-3ECF8E.svg?logo=supabase&logoColor=white)](https://supabase.com)
-[![Google Gemini](https://img.shields.io/badge/IA-Google_Gemini-8E75B2.svg?logo=googlegemini&logoColor=white)](https://ai.google.dev)
-[![GitHub Pages](https://img.shields.io/badge/hospedagem-GitHub_Pages-222222.svg?logo=githubpages&logoColor=white)](https://pages.github.com)
+<img src="logo-codestars.svg" alt="CodeStars" width="280">
 
-:star: Dê uma estrela no GitHub, isso nos motiva muito!
+### Aprenda programação do zero, passo a passo, com um tutor que pergunta em vez de entregar a resposta.
+
+<br>
+
+[![Acessar a plataforma](https://img.shields.io/badge/Acessar_a_plataforma-F2F26B?style=for-the-badge&logo=githubpages&logoColor=1E1230)](https://joseaugusto271.github.io/CodeStars/)
+
+![Status](https://img.shields.io/badge/status-no_ar-7FF0C0?style=flat-square)
+![TCC](https://img.shields.io/badge/projeto-TCC-2C1450?style=flat-square)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)
+![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-222222?style=flat-square&logo=githubpages&logoColor=white)
+
+<br>
+
+<img src="docs/login.png" alt="Tela de entrada do CodeStars, com a estrela mascote e o formulário de login" width="900">
+
+</div>
 
 O [CodeStars](https://joseaugusto271.github.io/CodeStars/) é uma plataforma web gamificada para aprender programação na prática. O aluno estuda **HTML, CSS, JavaScript, Git e Python** escrevendo código de verdade desde a primeira lição, em um editor que mostra o resultado ao lado, em tempo real.
 
@@ -14,7 +29,7 @@ O grande diferencial é o **Tutor Socrático com Inteligência Artificial**: qua
 
 Projeto desenvolvido como **Trabalho de Conclusão de Curso (TCC)**.
 
-![codestars-painel](docs/screenshots/painel.png)
+![codestars-painel](docs/painel.png)
 
 ## Índice
 
@@ -51,11 +66,11 @@ Projeto desenvolvido como **Trabalho de Conclusão de Curso (TCC)**.
 
 Cada lição começa com uma explicação curta, com exemplos de código:
 
-![codestars-licao-teoria](docs/screenshots/licao-teoria.png)
+![codestars-licao-teoria](docs/licao-teoria.png)
 
 E termina com um exercício prático, no editor, com dica e verificação:
 
-![codestars-licao-pratica](docs/screenshots/licao-pratica.png)
+![codestars-licao-pratica](docs/licao-pratica.png)
 
 ### Praticar e criar
 
@@ -71,7 +86,7 @@ E termina com um exercício prático, no editor, com dica e verificação:
 
 O ranking geral mostra o pódio, a posição do aluno e quantas estrelas faltam para passar o próximo:
 
-![codestars-ranking](docs/screenshots/ranking.png)
+![codestars-ranking](docs/ranking.png)
 
 ### Conta e personalização
 
@@ -79,8 +94,6 @@ O ranking geral mostra o pódio, a posição do aluno e quantas estrelas faltam 
 * **Perfil:** nome, foto, meta diária e lembrete
 * **Temas:** claro, escuro ou automático
 * **Central de ajuda:** guia rápido, perguntas frequentes com busca, atalhos do editor e formulário de contato
-
-![codestars-login](docs/screenshots/login.png)
 
 ## Como a avaliação funciona
 
@@ -106,7 +119,7 @@ São cinco trilhas, e cada uma só abre quando a anterior termina. O troféu no 
 | 4 | **Git** | Guardar o histórico do código e publicar no GitHub |
 | 5 | **Python** | Variáveis, decisões, listas e funções, com o código rodando no próprio navegador |
 
-![codestars-trilhas](docs/screenshots/trilhas.png)
+![codestars-trilhas](docs/trilhas.png)
 
 ```mermaid
 flowchart LR
@@ -130,7 +143,6 @@ flowchart LR
 
 * HTML5, CSS3 e JavaScript puro, em um site estático (sem etapa de build)
 * Hospedagem contínua via **GitHub Pages**
-* Arquitetura planejada para escalabilidade (React/Next.js)
 
 **Back-end e banco de dados**
 
