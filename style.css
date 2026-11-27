@@ -531,6 +531,11 @@ html.au-aberta{overflow:hidden}
 .pj-nota b{display:grid;place-items:center;width:74px;height:74px;border-radius:50%;font:700 var(--t-2xl) 'Chakra Petch',sans-serif;background:#ffd9df;color:#8a1b2d;flex:none}
 .pj-res.ok .pj-nota b{background:#c9f7e0;color:#0b5a2b;animation:pula .6s}
 .pj-nota strong{font:700 var(--t-lg)/1.25 'Chakra Petch',sans-serif}
+.pj-est{display:flex;gap:6px;margin:2px 0 6px;font-size:30px;color:#e0a800}
+.pj-est .off{color:#d8d2b4}
+.pj-est .i{width:1em;height:1em}
+.pj-res.ok .pj-est .on{animation:pula .6s}
+.pj-est-txt{margin:0 0 12px;font-weight:800}
 @media (max-width:1100px){.pj-main{grid-template-columns:1fr}.pj-lado{align-self:stretch}}
 .rm{background:none;border:0;color:#522580;font-weight:800;text-decoration:underline;padding:4px 0}
 .campo{margin-bottom:16px}

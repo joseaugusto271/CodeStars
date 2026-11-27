@@ -452,8 +452,10 @@ async function carregaTudo(){
   const [dz, qz] = await Promise.all([ sb.from('desafios').select('*').order('ordem'), sb.from('quizzes').select('*').order('ordem') ]);
   praticaOk = !dz.error && !qz.error; desafios = dz.error ? [] : dz.data; quizzes = qz.error ? [] : qz.data;
   // Projeto final: se projeto-final.sql ainda não foi rodado, o site segue sem o projeto
-  const [pf, pe] = await Promise.all([ sb.from('projetos_finais').select('*'), sb.from('projeto_final_envios').select('modulo,nota,aprovado,criado_em').order('criado_em', { ascending:false }) ]);
+  const [pf, pe, ps] = await Promise.all([ sb.from('projetos_finais').select('*'), sb.from('projeto_final_envios').select('modulo,nota,aprovado,criado_em').order('criado_em', { ascending:false }),
+    sb.from('projeto_final_estrelas').select('modulo,estrelas') ]);
   projetosFinais = (pf.error || pe.error) ? [] : pf.data; envios = (pf.error || pe.error) ? [] : pe.data;
+  projEstrelas = ps.error ? {} : Object.fromEntries((ps.data || []).map(r => [r.modulo, r.estrelas]));   // sem a tabela (SQL não rodado): segue sem estrelas do projeto
   if (!projetos.length) await criaProjeto('Meu primeiro projeto');
   projAtual = projetos.slice().sort((a,b) => b.atualizado_em.localeCompare(a.atualizado_em))[0];
 }
@@ -537,7 +539,7 @@ function pintaPainel(){
     $('cTag').textContent = 'PROJETO FINAL • ' + pend.nome.toUpperCase();
     $('cTit').textContent = pend.proj.titulo;
     $('cBarra').style.width = '100%'; $('cProg').setAttribute('aria-valuenow', 100);
-    $('cMeta1').textContent = 'Todas as lições concluídas'; $('cMeta2').textContent = 'Passa com nota maior que ' + NOTA_MINIMA;
+    $('cMeta1').textContent = 'Todas as lições concluídas'; $('cMeta2').textContent = 'Passa com nota ' + NOTA_MINIMA + ' ou mais';
     $('cPre').hidden = true; b0.hidden = false; b0.textContent = 'Fazer o projeto'; b0.onclick = () => abreProjeto(pend.id);
   } else if (prox){
     const m = mods.find(x => x.id === prox.modulo), n = m.l.indexOf(prox) + 1, pct = Math.round(m.feitas / m.total * 100);
@@ -619,7 +621,12 @@ mas.addEventListener('click', () => { const a = falasLista(); fi = (fi + 1) % a.
 /* =====================================================================
    6b) PROJETO FINAL de cada trilha (corrigido por IA na Edge Function avaliar-projeto)
    ===================================================================== */
-const NOTA_MINIMA = 5;   // passa com nota MAIOR que isto (a regra de verdade fica na função do servidor)
+const NOTA_MINIMA = 5;   // passa com nota 5 ou mais (a regra de verdade fica na função do servidor)
+// Estrelas do projeto final pela nota: 5–6 = 1 · 7–8 = 2 · 9–10 = 3. O servidor recalcula tudo (conceder_estrelas_projeto);
+// aqui a conta só serve para mostrar na tela.
+const estrelasDaNota = n => n >= 9 ? 3 : n >= 7 ? 2 : n >= NOTA_MINIMA ? 1 : 0;
+let projEstrelas = {};   // melhor quantidade de estrelas já creditada em cada projeto final (módulo -> 0..3)
+const estrelasProjeto = mod => projEstrelas[mod] || 0;
 let pjAtual = null, pjBusy = false, pjAprovado = false;
 const pjChave = m => 'cs_proj_' + usuario.id + '_' + m;
 function melhorNota(mod){ const n = envios.filter(e => e.modulo === mod).map(e => Number(e.nota)); return n.length ? Math.max(...n) : null; }
@@ -628,7 +635,8 @@ const fmtNota = n => Number(n).toLocaleString('pt-BR', { maximumFractionDigits:1
 function linhaProjeto(m, i){
   if (!m.proj) return '';
   const s = m.projOk ? 'ok' : (m.st === 'trava' || m.feitas < m.total) ? 'trava' : 'atual', melhor = melhorNota(m.id);
-  const sub = 'Projeto final' + (melhor != null ? ' · melhor nota ' + fmtNota(melhor) : '');
+  const est = estrelasProjeto(m.id);
+  const sub = 'Projeto final' + (melhor != null ? ' · melhor nota ' + fmtNota(melhor) : '') + (est ? ' · ' + est + ' ' + plural(est, 'estrela', 'estrelas') : '');
   return noMapa(i, s, 'data-proj="' + esc(m.id) + '"', ICO('trophy'), 'Projeto: ' + esc(m.proj.titulo), sub, s === 'atual').replace('class="pm-fase ', 'class="pm-fase pm-boss ');
 }
 
@@ -644,7 +652,7 @@ function abreProjeto(modId){
   $('pjTag').textContent = 'PROJETO FINAL • ' + m.nome.toUpperCase();
   $('pjTema').textContent = p.titulo; $('pjDesc').textContent = p.tema;
   $('pjReq').innerHTML = p.requisitos.map(r => `<li>${esc(r)}</li>`).join('');
-  $('pjInfo').textContent = 'Passa com nota maior que ' + NOTA_MINIMA + ' (de 0 a 10).';
+  $('pjInfo').textContent = 'Passa com nota ' + NOTA_MINIMA + ' ou mais (de 0 a 10). Estrelas: 5–6 = 1 · 7–8 = 2 · 9–10 = 3.';
   let rasc = null; try{ rasc = localStorage.getItem(pjChave(m.id)); }catch(e){}
   $('pjCod').value = rasc != null ? rasc : p.base;
   const tipo = p.tipo || 'web';
@@ -662,10 +670,28 @@ function fechaProjeto(){
   $('proj').hidden = true; $('pjVer').srcdoc = ''; pjAtual = null;
   document.documentElement.classList.remove('au-aberta');
 }
-function mostraNota(d){
+// Pede ao servidor para creditar as estrelas: ele calcula pela melhor nota APROVADA que a própria correção gravou
+// (nada que o navegador mande conta). Devolve { novas, total } ou null se a função ainda não existe no banco.
+async function concedeEstrelasProjeto(modulo){
+  try{
+    const { data, error } = await sb.rpc('conceder_estrelas_projeto', { p_modulo: modulo });
+    if (error) throw error;
+    const r = Array.isArray(data) ? data[0] : data; if (!r) return null;
+    projEstrelas[modulo] = r.estrelas_projeto || 0;
+    return { novas: r.estrelas_novas || 0, total: r.estrelas_projeto || 0 };
+  }catch(e){ console.warn('conceder_estrelas_projeto indisponível: rode o SQL das estrelas do projeto final no Supabase.', e && e.message); return null; }
+}
+function mostraNota(d, ganho){
   const r = $('pjRes'); r.hidden = false; r.className = 'pj-res' + (d.aprovado ? ' ok' : '');
   const prox = modulos().find(x => x.st === 'atual'), fim = d.aprovado && !prox;
-  r.innerHTML = `<div class="pj-nota"><b>${fmtNota(d.nota)}</b><strong>${d.aprovado ? (fim ? 'Aprovado! Você concluiu a trilha toda' : 'Aprovado! Próximo módulo liberado') : 'Quase lá! Ajuste e envie de novo'}</strong></div><p>${esc(d.feedback || '').replace(/\n/g, '<br>')}</p>`;
+  const est = d.aprovado ? (ganho ? ganho.total : estrelasDaNota(Number(d.nota))) : 0, E = n => n + ' ' + plural(n, 'estrela', 'estrelas');
+  const linha = !d.aprovado ? 'Com nota ' + NOTA_MINIMA + ' ou mais você ganha estrelas: 5–6 = 1 · 7–8 = 2 · 9–10 = 3.'
+    : !ganho ? 'Esta nota vale ' + E(est) + '.'
+    : ganho.novas > 0 ? (ganho.total === ganho.novas ? 'Você ganhou ' + E(ganho.novas) + '!' : 'Você melhorou a nota: +' + E(ganho.novas) + '!')
+    : ganho.total >= 3 ? 'Você já tinha as 3 estrelas deste projeto.' : 'Você já tinha ' + E(ganho.total) + ' neste projeto. Uma nota maior rende mais (9 ou mais = 3 estrelas).';
+  const fileira = [0, 1, 2].map(k => `<span class="${k < est ? 'on' : 'off'}">${ICO('star', 1)}</span>`).join('');
+  r.innerHTML = `<div class="pj-nota"><b>${fmtNota(d.nota)}</b><strong>${d.aprovado ? (fim ? 'Aprovado! Você concluiu a trilha toda' : 'Aprovado! Próximo módulo liberado') : 'Quase lá! Ajuste e envie de novo'}</strong></div>`
+    + `<div class="pj-est" role="img" aria-label="${est} de 3 estrelas">${fileira}</div><p class="pj-est-txt">${esc(linha)}</p><p>${esc(d.feedback || '').replace(/\n/g, '<br>')}</p>`;
   r.scrollIntoView({ behavior: rmov ? 'auto' : 'smooth', block:'nearest' });
 }
 async function enviaProjeto(){
@@ -674,20 +700,23 @@ async function enviaProjeto(){
   const cod = $('pjCod').value;
   if (cod.trim().length < 30){ aviso('Escreva um pouco mais de código antes de enviar.'); return; }
   if (cod.length > 8000){ aviso('Seu código passou de 8.000 caracteres. Deixe mais enxuto.'); return; }
-  const btn = $('pjEnviar'); pjBusy = true; btn.disabled = true; btn.textContent = 'Corrigindo…';
+  const modId = pjAtual.id, btn = $('pjEnviar'); pjBusy = true; btn.disabled = true; btn.textContent = 'Corrigindo…';
   try{
     const { data:{ session } } = await sb.auth.getSession();
     const r = await fetch(URL_LIMPA + '/functions/v1/avaliar-projeto', {
       method:'POST',
       headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + session.access_token, 'apikey':SUPABASE_ANON_KEY.trim() },
-      body: JSON.stringify({ modulo: pjAtual.id, codigo: cod }),
+      body: JSON.stringify({ modulo: modId, codigo: cod }),
       signal: AbortSignal.timeout(70000)
     });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.erro || 'A correção não respondeu. Tente de novo em instantes.');
-    envios.unshift({ modulo: pjAtual.id, nota: d.nota, aprovado: d.aprovado, criado_em: new Date().toISOString() });
-    pjAprovado = !!d.aprovado; mostraNota(d);
-    if (d.aprovado){ moduloSel = null; pintaPainel(); try{ localStorage.removeItem(pjChave(pjAtual.id)); }catch(e){} }
+    envios.unshift({ modulo: modId, nota: d.nota, aprovado: d.aprovado, criado_em: new Date().toISOString() });
+    pjAprovado = !!d.aprovado;
+    let ganho = null;
+    if (d.aprovado){ ganho = await concedeEstrelasProjeto(modId); try{ await recarregaResumo(); }catch(e){} }   // total e ranking já com as estrelas novas
+    mostraNota(d, ganho);
+    if (d.aprovado){ moduloSel = null; pintaPainel(); try{ localStorage.removeItem(pjChave(modId)); }catch(e){} }
     btn.textContent = d.aprovado ? 'Concluir' : 'Enviar de novo';
   }catch (err){
     aviso(err.name === 'TimeoutError' ? 'A correção demorou demais. Tente de novo em instantes.' : (err.message || 'Não consegui enviar o projeto.')); btn.textContent = 'Enviar para a correção';
@@ -1924,7 +1953,7 @@ async function entrou(user){
 }
 function saiu(avisar){
   $('aula').hidden = true; $('proj').hidden = true; document.documentElement.classList.remove('au-aberta');
-  usuario = null; projetosFinais = []; envios = []; perfil = null; projetos = []; projAtual = null; feitas = new Set(); editorIniciado = false;
+  usuario = null; projetosFinais = []; envios = []; projEstrelas = {}; perfil = null; projetos = []; projAtual = null; feitas = new Set(); editorIniciado = false;
   $('res').srcdoc = ''; $('lgSenha').value = ''; $('lgNova').value = ''; $('lgNova2').value = '';
   telaDe('login'); modo('entrar');
   if (avisar) aviso('Você saiu da conta. Até a próxima lição!');
